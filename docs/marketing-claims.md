@@ -219,11 +219,17 @@ Added in 0.3.29:
 | --- | --- | --- | --- |
 | usevolant.com redirects plain HTTP to HTTPS and sends a one-year HSTS header | Website | #313, #336; Always Use HTTPS on the zone verified October 30, 2026 (301, path and query kept); HSTS verified by the production smoke in `Scripts/ship.sh`; app unchanged from 0.3.28 | Release notes only |
 
-Merged after 0.3.29, not in the current download:
+Added in 0.3.30:
+
+| Story | In 0.3.30 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Apple silicon only; Intel Macs stay on 0.3.29 and are not offered later updates | Yes | Owner decision November 3, 2026; #338; `ARCHS: arm64`; `Scripts/ship.sh` checks every Volant binary and the feed's arm64 requirement; Sparkle stays universal; no Intel Mac observed refusing the update | FAQ, download line and Getting started say Apple silicon |
+| Installed app about 21 MB, down from 45 MB | Yes | #338, #339; Release archive measurements; helpers keep only the VolantCore code they reach; signed rates, extensions and AI XPC checks and the input-helper VM e2e passed; the agent helper has no built-binary check | Release notes only |
+
+Merged after 0.3.30, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
-| Apple silicon only; Intel Macs stay on 0.3.29 and are not offered later updates | Next release | Owner decision November 3, 2026; `ARCHS: arm64`; `Scripts/ship.sh` checks every Volant binary and the feed's arm64 requirement; Sparkle stays universal | FAQ, download line and Getting started say Apple silicon; deployed with the release |
 
 ## Privacy language
 
