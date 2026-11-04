@@ -226,11 +226,17 @@ Added in 0.3.30:
 | Apple silicon only; Intel Macs stay on 0.3.29 and are not offered later updates | Yes | Owner decision November 3, 2026; #338; `ARCHS: arm64`; `Scripts/ship.sh` checks every Volant binary and the feed's arm64 requirement; Sparkle stays universal; no Intel Mac observed refusing the update | FAQ, download line and Getting started say Apple silicon |
 | Installed app about 21 MB, down from 45 MB | Yes | #338, #339; Release archive measurements; helpers keep only the VolantCore code they reach; signed rates, extensions and AI XPC checks and the input-helper VM e2e passed; the agent helper has no built-binary check | Release notes only |
 
-Merged after 0.3.30, not in the current download:
+Added in 0.3.31 (website and distribution; the app is unchanged from 0.3.30):
+
+| Story | In 0.3.31 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Homebrew install: `brew install --cask mysticcoders/tap/volant` | Yes | #344, #345, #346; clean-VM install of 0.3.30 arm64 passed codesign and Gatekeeper, and zap uninstall removed it; ship.sh updates the cask each release | Homepage download section, FAQ, Getting started, README |
+| Comparison pages: Volant vs Raycast, Volant vs Alfred | Yes | Competitor facts limited to what their sites state (closed source, paid tiers linked rather than priced, Alfred's Powerpack listing Clipboard History and Snippets) and `docs/competitors.md`; Raycast's faster reopen is stated against Volant; no footprint or speed claims, since the September 19 figures predate the current helpers | /docs/volant-vs-raycast and /docs/volant-vs-alfred, plus sitemap.xml and robots.txt |
+
+Merged after 0.3.31, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
-| Comparison pages: Volant vs Raycast, Volant vs Alfred | Website, next deployment | Competitor facts limited to what their sites state (closed source, paid tiers linked rather than priced, Alfred's Powerpack listing Clipboard History and Snippets) and `docs/competitors.md`; Raycast's faster reopen is stated against Volant; no footprint or speed claims, since the September 19 figures predate the current helpers | /docs/volant-vs-raycast and /docs/volant-vs-alfred, plus sitemap.xml and robots.txt |
 
 ## Privacy language
 
