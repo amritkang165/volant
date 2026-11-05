@@ -233,7 +233,16 @@ Added in 0.3.31 (website and distribution; the app is unchanged from 0.3.30):
 | Homebrew install: `brew install --cask mysticcoders/tap/volant` | Yes | #344, #345, #346; clean-VM install of 0.3.30 arm64 passed codesign and Gatekeeper, and zap uninstall removed it; ship.sh updates the cask each release | Homepage download section, FAQ, Getting started, README |
 | Comparison pages: Volant vs Raycast, Volant vs Alfred | Yes | Competitor facts limited to what their sites state (closed source, paid tiers linked rather than priced, Alfred's Powerpack listing Clipboard History and Snippets) and `docs/competitors.md`; Raycast's faster reopen is stated against Volant; no footprint or speed claims, since the September 19 figures predate the current helpers | /docs/volant-vs-raycast and /docs/volant-vs-alfred, plus sitemap.xml and robots.txt |
 
-Merged after 0.3.31, not in the current download:
+Added in 0.3.32:
+
+| Story | In 0.3.32 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| AI Chat opens ready to type: resumes the last conversation, and with no provider lists installed agents to connect in one click | Yes | #352; ACPResumeModelTests, AIConfigurationTests, Actions fixture setup card with fictional detection; resuming a real provider and detection through the signed helper not exercised | Release notes |
+| Markdown tables and nested lists in agent replies and the Notes preview | Yes | #355; MarkdownBlocksTests and the chat fixture's fictional reply rendered light and dark; inline HTML, footnotes and lists inside quotes not handled | Release notes |
+| Click-away hides Translate and AI Chat; Escape steps back in AI Chat; Translate clears on dismissal | Yes | #352; launcher check and Actions translate and panel-chat scenarios; owner tried a Volant Dev build | Release notes |
+| Star on GitHub in Settings › About and the website header | Yes | #349; the website count is read at build time; the app shows no count because the main app has no network access | Website header |
+
+Merged after 0.3.32, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
