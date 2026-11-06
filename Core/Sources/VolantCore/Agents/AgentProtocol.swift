@@ -61,6 +61,12 @@ import Foundation
     func fsearchStatus(reply: @escaping (Data?, String?) -> Void)
     /// Tells fsearch the owner opened `path`, so it ranks higher. Best effort.
     func fsearchOpened(path: String, reply: @escaping (String?) -> Void)
+    /// Files in the owner's home folder whose names contain `term`, newest first, as JSON
+    /// `[HomeFileSearch.Entry]` (at most `HomeFileSearch.maximumResults`). The sandboxed app can't
+    /// run this Spotlight query itself. Takes only the term, which the helper validates again. A
+    /// newer search on the same connection replaces one in flight, whose reply is then empty, and
+    /// the connection ending stops it.
+    func searchHomeFiles(term: String, reply: @escaping (Data?, String?) -> Void)
     /// The TCP ports the owner's own processes are listening on, as JSON `[ListeningServer]`, read
     /// fresh on each call and kept nowhere. Takes no input and acts on no process. Carries each
     /// process's executable path and working folder, never its arguments or environment.

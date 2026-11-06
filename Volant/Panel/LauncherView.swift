@@ -194,6 +194,28 @@ struct LauncherView: View {
         .padding(.vertical, 16)
     }
 
+    /// The line under the search field when there are no result rows, with a spinner while a file
+    /// search is pending.
+    private var emptyState: some View {
+        HStack(spacing: 8) {
+            if model.searchingFiles { ProgressView().controlSize(.small) }
+            Text(model.emptyStateMessage).foregroundStyle(.secondary)
+        }
+        .padding(.top, 24)
+        .frame(maxWidth: .infinity)
+    }
+
+    /// One quiet line after merged results while their file search is pending, so rows above stay put.
+    private var searchingFilesLine: some View {
+        HStack(spacing: 6) {
+            ProgressView().controlSize(.mini)
+            Text("Searching files…", comment: "Launcher status while a file search is in progress").font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+    }
+
     private var results: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -243,10 +265,9 @@ struct LauncherView: View {
                         }
                     }
                     if model.sections.isEmpty && model.clipboardMessage == nil && model.searchRecoveryMessage == nil {
-                        Text(model.notice ?? (model.query.isEmpty ? String(localized: "Type to search", comment: "Launcher notice with an empty search") : String(localized: "No results", comment: "Launcher notice when nothing matches")))
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 24)
-                            .frame(maxWidth: .infinity)
+                        emptyState
+                    } else if model.searchingFiles {
+                        searchingFilesLine
                     }
                 }
                 .padding(.horizontal, 8)

@@ -36,7 +36,11 @@ final class SearchRecoveryTests: XCTestCase {
     @MainActor
     func testFileRefusalCompletesOnceReleasesCallbackAndCanRetry() async {
         var attempts = 0
-        let files = FileSearch(startQuery: { _ in attempts += 1; return false })
+        let files = FileSearch(home: HomeFileSearchClient { _, completion in
+            attempts += 1
+            DispatchQueue.main.async { completion(nil, HostMessage(.fileSearchUnavailable).wire) }
+            return {}
+        })
         final class Lifetime {}
         var lifetime: Lifetime? = Lifetime()
         weak var released = lifetime
@@ -64,22 +68,24 @@ final class SearchRecoveryTests: XCTestCase {
         XCTAssertEqual(attempts, 2)
     }
 
-    /// Waits for the first query to start after its debounce. Gathering notifications are delivered
-    /// synchronously to their observer, so the obsolete query's completion would have run by the
-    /// time `post` returns.
+    /// Waits for the first search to reach the helper after its debounce, starts a second, then lets
+    /// the first one's late reply arrive: it must not complete, and the first search was cancelled.
     @MainActor
-    func testOldFileQueryCannotCompleteAfterNewSearch() async {
-        var queries: [NSMetadataQuery] = []
-        let files = FileSearch(startQuery: { queries.append($0); return true })
+    func testOldFileSearchCannotCompleteAfterNewSearch() async {
+        var replies: [(Data?, String?) -> Void] = []
+        var cancelled = 0
+        let files = FileSearch(home: HomeFileSearchClient { _, completion in
+            replies.append(completion)
+            return { cancelled += 1 }
+        })
         var oldAnswered = false
         files.search("first") { _ in oldAnswered = true }
-        for _ in 0..<100 where queries.isEmpty { try? await Task.sleep(for: .milliseconds(10)) }
-        XCTAssertEqual(queries.count, 1)
+        for _ in 0..<100 where replies.isEmpty { try? await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertEqual(replies.count, 1)
         files.search("second") { _ in }
-        if let query = queries.first {
-            NotificationCenter.default.post(name: .NSMetadataQueryDidFinishGathering, object: query)
-        }
-        XCTAssertFalse(oldAnswered, "An obsolete query never completes")
+        XCTAssertEqual(cancelled, 1, "A newer search stops the helper search in flight")
+        replies.first?(try? HomeFileSearch.reply([HomeFileSearch.Entry(path: "/Users/me/first.txt", name: "first.txt", kind: "Plain Text")]), nil)
+        XCTAssertFalse(oldAnswered, "An obsolete search never completes")
         files.cancel()
     }
 
@@ -94,7 +100,7 @@ final class SearchRecoveryTests: XCTestCase {
         let model = LauncherModel(index: index,
             clipboard: ClipboardStore(retention: 10, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
             notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),
-            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false })) { _ in }
+            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable)) { _ in }
         model.searchesSecondarySources = false
         model.query = "fixture"
         XCTAssertNotNil(model.searchRecoveryMessage)

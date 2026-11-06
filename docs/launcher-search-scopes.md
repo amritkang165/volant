@@ -45,7 +45,9 @@ and `clip` searches for both. `contacts`, `people`, `files`, `file` and `clipboa
 - Native Actions fixture `search-scopes`: the three scopes entered with real Return and Tab key
   events, Escape and Delete, fictional contacts, files and clips, rendered light and dark at every
   launcher size in Tart.
-- Not verified: the real Contacts permission prompt from the scope in the signed app, and live
-  Spotlight results inside the Files scope.
+- Not verified: the real Contacts permission prompt from the scope in the signed app. Live
+  Spotlight results inside the Files scope found nothing in Volant Dev because the sandboxed query
+  could not see the owner's files; the query now runs in the agent helper (see
+  [file search](file-search.md)).
 - An existing alias, quicklink or snippet named `contacts`, `people`, `files`, `file` or `clipboard`
   is now refused when edited, like other reserved words.

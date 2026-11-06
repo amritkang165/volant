@@ -51,6 +51,7 @@ final class AgentHost: NSObject, VolantAgentHostProtocol {
     func invalidate() {
         acp.queue.async { self.acp.stop() }
         rex.queue.async { self.rex.stop() }
+        homeFiles.stop()
     }
     private let inspectionQueue = DispatchQueue(label: "com.mysticcoders.volant.inspection")
     func detectACPAgents(reply: @escaping (Data?, String?) -> Void) {
@@ -91,6 +92,8 @@ final class AgentHost: NSObject, VolantAgentHostProtocol {
         }
     }
 
+    private let homeFiles = HomeFileSearchHost()
+    func searchHomeFiles(term: String, reply: @escaping (Data?, String?) -> Void) { homeFiles.search(term, reply: reply) }
     func fsearchStatus(reply: @escaping (Data?, String?) -> Void) {
         fsearchQueue.async { [fsearchSocket] in
             do { reply(try JSONEncoder().encode(try FSearch.status(from: try FSearch.exchange(socket: fsearchSocket, request: FSearch.statusRequest))), nil) }

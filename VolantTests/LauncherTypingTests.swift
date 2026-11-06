@@ -9,7 +9,7 @@ private final class ManualFileSearch: FileSearch {
     private(set) var searches: [String] = []
     private var completions: [(String, (SearchResult) -> Void)] = []
 
-    init() { super.init(startQuery: { _ in false }) }
+    init() { super.init(home: .unavailable) }
 
     override func search(_ term: String, completion: @escaping (SearchResult) -> Void) {
         searches.append(term)
@@ -35,7 +35,7 @@ final class LauncherTypingTests: XCTestCase {
 
     override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }
 
-    private func makeModel(files: FileSearch = FileSearch(startQuery: { _ in false }), notes: NotesStore? = nil) -> LauncherModel {
+    private func makeModel(files: FileSearch = FileSearch(home: .unavailable), notes: NotesStore? = nil) -> LauncherModel {
         let model = LauncherModel(index: AppIndex(entries: []),
             clipboard: ClipboardStore(retention: 10, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
             notes: notes ?? NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),

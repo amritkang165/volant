@@ -36,8 +36,11 @@ let fixtureIcon = Data(base64Encoded: "UklGRh4AAABXRUJQVlA4TBEAAAAvH8AHAAdQvKIUu
 /// File search for the fixture: fictional hits while `fixtureFiles` is set, otherwise Spotlight
 /// refused as before, so the Spotlight recovery scenario keeps its failure.
 var fixtureFiles: [FileEntry]?
+/// While set, fixture file searches never answer, so the pending "Searching files…" status shows.
+var fixtureFilesHeld = false
 final class FixtureFileSearch: FileSearch {
     override func search(_ term: String, completion: @escaping (SearchResult) -> Void) {
+        if fixtureFilesHeld { return }
         guard let files = fixtureFiles else { super.search(term, completion: completion); return }
         completion(.success(files.filter { $0.name.localizedCaseInsensitiveContains(term) }))
     }
@@ -64,7 +67,7 @@ let fakeCredentials = AICredentials(read: { _ in nil }, write: { _, _ in credent
 func freshLauncher() {
     panel?.orderOut(nil)
     launched = 0; spotlightAvailable = false; clipboardAvailable = true; clipboardRetryDelay = 0
-    fixtureFiles = nil
+    fixtureFiles = nil; fixtureFilesHeld = false
     chatRequests = 0; settingsRequests = 0; extensionSettingsRequests = 0; credentialWrites = 0
     chatConfig = nil; copied = []
     let id = UUID().uuidString
@@ -79,7 +82,7 @@ func freshLauncher() {
     positions.removeObject(forKey: "launcherPosition")
     panel = LauncherPanel(index: index, clipboard: clipboard, notes: NotesStore(directory: root.appendingPathComponent("Notes-\(id)")), config: preferences,
                           usage: UsageStore(url: root.appendingPathComponent("actions-usage-\(id).sqlite")), positionStore: positions,
-                          files: FixtureFileSearch(startQuery: { _ in false })) { action in
+                          files: FixtureFileSearch(home: .unavailable)) { action in
         switch action {
         case .ai:
             chatRequests += 1
@@ -1568,6 +1571,14 @@ func searchScopesScenario() throws {
     panel.model.query = "report"; settle()
     verify(waitUntil { panel.model.rows.count == 2 }, "Typing searches only files: \(panel.model.rows.map(\.id))")
     try render("scope-files")
+    fixtureFilesHeld = true
+    panel.model.query = "launch"; settle()
+    verify(waitUntil(timeout: 2) { panel.model.searchingFiles } && panel.model.rows.isEmpty, "A pending file search shows Searching files…")
+    try render("scope-files-searching")
+    fixtureFilesHeld = false
+    panel.model.query = "zzqx"; settle()
+    verify(waitUntil { panel.model.emptyStateMessage.contains("zzqx") } && !panel.model.searchingFiles, "A file search that finds nothing says so: \(panel.model.emptyStateMessage)")
+    try render("scope-files-none")
     key("\u{1b}", 53); key("\u{1b}", 53)
     verify(waitUntil { panel.model.scope == nil } && panel.isVisible, "Escape twice leaves the Files scope without closing Volant")
 
@@ -1583,6 +1594,15 @@ func searchScopesScenario() throws {
 
     panel.model.query = "contacts ben"; settle()
     verify(panel.model.scope == nil && panel.model.rows.map(\.id) == ["contact:fixture-ben"], "A one-go query searches at once")
+    panel.model.appleShortcuts.loadOverride = { $0([], nil) }
+    panel.model.searchesSecondarySources = true
+    fixtureFilesHeld = true
+    panel.model.query = "fixture"; settle()
+    verify(waitUntil(timeout: 2) { panel.model.searchingFiles } && panel.model.rows.first?.id.hasSuffix("Fixture.app") == true,
+           "Merged search keeps its rows and adds the quiet Searching files… line: \(panel.model.rows.map(\.id))")
+    try render("search-files-searching")
+    fixtureFilesHeld = false
+    panel.model.searchesSecondarySources = false
     panel.orderOut(nil)
     print("PASS: Contacts, Files and Clipboard scopes enter with Return and Tab, search one source, and leave with Escape and Delete")
 }

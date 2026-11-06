@@ -111,7 +111,7 @@ final class RexModelTests: XCTestCase {
         rex.stopper = {}
         let model = LauncherModel(index: AppIndex(entries: []), clipboard: ClipboardStore(retention: 2, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
                                   notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),
-                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false }), rex: rex) { _ in }
+                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable), rex: rex) { _ in }
         model.searchesSecondarySources = false
         model.query = "safari"
         XCTAssertFalse(rex.connected, "Rex is read only from the rex view or its footer status")
