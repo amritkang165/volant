@@ -248,12 +248,17 @@ Added in 0.3.33:
 | --- | --- | --- | --- |
 | Settings › Your Volant: your own launcher activity for the last 30 days and your most used apps, commands and extensions, counted only on this Mac | Yes | #357; UsageStatsTests, FrecencyTests, seeded Settings renders in light and dark; owner tried a Volant Dev build, including Clear Activity History; daily counts start with the build that adds them; calculator answers, extension results and Shortcuts are not counted | Release notes; say "stays on your Mac, never sent anywhere", never "analytics" or "telemetry" |
 
-Merged after 0.3.33, not in the current download:
+Added in 0.3.34:
+
+| Story | In 0.3.34 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Search Contacts, Search Files and Search Clipboard: type the name, press Return or Tab, and search only that source; or type it in one go, such as `contacts jane` | Yes | #360; SearchScopeTests, LauncherSearchScopeTests, Actions fixture `search-scopes` with fictional contacts, files and clips in light and dark at every size; owner tried it in Volant Dev, including live file results once #363 moved the search to the helper; the real Contacts prompt from the scope not exercised | Launcher docs; release notes |
+| File search finds the owner's files again: the Spotlight query runs in the agent helper | Yes | #363; Volant 0.3.33 and earlier ran it in the sandboxed app, where Spotlight returns only files the app may read, so `/`, the Files scope and file rows in ordinary search found none of the owner's files (measured November 6, 2026: 0 results sandboxed, 28,252 unsandboxed for one term). HomeFileSearchTests, HomeFileSearchClientTests and the helper's search code run against this Mac's Spotlight outside the app; the owner found home-folder files through the helper in Volant Dev; delivery through the Release-signed helper is unverified | Release notes as a fix; no speed claim |
+
+Merged after 0.3.34, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
-| File search finds the owner's files again: the Spotlight query runs in the agent helper | Not yet | Volant 0.3.33 and earlier ran it in the sandboxed app, where Spotlight returns only files the app may read, so `/`, the Files scope and file rows in ordinary search found none of the owner's files (measured November 6, 2026: 0 results sandboxed, 28,252 unsandboxed for one term). HomeFileSearchTests, HomeFileSearchClientTests and the helper's search code run against this Mac's Spotlight outside the app; the owner found home-folder files through the helper in Volant Dev; delivery through the Release-signed helper is unverified | Release notes as a fix; no speed claim |
-| Search Contacts, Search Files and Search Clipboard: type the name, press Return or Tab, and search only that source; or type it in one go, such as `contacts jane` | Not yet | Launcher search scopes PR; SearchScopeTests, LauncherSearchScopeTests, Actions fixture `search-scopes` with fictional contacts, files and clips in light and dark at every size; the real Contacts prompt from the scope and live Spotlight results inside it not exercised | Launcher docs; release notes |
 
 ## Privacy language
 
