@@ -8,7 +8,7 @@ import { StarButton } from '@/components/star-button';
 
 export const repositoryURL = 'https://github.com/mysticcoders/volant';
 export const socialURL = 'https://x.com/mysticcoders';
-export const appVersion = '0.3.33';
+export const appVersion = '0.3.34';
 export const downloadURL = `/updates/Volant-${appVersion}.dmg`;
 
 export function Brand() {
