@@ -205,8 +205,7 @@ button:focus-visible {
   gap: 9px;
 }
 .brand img {
-  filter: invert(70%) sepia(48%) saturate(901%) hue-rotate(316deg)
-    brightness(105%);
+  filter: none;
 }
 .brand-dot {
   color: var(--primary);

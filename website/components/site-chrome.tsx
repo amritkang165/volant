@@ -2,6 +2,7 @@
 // production build (RSC prefetch setup and the click handler both fail), leaving internal
 // navigation dead. Plain anchors until that is fixed upstream. See QUALITY.md.
 import Image from 'next/image';
+import type { ReactNode } from 'react';
 
 import { StarButton } from '@/components/star-button';
 
@@ -13,13 +14,13 @@ export const downloadURL = `/updates/Volant-${appVersion}.dmg`;
 export function Brand() {
   return (
     <span className="brand">
-      <Image unoptimized src="/favicon.svg" alt="" width="30" height="30" />
+      <Image unoptimized src="/brand-mark.svg" alt="" width="30" height="30" />
       volant<span className="brand-dot">.</span>
     </span>
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ children }: { children?: ReactNode }) {
   return (
     <header id="top" className="nav wrap">
       <a href="/" aria-label="Volant home">
@@ -33,6 +34,7 @@ export function SiteHeader() {
         <a href="/docs">Docs</a>
       </nav>
       <div className="nav-actions">
+        {children}
         <StarButton href={repositoryURL} />
         <a className="button small" href={downloadURL} download>
           Download

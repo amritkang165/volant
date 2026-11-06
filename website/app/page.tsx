@@ -1,6 +1,8 @@
 'use client';
 // oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import Image from 'next/image';
+import { useState } from 'react';
+import { LauncherDemo } from '@/components/launcher-demo';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -82,12 +84,25 @@ const benefits = [
 ];
 
 export default function Home() {
+  const [appearance, setAppearance] = useState('system');
   return (
-    <div className="home-refresh">
+    <div className="home-refresh" data-theme={appearance}>
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <SiteHeader />
+      <SiteHeader>
+        <label className="home-appearance">
+          <span className="sr-only">Site appearance</span>
+          <select
+            value={appearance}
+            onChange={(event) => setAppearance(event.target.value)}
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </SiteHeader>
       <main id="main">
         <section className="home-hero wrap">
           <div className="home-hero-copy">
@@ -116,27 +131,7 @@ export default function Home() {
               Free & open source · macOS 15+ · Apple silicon
             </p>
           </div>
-          <figure className="home-product">
-            <div className="home-product-label">
-              <span /> YOUR NEXT MOVE, WITHIN REACH
-            </div>
-            <a
-              href="/images/launcher-dark.png"
-              aria-label="View the full-size native Volant launcher"
-            >
-              <Image
-                unoptimized
-                src="/images/launcher-dark.png"
-                alt="Volant’s native launcher showing Safari results and fictional agent sessions with their status."
-                width={1500}
-                height={960}
-                preload
-              />
-            </a>
-            <figcaption>
-              Actual Volant interface · fictional activity
-            </figcaption>
-          </figure>
+          <LauncherDemo />
         </section>
         <div className="home-proof wrap">
           <span>
