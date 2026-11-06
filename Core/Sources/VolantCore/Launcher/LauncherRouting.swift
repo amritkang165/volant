@@ -5,6 +5,8 @@ public enum LauncherRouting {
     /// Whole queries that open the in-launcher forms for a new snippet or quicklink.
     public static let snippetCreatePhrases: Set<String> = ["new snippet", "create snippet", "add snippet"]
     public static let quicklinkCreatePhrases: Set<String> = ["new quicklink", "create quicklink", "add quicklink"]
+    /// Whole queries that open Pick Color, and show the last picked color above it.
+    public static let colorPickerPhrases: Set<String> = ["color picker", "pick color", "pick colour", "colour picker"]
     static var createPhrases: Set<String> { snippetCreatePhrases.union(quicklinkCreatePhrases) }
 
     public static func isReserved(_ text: String) -> Bool {

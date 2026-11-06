@@ -2,7 +2,7 @@ import Foundation
 
 /// Discoverable entry points. Data rows keep their own identity and aren't branded as apps.
 public enum CoreCommand: String, CaseIterable, Hashable {
-    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, newSnippet, newQuicklink, catalog
+    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, colorPicker, camera, newSnippet, newQuicklink, catalog
     /// The command's name in the launcher, translated in the Core table.
     public var titleResource: LocalizedStringResource {
         switch self {
@@ -23,6 +23,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .wifi: return LocalizedStringResource("Wi-Fi Networks", table: "Core", comment: "Launcher command name")
         case .bluetooth: return LocalizedStringResource("Bluetooth Devices", table: "Core", comment: "Launcher command name")
         case .audio: return LocalizedStringResource("Audio Devices", table: "Core", comment: "Launcher command name")
+        case .colorPicker: return LocalizedStringResource("Pick Color", table: "Core", comment: "Launcher command name: sample a color from the screen")
+        case .camera: return LocalizedStringResource("Open Camera", table: "Core", comment: "Launcher command name: show a small camera preview window")
         case .newSnippet: return LocalizedStringResource("Create Snippet", table: "Core", comment: "Launcher command name")
         case .newQuicklink: return LocalizedStringResource("Create Quicklink", table: "Core", comment: "Launcher command name")
         case .catalog: return LocalizedStringResource("Extension Catalog", table: "Core", comment: "Launcher command name")
@@ -58,6 +60,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .wifi: return "wifi"
         case .bluetooth: return "antenna.radiowaves.left.and.right"
         case .audio: return "speaker.wave.2"
+        case .colorPicker: return "eyedropper"
+        case .camera: return "camera"
         case .newSnippet: return "text.badge.plus"
         case .newQuicklink: return "link.badge.plus"
         case .catalog: return "puzzlepiece.extension"
@@ -72,6 +76,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .caffeinate: return LocalizedStringResource("Keep your Mac awake", table: "Core", comment: "Launcher command description, shown under its name")
         case .emoji: return LocalizedStringResource("Browse emoji and copy one", table: "Core", comment: "Launcher command description, shown under its name")
         case .servers: return LocalizedStringResource("See which local servers are listening, and open one", table: "Core", comment: "Launcher command description, shown under its name")
+        case .colorPicker: return LocalizedStringResource("Sample a color on screen and copy it as HEX, RGB, HSL or OKLCH", table: "Core", comment: "Launcher command description, shown under its name")
+        case .camera: return LocalizedStringResource("Show a small mirrored camera preview", table: "Core", comment: "Launcher command description, shown under its name")
         case .newSnippet: return LocalizedStringResource("Save text to copy by keyword", table: "Core", comment: "Launcher command description, shown under its name")
         case .newQuicklink: return LocalizedStringResource("Save a link to open by name", table: "Core", comment: "Launcher command description, shown under its name")
         case .catalog: return LocalizedStringResource("Browse and install reviewed extensions", table: "Core", comment: "Launcher command description, shown under its name")
@@ -98,6 +104,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .contacts: return "people | person | address book"
         case .files: return "file | documents | finder"
         case .servers: return "ports | localhost | listening | dev server"
+        case .colorPicker: return LauncherRouting.colorPickerPhrases.sorted().joined(separator: " | ") + " | eyedropper | colour"
+        case .camera: return "webcam | facetime camera | mirror | open camera"
         case .newSnippet: return LauncherRouting.snippetCreatePhrases.sorted().joined(separator: " | ")
         case .newQuicklink: return LauncherRouting.quicklinkCreatePhrases.sorted().joined(separator: " | ") + " | new link"
         default: return ""

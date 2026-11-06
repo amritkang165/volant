@@ -41,6 +41,7 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         isReleasedWhenClosed = false
         hidesOnDeactivate = false
         model.dismiss = { [weak self] in self?.orderOut(nil) }
+        model.reopen = { [weak self] in if self?.isVisible == false { self?.toggle() } }
         model.restoreSearchEditor = { [weak self] in self?.restoreSearchEditorAfterForm() }
         model.focusEntryName = { [weak self] in self?.focusEntryNameField() }
         contentView = NSHostingView(rootView: ThemedRoot { ThemedLauncher(model: model) })

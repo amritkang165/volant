@@ -449,6 +449,20 @@ private struct CommandTile: View {
     }
 }
 
+/// A picked color as a tile the size of a command tile, outlined so white and near-background
+/// colors stay visible in both appearances.
+private struct ColorSwatchTile: View {
+    let color: PickedColor
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 5.5, style: .continuous)
+            .fill(Color(.sRGB, red: color.red, green: color.green, blue: color.blue, opacity: 1))
+            .frame(width: 22, height: 22)
+            .overlay(RoundedRectangle(cornerRadius: 5.5, style: .continuous).strokeBorder(Color.primary.opacity(0.2), lineWidth: 0.5))
+            .accessibilityHidden(true)
+    }
+}
+
 /// A server's runtime logo, in its brand color on a white tile like an app icon, so a brand color
 /// is never altered and reads the same in light and dark appearance. Callers fall back to the
 /// generic tile when the logo isn't in the bundle, so a tile is never left blank.
@@ -502,6 +516,8 @@ private extension CoreCommand {
         case .servers: return Color(red: 0.2, green: 0.55, blue: 0.35)
         case .wifi, .bluetooth: return .blue
         case .audio: return .mint
+        case .colorPicker: return Color(red: 0.85, green: 0.35, blue: 0.55)
+        case .camera: return Color(white: 0.35)
         case .newSnippet, .newQuicklink: return .cyan
         case .catalog: return Color(red: 0.95, green: 0.42, blue: 0.29)
         }
@@ -566,6 +582,9 @@ private struct RowView: View {
         case .server(let server): return "\(server.port) · " + (server.folderName.map { server.displayName + " · " + $0 } ?? server.displayName)
         case .core(let command): return command.title
         case .systemAction(let action): return action.title
+        case .systemToggle(let toggle, _): return toggle.title
+        case .pickedColor(let color, let format): return color.value(format)
+        case .privacySettings(let pane): return pane.title
         case .caffeinate(let command): return command.title
         case .agentSession(let session): return session.project
         case .herdrMachine(let machine, _, _): return machine?.label ?? String(localized: "Local", comment: "Herdr machine row title for this Mac")
@@ -601,6 +620,9 @@ private struct RowView: View {
         case .core(let command): return command.detail
         case .server(let server): return server.detail(home: ServersModel.home)
         case .systemAction(let action): return action.detail
+        case .systemToggle(let toggle, let on): return toggle.detail(on: on)
+        case .pickedColor(_, let format): return format.label
+        case .privacySettings(let pane): return pane.detail
         case .caffeinate(let command): return command.detail
         case .systemSettings: return String(localized: "Open this pane in System Settings", comment: "Launcher row subtitle")
         case .settings: return String(localized: "Preferences, app shortcuts and backups", comment: "Launcher row subtitle for Volant Settings")
@@ -653,6 +675,9 @@ private struct RowView: View {
             else { CommandTile(symbol: CoreCommand.servers.symbol, tint: CoreCommand.servers.tint) }
         case .core(let command): CommandTile(symbol: command.symbol, tint: command.tint)
         case .systemAction(let action): CommandTile(symbol: action.symbol, tint: action.tint)
+        case .systemToggle(let toggle, _): CommandTile(symbol: toggle.symbol, tint: .indigo)
+        case .pickedColor(let color, _): ColorSwatchTile(color: color)
+        case .privacySettings(let pane): CommandTile(symbol: pane.symbol, tint: .gray)
         case .caffeinate: CommandTile(symbol: "cup.and.saucer", tint: CoreCommand.caffeinate.tint)
         case .agentSession(let session):
             Image(systemName: session.agentStatus == "blocked" ? "exclamationmark.bubble" : "terminal").font(.system(size: 20))

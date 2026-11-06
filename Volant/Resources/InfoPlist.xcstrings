@@ -8,91 +8,91 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volant asks macOS to show its restart, shut down and log out confirmations when you choose those commands."
+            "value": "Volant asks macOS to show its restart, shut down and log out confirmations, and asks System Events to switch Light and Dark appearance or menu bar hiding, only when you choose those commands."
           }
         },
         "es": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Volant pide a macOS que muestre sus confirmaciones de reinicio, apagado y cierre de sesión cuando eliges esos comandos."
+            "value": "Volant pide a macOS que muestre sus confirmaciones de reinicio, apagado y cierre de sesión, y pide a System Events que cambie entre la apariencia clara y oscura o la ocultación de la barra de menús, solo cuando eliges esos comandos."
           }
         },
         "de": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Volant bittet macOS, die Bestätigungen für Neustart, Ausschalten und Abmelden anzuzeigen, wenn du diese Befehle wählst."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Volant chiede a macOS di mostrare le conferme di riavvio, spegnimento e logout quando scegli quei comandi."
+            "value": "Volant bittet macOS, die Bestätigungen für Neustart, Ausschalten und Abmelden anzuzeigen, und bittet System Events, zwischen hellem und dunklem Erscheinungsbild oder dem Ausblenden der Menüleiste zu wechseln, nur wenn du diese Befehle wählst."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Volant demande à macOS d’afficher ses confirmations de redémarrage, d’extinction et de fermeture de session lorsque vous choisissez ces commandes."
+            "value": "Volant demande à macOS d’afficher ses confirmations de redémarrage, d’extinction et de fermeture de session, et demande à System Events de basculer entre l’apparence claire et sombre ou le masquage de la barre des menus, uniquement lorsque vous choisissez ces commandes."
           }
         },
-        "zh-Hans": {
+        "it": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "当你选择重新启动、关机和退出登录命令时，Volant会请求macOS显示相应的确认信息。"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Volant просит macOS показывать подтверждения перезагрузки, выключения и выхода из системы, когда вы выбираете эти команды."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "O Volant pede ao macOS para mostrar as confirmações de reiniciar, desligar e encerrar sessão quando você escolhe esses comandos."
+            "value": "Volant chiede a macOS di mostrare le conferme di riavvio, spegnimento e logout, e chiede a System Events di passare tra aspetto chiaro e scuro o di nascondere la barra dei menu, solo quando scegli quei comandi."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "再起動、システム終了、ログアウトのコマンドを選択したときに、Volantはその確認を表示するようmacOSに依頼します。"
+            "value": "Volantは、再起動、システム終了、ログアウトのコマンドを選んだときだけmacOSに確認を表示するよう依頼し、ライトとダークの外観やメニューバーの自動非表示を切り替えるコマンドを選んだときだけSystem Eventsに切り替えを依頼します。"
           }
         },
-        "nl": {
+        "zh-Hans": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Volant vraagt macOS om de bevestigingen voor opnieuw opstarten, uitschakelen en afmelden te tonen wanneer je die commando's kiest."
+            "value": "仅当你选择相应命令时，Volant 才会请求 macOS 显示重新启动、关机和退出登录的确认，并请求 System Events 切换浅色与深色外观或菜单栏自动隐藏。"
           }
         },
-        "ko": {
+        "pt-BR": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "재시동, 시스템 종료 및 로그아웃 명령을 선택하면 Volant가 macOS에 해당 확인 창을 표시하도록 요청합니다."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Volant просить macOS показувати підтвердження перезавантаження, вимкнення та завершення сеансу, коли ви вибираєте ці команди."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Volant prosi macOS o wyświetlenie potwierdzeń ponownego uruchomienia, wyłączenia i wylogowania, gdy wybierzesz te polecenia."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "needs_review",
-            "value": "Volant, siz yeniden başlatma, kapatma ve oturumu kapatma komutlarını seçtiğinizde macOS’ten bunların onay pencerelerini göstermesini ister."
+            "value": "O Volant pede ao macOS que mostre as confirmações de reinício, desligamento e encerramento de sessão, e pede ao System Events que alterne entre a aparência clara e escura ou a ocultação da barra de menus, apenas quando você escolhe esses comandos."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "O Volant pede ao macOS que mostre as confirmações de reiniciar, desligar e terminar sessão quando escolhe esses comandos."
+            "value": "O Volant pede ao macOS que mostre as confirmações de reinício, encerramento e fim de sessão, e pede ao System Events que alterne entre o aspeto claro e escuro ou a ocultação da barra de menus, apenas quando escolhe esses comandos."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant는 해당 명령을 선택할 때만 macOS에 재시동, 시스템 종료, 로그아웃 확인을 표시하도록 요청하고, System Events에 라이트와 다크 화면 모드 또는 메뉴 막대 가리기를 전환하도록 요청합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant vraagt macOS om de bevestigingen voor herstarten, uitschakelen en afmelden te tonen, en vraagt System Events om te wisselen tussen lichte en donkere weergave of het verbergen van de menubalk, alleen wanneer je die opdrachten kiest."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant prosi macOS o wyświetlenie potwierdzeń ponownego uruchomienia, wyłączenia i wylogowania oraz prosi System Events o przełączenie jasnego i ciemnego wyglądu lub ukrywania paska menu, tylko gdy wybierzesz te polecenia."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant просит macOS показать подтверждения перезагрузки, выключения и выхода из системы, а также просит System Events переключить светлое и тёмное оформление или скрытие строки меню, только когда вы выбираете эти команды."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant просить macOS показати підтвердження перезавантаження, вимкнення та виходу із системи, а також просить System Events перемкнути світлий і темний вигляд або приховування смуги меню, лише коли ви вибираєте ці команди."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant, yalnızca bu komutları seçtiğinizde macOS’tan yeniden başlatma, kapatma ve oturumu kapatma onaylarını göstermesini, System Events’tan da açık ve koyu görünüm ya da menü çubuğu gizleme arasında geçiş yapmasını ister."
           }
         }
       }
@@ -381,6 +381,102 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "O Volant mostra os eventos de hoje e as respetivas ligações de reunião. Apenas leitura."
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "comment": "Permission prompt macOS shows the first time Volant asks for this access.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volant shows a live preview from your camera only while the Open Camera window is open. Nothing is recorded, saved or sent."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant muestra una vista previa en vivo de tu cámara solo mientras la ventana Abrir cámara está abierta. No se graba, guarda ni envía nada."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant zeigt eine Live-Vorschau deiner Kamera nur, solange das Fenster „Kamera öffnen“ geöffnet ist. Nichts wird aufgezeichnet, gespeichert oder gesendet."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant affiche un aperçu en direct de votre caméra uniquement pendant que la fenêtre Ouvrir la caméra est ouverte. Rien n’est enregistré, conservé ni envoyé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant mostra un’anteprima dal vivo della fotocamera solo mentre la finestra Apri fotocamera è aperta. Nulla viene registrato, salvato o inviato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volantは「カメラを開く」ウインドウが開いている間だけカメラのライブプレビューを表示します。録画、保存、送信は一切行いません。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "仅在“打开相机”窗口打开时，Volant 才会显示相机的实时预览。不会录制、保存或发送任何内容。"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant mostra uma pré-visualização ao vivo da sua câmera apenas enquanto a janela Abrir câmera está aberta. Nada é gravado, salvo ou enviado."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant mostra uma pré-visualização em direto da sua câmara apenas enquanto a janela Abrir câmara está aberta. Nada é gravado, guardado ou enviado."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant는 카메라 열기 윈도우가 열려 있는 동안에만 카메라의 실시간 미리보기를 표시합니다. 아무것도 녹화, 저장 또는 전송하지 않습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant toont alleen een live voorvertoning van je camera zolang het venster Camera openen open is. Er wordt niets opgenomen, bewaard of verstuurd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant pokazuje podgląd na żywo z kamery tylko wtedy, gdy okno Otwórz kamerę jest otwarte. Nic nie jest nagrywane, zapisywane ani wysyłane."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant показывает живой предпросмотр камеры, только пока открыто окно «Открыть камеру». Ничего не записывается, не сохраняется и не отправляется."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant показує живий попередній перегляд камери, лише поки відкрите вікно «Відкрити камеру». Нічого не записується, не зберігається й не надсилається."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant, kameranızın canlı önizlemesini yalnızca Kamerayı Aç penceresi açıkken gösterir. Hiçbir şey kaydedilmez, saklanmaz veya gönderilmez."
           }
         }
       }

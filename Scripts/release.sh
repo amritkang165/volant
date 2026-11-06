@@ -59,6 +59,7 @@ assert ent.get('com.apple.security.app-sandbox') is True
 assert not ent.get('com.apple.security.get-task-allow')
 assert not ent.get('com.apple.security.network.client')
 assert not ent.get('com.apple.security.network.server')
+assert set(ent.get('com.apple.security.temporary-exception.apple-events', [])) <= {'com.apple.loginwindow', 'com.apple.systemevents'}
 assert ent.get('com.apple.developer.ubiquity-kvstore-identifier') == 'REMBT6JY4N.com.mysticcoders.volant'
 PY
 test -f "$APP/Contents/embedded.provisionprofile"

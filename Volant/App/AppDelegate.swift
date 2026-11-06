@@ -89,6 +89,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .open(let id): self?.notesPanel.open(noteID: id)
         case .create(let text): self?.notesPanel.openNew(text: text)
         case .confetti: ConfettiWindow.celebrate()
+        case .camera: self?.showCamera()
         case .systemAction(let action): self?.performSystemAction(action)
         case .checkForUpdates: self?.checkForUpdates()
         case .whatsNew:
@@ -400,6 +401,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.toggle(source: .hotkey, requestedAt: started)
     }
     @objc private func togglePanel() { panel.toggle(source: .menu) }
+
+    /// Created on first use, so the camera is never touched before Open Camera is chosen.
+    private lazy var cameraWindow: CameraPreviewWindow = {
+        let window = CameraPreviewWindow()
+        window.onFailure = { [weak self] message in
+            guard let self else { return }
+            if !self.panel.isVisible { self.panel.toggle() }
+            self.panel.model.actionFeedback = message
+        }
+        return window
+    }()
+
+    private func showCamera() { cameraWindow.present() }
 
     /// One path for the launcher and the hotkeys. The launcher is hidden first and the action
     /// runs a moment later, so it is not on screen when the Mac locks or a dialog appears. A
