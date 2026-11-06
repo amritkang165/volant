@@ -704,3 +704,16 @@ Later the same day the owner installed a reader from Settings → Catalog in the
 - **Feed:** the signed build-46 appcast generated with this DMG passes `sign_update --verify`.
 
 **Publishing.** After the owner merged this release, `Scripts/ship.sh` deployed the download while the previous feed stayed live, verified the public DMG, then deployed the feed and compared it byte for byte. Its results are posted on the release pull request.
+
+## 0.3.33 build 47 — November 6, 2026
+
+**What's in it.** See the [release notes](releases/0.3.33.md).
+
+**Build.** Built from `3b410e0` on `release/0.3.33` by `Scripts/ship.sh`.
+
+- **Notarization:** Apple accepted app submission `2d6cd5b7-38b0-482c-a97c-af65f88ff412` and DMG submission `81d61240-94f2-41e8-81fe-db31e87623fd`. Both were stapled and passed Gatekeeper as Notarized Developer ID.
+- **Mounted DMG:** `Volant.app` 0.3.33, build 47, `arm64`, valid deep strict signature, stapled, Applications link present.
+- **DMG SHA-256:** `8c7305964cc49eaae8e252f4c0b96c50fd71913b2afe37bc2fec0a312a83256c` (9880165 bytes).
+- **Feed:** the signed build-47 appcast generated with this DMG passes `sign_update --verify`.
+
+**Publishing.** After the owner merged this release, `Scripts/ship.sh` deployed the download while the previous feed stayed live, verified the public DMG, then deployed the feed and compared it byte for byte. Its results are posted on the release pull request.
