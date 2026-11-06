@@ -96,7 +96,7 @@ private struct WelcomeShortcutPage: View {
                 }
                 .frame(width: 170)
             }
-            .padding(16).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+            .padding(16).background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
             if !model.summonRegistered {
                 WelcomeNotice(symbol: "exclamationmark.triangle.fill", tint: .orange,
                               text: String(localized: "macOS or another app is already using this shortcut, so it doesn’t open Volant yet. Choose another one above.", comment: "Welcome window warning when the summon shortcut failed to register"))
@@ -346,20 +346,26 @@ private struct WelcomeExtensionRow: View {
                 if let icon = ExtensionIcon.image(for: ext) {
                     Image(nsImage: icon).resizable().clipShape(RoundedRectangle(cornerRadius: 5))
                 } else {
-                    Image(systemName: "puzzlepiece.extension").foregroundStyle(.secondary)
+                    Image(systemName: "puzzlepiece.extension").font(.title3).foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 24, height: 24).accessibilityHidden(true)
-            Toggle(isOn: Binding(get: { ext.enabled }, set: setEnabled)) {
+            .frame(width: 26, height: 26).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(ext.name)
-                Text(ext.isCommunity
-                     ? String(localized: "From the catalog · \(ext.manifest.version, format: .verbatim)", comment: "Welcome window extension detail; the value is a version number")
-                     : String(localized: "Built in · \(ext.manifest.version, format: .verbatim)", comment: "Welcome window extension detail; the value is a version number"))
-                    .foregroundStyle(.secondary)
+                Text(detail).font(.callout).foregroundStyle(.secondary)
             }
-            .disabled(ext.communityBlocked || ext.revocation != nil)
+            Spacer()
+            Toggle(ext.name, isOn: Binding(get: { ext.enabled }, set: setEnabled))
+                .labelsHidden().toggleStyle(.switch)
+                .disabled(ext.communityBlocked || ext.revocation != nil)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 9)
+    }
+
+    private var detail: String {
+        ext.isCommunity
+            ? String(localized: "From the catalog · \(ext.manifest.version, format: .verbatim)", comment: "Welcome window extension detail; the value is a version number")
+            : String(localized: "Built in · \(ext.manifest.version, format: .verbatim)", comment: "Welcome window extension detail; the value is a version number")
     }
 }
 
@@ -378,6 +384,6 @@ private struct WelcomeStarCard: View {
                 Label(String(localized: "Star on GitHub", comment: "About settings link that opens Volant's GitHub page, where people can star the project"), systemImage: "star")
             }
         }
-        .padding(16).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+        .padding(16).background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
     }
 }
