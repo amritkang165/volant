@@ -136,7 +136,8 @@ export default function PrivacyAndSecurity() {
             <tr>
               <td>Contacts</td>
               <td>
-                Only to search contacts with <code>@</code>. Asked on first use.
+                Only to search contacts with <code>@</code> or Search Contacts.
+                Asked the first time you type a name there.
               </td>
             </tr>
             <tr>

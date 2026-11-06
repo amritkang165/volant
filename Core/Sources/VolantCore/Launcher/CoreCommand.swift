@@ -2,7 +2,7 @@ import Foundation
 
 /// Discoverable entry points. Data rows keep their own identity and aren't branded as apps.
 public enum CoreCommand: String, CaseIterable, Hashable {
-    case define, translate, caffeinate, emoji, notes, clipboard, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, newSnippet, newQuicklink, catalog
+    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, newSnippet, newQuicklink, catalog
     /// The command's name in the launcher, translated in the Core table.
     public var titleResource: LocalizedStringResource {
         switch self {
@@ -15,7 +15,9 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .caffeinate: return LocalizedStringResource("Caffeinate", table: "Core", comment: "Launcher command name")
         case .emoji: return LocalizedStringResource("Search Emoji", table: "Core", comment: "Launcher command name")
         case .notes: return LocalizedStringResource("Open Notes", table: "Core", comment: "Launcher command name")
-        case .clipboard: return LocalizedStringResource("Clipboard History", table: "Core", comment: "Launcher command name")
+        case .clipboard: return LocalizedStringResource("Search Clipboard", table: "Core", comment: "Launcher command name")
+        case .contacts: return LocalizedStringResource("Search Contacts", table: "Core", comment: "Launcher command name")
+        case .files: return LocalizedStringResource("Search Files", table: "Core", comment: "Launcher command name")
         case .agents: return LocalizedStringResource("Open Agents", table: "Core", comment: "Launcher command name")
         case .servers: return LocalizedStringResource("Listening Servers", table: "Core", comment: "Launcher command name")
         case .wifi: return LocalizedStringResource("Wi-Fi Networks", table: "Core", comment: "Launcher command name")
@@ -30,6 +32,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         switch self {
         case .emoji: return ":"
         case .clipboard: return "clip"
+        case .contacts: return "@"
+        case .files: return "/"
         case .newSnippet: return "new snippet"
         case .newQuicklink: return "new quicklink"
         default: return rawValue
@@ -47,6 +51,8 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .emoji: return "face.smiling"
         case .notes: return "note.text"
         case .clipboard: return "doc.on.clipboard"
+        case .contacts: return "person.crop.circle"
+        case .files: return "doc.text.magnifyingglass"
         case .agents: return "terminal"
         case .servers: return "server.rack"
         case .wifi: return "wifi"
@@ -69,6 +75,9 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .newSnippet: return LocalizedStringResource("Save text to copy by keyword", table: "Core", comment: "Launcher command description, shown under its name")
         case .newQuicklink: return LocalizedStringResource("Save a link to open by name", table: "Core", comment: "Launcher command description, shown under its name")
         case .catalog: return LocalizedStringResource("Browse and install reviewed extensions", table: "Core", comment: "Launcher command description, shown under its name")
+        case .clipboard: return LocalizedStringResource("Find something you copied", table: "Core", comment: "Launcher command description, shown under its name")
+        case .contacts: return LocalizedStringResource("Find people in your Contacts", table: "Core", comment: "Launcher command description, shown under its name")
+        case .files: return LocalizedStringResource("Find files on your Mac", table: "Core", comment: "Launcher command description, shown under its name")
         default: return LocalizedStringResource("Built into Volant", table: "Core", comment: "Launcher command description, shown under its name")
         }
     }
@@ -85,6 +94,9 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         switch self {
         case .ai: return "acp"
         case .catalog: return "extensions | store | marketplace | install"
+        case .clipboard: return "clipboard history | clip | copied | paste"
+        case .contacts: return "people | person | address book"
+        case .files: return "file | documents | finder"
         case .servers: return "ports | localhost | listening | dev server"
         case .newSnippet: return LauncherRouting.snippetCreatePhrases.sorted().joined(separator: " | ")
         case .newQuicklink: return LauncherRouting.quicklinkCreatePhrases.sorted().joined(separator: " | ") + " | new link"

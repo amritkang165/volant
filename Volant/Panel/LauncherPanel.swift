@@ -225,10 +225,10 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         return true
     }
 
-    /// Delete in an empty search field inside an extension goes back to the launcher, unless an input
+    /// Delete in an empty search field inside an extension or built-in scope goes back to the launcher, unless an input
     /// method is composing.
     private func leavesScope(_ event: NSEvent) -> Bool {
-        guard event.type == .keyDown, event.keyCode == 51, model.scopedExtension != nil, model.query.isEmpty,
+        guard event.type == .keyDown, event.keyCode == 51, model.scope != nil, model.query.isEmpty,
               event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
               let editor = searchInput(in: contentView)?.currentEditor() as? NSTextView, firstResponder === editor,
               !editor.hasMarkedText() else { return false }
@@ -359,6 +359,13 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         if leavesScope(event) {
             if !event.isARepeat { model.exitScope() }
             return
+        }
+        // Tab on a Contacts, Files or Clipboard command row enters that scope, as Return does.
+        if event.type == .keyDown, event.keyCode == 48,
+           event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
+           let editor = searchInput(in: contentView)?.currentEditor() as? NSTextView, firstResponder === editor,
+           !editor.hasMarkedText(), model.entryForm == nil, model.actionTarget == nil {
+            if !event.isARepeat, model.enterSelectedSearchScope() { return }
         }
         // Own Tab only in the main search editor, never in a form, menu, or chat.
         if event.type == .keyDown, event.keyCode == 48,

@@ -99,6 +99,20 @@ export default function Launcher() {
         </table>
       </div>
 
+      <h3>Or search one source by name</h3>
+      <p>
+        Type <code>contacts</code> (or <code>people</code>),{' '}
+        <code>files</code> or <code>clipboard</code> and the matching
+        command, Search Contacts, Search Files or Search Clipboard, comes
+        first. Press Return or Tab to search only that source: the search
+        field shows its name, and Escape or Delete in an empty field goes
+        back. You can also type it in one go, such as{' '}
+        <code>contacts jane</code>, <code>files report</code> or{' '}
+        <code>clipboard invoice</code>. These search the same way as{' '}
+        <code>@</code>, <code>/</code> and <code>clip</code>, and Contacts
+        still asks for access only once you type a name.
+      </p>
+
       <h3>Files from fsearch, if you run it</h3>
       <p>
         File results come from Spotlight. If you already run the{' '}
