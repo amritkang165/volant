@@ -16,6 +16,7 @@ public struct HostMessage: Error, LocalizedError, Equatable, Sendable {
         case serversUnreadable = "servers-unreadable"
         case repositoriesUnreadable = "repositories-unreadable"
         case notAFilePath = "not-a-file-path"
+        case fileSearchUnavailable = "file-search-unavailable"
         case herdrNotFound = "herdr-not-found"
         case herdrUnavailable = "herdr-unavailable"
         case savedMachinesUnreadable = "saved-machines-unreadable"
@@ -132,6 +133,7 @@ public struct HostMessage: Error, LocalizedError, Equatable, Sendable {
         case .serversUnreadable: return String(localized: "Couldn’t read listening servers.", table: "Core", comment: "Servers command error")
         case .repositoriesUnreadable: return String(localized: "Couldn’t read repository changes.", table: "Core", comment: "Herdr pane error while reading Git status")
         case .notAFilePath: return String(localized: "Not a file path.", table: "Core", comment: "File search error")
+        case .fileSearchUnavailable: return String(localized: "Couldn’t search files.", table: "Core", comment: "File search error from the helper that runs Spotlight")
         case .herdrNotFound: return String(localized: "Herdr was not found. Install Herdr, start a local session, then reconnect.", table: "Core", comment: "Herdr error; Herdr is a program name")
         case .herdrUnavailable: return String(localized: "Herdr is unavailable or the connection timed out.", table: "Core", comment: "Herdr error; Herdr is a program name")
         case .savedMachinesUnreadable: return String(localized: "Couldn’t read saved machines. Check Herdr 0.9.1 or later is installed.", table: "Core", comment: "Herdr machine status detail")

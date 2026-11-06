@@ -79,7 +79,7 @@ func freshLauncher() {
     positions.removeObject(forKey: "launcherPosition")
     panel = LauncherPanel(index: index, clipboard: clipboard, notes: NotesStore(directory: root.appendingPathComponent("Notes-\(id)")), config: preferences,
                           usage: UsageStore(url: root.appendingPathComponent("actions-usage-\(id).sqlite")), positionStore: positions,
-                          files: FixtureFileSearch(startQuery: { _ in false })) { action in
+                          files: FixtureFileSearch(home: .unavailable)) { action in
         switch action {
         case .ai:
             chatRequests += 1

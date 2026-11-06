@@ -28,7 +28,7 @@ final class FSearchFileSearchTests: XCTestCase {
 
     func testFSearchAnswersWithoutSpotlightAndHidesNoise() async {
         var spotlightStarted = false
-        let files = FileSearch(startQuery: { _ in spotlightStarted = true; return false })
+        let files = FileSearch(home: HomeFileSearchClient { _, completion in spotlightStarted = true; completion(nil, nil); return {} })
         files.fsearch = client({ _ in (self.hits(["/Users/me/Projects/main.rs", "/Users/me/Library/Caches/main.rs", "/Users/me/app/build/main.rs",
                                                  "/Users/me/.hidden/main.rs"] + (0..<12).map { "/Users/me/n\($0)/main.rs" }), nil) })
         guard case .success(let entries) = await search(files, "mian.rs") else { return XCTFail("Expected results") }
@@ -38,19 +38,24 @@ final class FSearchFileSearchTests: XCTestCase {
         XCTAssertEqual(entries.count, 8, "At most eight file rows")
     }
 
-    func testAnUnreachableDaemonFallsBackToSpotlight() async {
-        var spotlightStarted = false
-        let files = FileSearch(startQuery: { _ in spotlightStarted = true; return false })
+    func testAnUnreachableDaemonFallsBackToTheHelpersSpotlightSearch() async {
+        var spotlightTerms: [String] = []
+        let files = FileSearch(home: HomeFileSearchClient { term, completion in
+            spotlightTerms.append(term)
+            completion(try? HomeFileSearch.reply([HomeFileSearch.Entry(path: "/Users/me/Documents/invoice.pdf", name: "invoice.pdf", kind: "PDF document")]), nil)
+            return {}
+        })
         files.fsearch = client({ _ in (nil, FSearchError.notRunning.localizedDescription) })
-        guard case .failure(.unavailable) = await search(files, "invoice") else { return XCTFail("Expected Spotlight's answer") }
-        XCTAssertTrue(spotlightStarted, "The same term went to Spotlight")
+        guard case .success(let entries) = await search(files, "invoice") else { return XCTFail("Expected Spotlight's answer") }
+        XCTAssertEqual(spotlightTerms, ["invoice"], "The same term went to the helper's Spotlight search")
+        XCTAssertEqual(entries.map(\.url.path), ["/Users/me/Documents/invoice.pdf"])
     }
 
     /// Each search waits for its debounce until the fake daemon receives the request. The fake's
     /// replies complete synchronously, so the answers are final as soon as both replies are sent.
     func testOnlyTheNewestQueryIsAnswered() async {
         var pending: [(Data?, String?) -> Void] = []
-        let files = FileSearch(startQuery: { _ in false })
+        let files = FileSearch(home: .unavailable)
         let fake = FSearchClient()
         fake.call = { _, completion in pending.append(completion) }
         files.fsearch = fake
@@ -73,7 +78,7 @@ final class FSearchFileSearchTests: XCTestCase {
         let model = LauncherModel(index: AppIndex(entries: []),
             clipboard: ClipboardStore(retention: 10, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
             notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: config,
-            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false }), onNote: { _ in })
+            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable), onNote: { _ in })
         XCTAssertNil(model.files.fsearch, "Off by default")
         var opened: [String] = []
         model.fsearchClient = client({ _ in (nil, nil) }) { if case .opened(let path) = $0 { opened.append(path) } }

@@ -53,7 +53,7 @@ final class LauncherCatalogTests: XCTestCase {
         let model = LauncherModel(index: AppIndex(entries: []),
             clipboard: ClipboardStore(retention: 10, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
             notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),
-            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false }), onNote: actions)
+            usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable), onNote: actions)
         model.searchesSecondarySources = false
         model.appleShortcuts.loadOverride = { $0([], nil) }
         model.actionConfigURL = config

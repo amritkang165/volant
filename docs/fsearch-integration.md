@@ -26,7 +26,8 @@ not synced). The owner chose this over a native index to avoid giving Volant Ful
   through, such as `/ext:swift launcher` or `/in:~/workspace readme`. Typos are tolerated.
 - Results hide the same noise as Spotlight results (Library, build folders, dotfiles, node_modules).
 - A query is sent 50 ms after typing pauses (Spotlight keeps 150 ms); only the newest answer is shown.
-- When fsearch is not running, still indexing, or fails, the same query goes to Spotlight. Settings
+- When fsearch is not running, still indexing, or fails, the same query goes to the helper's
+  Spotlight search (`searchHomeFiles`, see [file search](file-search.md)). Settings
   shows the daemon's state: its item count and whether it has Full Disk Access, or how to start it.
 
 ## Evidence
@@ -34,7 +35,7 @@ not synced). The owner chose this over a native index to avoid giving Volant Ful
 - `FSearchTests` (Core) run the client against a fake daemon socket: request lines, hit validation,
   daemon errors, a missing daemon, silence (timeout) and an oversized reply.
 - `FSearchFileSearchTests` (app): fsearch answering without Spotlight and hiding noise, fallback to
-  Spotlight, stale answers dropped, and the setting switching the source.
+  the helper's Spotlight search, stale answers dropped, and the setting switching the source.
 - Against the owner's real fsearch 0.2.1 daemon (9.48M entries, no Full Disk Access), the Core client
   answered `mian.rs` in 4.6 ms and other queries in under 1 ms (October 14, 2026). The owner then
   used it in an installed Developer ID build: the File Search status, typo-tolerant `/` searches and

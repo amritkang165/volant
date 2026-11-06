@@ -8,32 +8,33 @@ struct FileEntry: Identifiable, Hashable {
     let kind: String
 }
 
-/// Debounced Spotlight file search within the user's home. Sandbox-safe: opening a hit hands the URL to the system.
-/// With `fsearch` set (the owner turned on Use fsearch), a running fsearch daemon answers first, across
-/// the whole disk with typo tolerance; if it can't, the same query falls back to Spotlight.
-/// Not final so launcher tests can deliver fictional results without Spotlight.
-class FileSearch: NSObject {
+/// Debounced file search within the owner's home folder. The Spotlight query runs in the agent
+/// helper (`HomeFileSearchClient`), because inside the sandbox Spotlight returns only files the app
+/// may read, which is none of the owner's. Opening or revealing a hit hands the URL to the system,
+/// which the sandbox allows. With `fsearch` set (the owner turned on Use fsearch), a running fsearch
+/// daemon answers first, across the whole disk with typo tolerance; if it can't, the same term goes
+/// to the helper's Spotlight search. Not final so launcher tests can deliver fictional results.
+class FileSearch {
     enum Failure: Error { case unavailable }
     typealias SearchResult = Result<[FileEntry], Failure>
-    private let startQuery: (NSMetadataQuery) -> Bool
-    init(startQuery: @escaping (NSMetadataQuery) -> Bool = { $0.start() }) {
-        self.startQuery = startQuery
-        super.init()
-    }
-    deinit { query?.stop(); NotificationCenter.default.removeObserver(self) }
-    private var query: NSMetadataQuery?
-    private var completion: ((SearchResult) -> Void)?
+    private let home: HomeFileSearchClient
+    init(home: HomeFileSearchClient = .shared) { self.home = home }
+    deinit { cancelHome?() }
     private var pending: DispatchWorkItem?
+    /// Stops the helper search in flight without completing it.
+    private var cancelHome: (() -> Void)?
     /// Set while Use fsearch is on.
     var fsearch: FSearchClient?
-    private var fsearchGeneration = 0
+    /// Advanced by every search and cancel, so only the newest request's answer completes.
+    private var generation = 0
 
     func search(_ term: String, completion: @escaping (SearchResult) -> Void) {
         cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self else { return }
+            self.pending = nil
             if let fsearch = self.fsearch, term.trimmingCharacters(in: .whitespaces).count >= 2 { self.runFSearch(fsearch, term, completion: completion) }
-            else { self.run(term, completion: completion) }
+            else { self.runHome(term, completion: completion) }
         }
         pending = work
         // fsearch answers in about a millisecond, so it needs only enough delay to skip keystrokes.
@@ -41,80 +42,103 @@ class FileSearch: NSObject {
     }
 
     /// Asks fsearch, keeping only the newest request's answer. Noisy paths are hidden as for Spotlight;
-    /// an error falls back to Spotlight for the same term.
+    /// an error falls back to the helper's Spotlight search for the same term.
     private func runFSearch(_ fsearch: FSearchClient, _ term: String, completion: @escaping (SearchResult) -> Void) {
-        fsearchGeneration += 1
-        let generation = fsearchGeneration
+        generation += 1
+        let request = generation
         fsearch.search(term, limit: FSearch.maximumHits) { [weak self] result in
-            guard let self, generation == self.fsearchGeneration else { return }
+            guard let self, request == self.generation else { return }
             switch result {
-            case .success(let entries): completion(.success(Array(entries.filter { FileSearch.isInteresting($0.url.path) }.prefix(8))))
-            case .failure: self.run(term, completion: completion)
+            case .success(let entries): completion(.success(Array(entries.filter { FileSearch.isInteresting($0.url.path) }.prefix(HomeFileSearch.maximumResults))))
+            case .failure: self.runHome(term, completion: completion)
             }
+        }
+    }
+
+    /// Asks the helper's Spotlight search, keeping only the newest request's answer. A term too
+    /// short to search answers with no files rather than a failure.
+    private func runHome(_ term: String, completion: @escaping (SearchResult) -> Void) {
+        guard let term = HomeFileSearch.term(term) else { completion(.success([])); return }
+        generation += 1
+        let request = generation
+        cancelHome = home.search(term) { [weak self] result in
+            guard let self, request == self.generation else { return }
+            self.cancelHome = nil
+            completion(result)
         }
     }
 
     func cancel() {
         pending?.cancel()
         pending = nil
-        fsearchGeneration += 1
-        stop()
-    }
-
-    private func run(_ term: String, completion: @escaping (SearchResult) -> Void) {
-        pending = nil
-        stop()
-        guard term.count >= 3 else { completion(.success([])); return }
-        let q = NSMetadataQuery()
-        q.predicate = NSPredicate(format: "kMDItemFSName CONTAINS[cd] %@ AND kMDItemContentType != 'com.apple.application-bundle'", term)
-        q.searchScopes = [NSMetadataQueryUserHomeScope]
-        q.sortDescriptors = [NSSortDescriptor(key: NSMetadataItemFSContentChangeDateKey, ascending: false)]
-        self.completion = completion
-        query = q
-        NotificationCenter.default.addObserver(self, selector: #selector(gathered(_:)), name: .NSMetadataQueryDidFinishGathering, object: q)
-        if !startQuery(q) {
-            stop()
-            completion(.failure(.unavailable))
-        }
-    }
-
-    @objc private func gathered(_ note: Notification) {
-        guard let q = note.object as? NSMetadataQuery, q === query else { return }
-        q.disableUpdates()
-        var out: [FileEntry] = []
-        for i in 0..<min(q.resultCount, 200) where out.count < 8 {
-            guard let item = q.result(at: i) as? NSMetadataItem,
-                  let path = item.value(forAttribute: NSMetadataItemPathKey) as? String,
-                  FileSearch.isInteresting(path) else { continue }
-            let url = URL(fileURLWithPath: path)
-            let name = (item.value(forAttribute: NSMetadataItemDisplayNameKey) as? String) ?? url.lastPathComponent
-            let kind = (item.value(forAttribute: kMDItemKind as String) as? String) ?? ""
-            out.append(FileEntry(id: path, name: name, url: url, kind: kind))
-        }
-        let done = completion
-        stop()
-        done?(.success(out))
+        generation += 1
+        cancelHome?()
+        cancelHome = nil
     }
 
     /// Hide library internals, caches, build products and dotfiles from the results.
-    static func isInteresting(_ path: String) -> Bool {
-        let noisy = ["/Library/", "/node_modules/", "/DerivedData/", "/.Trash/", "/dist/", "/target/", "/Pods/"]
-        if noisy.contains(where: { path.contains($0) }) { return false }
-        let parts = path.split(separator: "/")
-        if parts.contains(where: { $0.hasPrefix(".") }) { return false }
-        let directories = parts.dropLast().map { $0.lowercased() }
-        return !directories.contains { $0 == "build" || $0.hasPrefix("build-") || $0.hasPrefix("build_") }
-    }
-
-    private func stop() {
-        if let q = query {
-            NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidFinishGathering, object: q)
-            q.stop()
-        }
-        query = nil
-        completion = nil
-    }
+    static func isInteresting(_ path: String) -> Bool { HomeFileSearch.isInteresting(path) }
 
     static func open(_ entry: FileEntry) { NSWorkspace.shared.open(entry.url) }
     static func reveal(_ entry: FileEntry) { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
+}
+
+/// The helper's Spotlight search of the owner's home folder. Each search opens a short-lived
+/// connection to the agent helper and completes once on the main queue, with the helper's files or
+/// `.unavailable` after an error or a timeout; cancelling ends the connection, which stops the
+/// helper's query, and never completes. Tests and fixtures replace `call`.
+final class HomeFileSearchClient {
+    static let shared = HomeFileSearchClient()
+    /// A client whose every search fails, for fixtures and tests that must not reach a helper.
+    static var unavailable: HomeFileSearchClient {
+        HomeFileSearchClient { _, completion in
+            DispatchQueue.main.async { completion(nil, HostMessage(.fileSearchUnavailable).wire) }
+            return {}
+        }
+    }
+
+    /// Sends one term and returns a closure that cancels it.
+    let call: (String, @escaping (Data?, String?) -> Void) -> () -> Void
+
+    init(call: @escaping (String, @escaping (Data?, String?) -> Void) -> () -> Void = HomeFileSearchClient.helperCall) { self.call = call }
+
+    /// Files whose names contain `term`, newest first, at most `HomeFileSearch.maximumResults`.
+    func search(_ term: String, completion: @escaping (FileSearch.SearchResult) -> Void) -> () -> Void {
+        call(term) { data, _ in
+            guard let data, let entries = HomeFileSearch.entries(from: data) else { completion(.failure(.unavailable)); return }
+            completion(.success(entries.map(HomeFileSearchClient.fileEntry)))
+        }
+    }
+
+    static func fileEntry(_ entry: HomeFileSearch.Entry) -> FileEntry {
+        FileEntry(id: entry.path, name: entry.name, url: URL(fileURLWithPath: entry.path), kind: entry.kind)
+    }
+
+    /// One search over its own connection. Completes once on the main queue, after the helper
+    /// replies, the connection fails, or the time limit plus a second passes.
+    private static func helperCall(_ term: String, completion: @escaping (Data?, String?) -> Void) -> () -> Void {
+        let connection = NSXPCConnection(serviceName: "com.mysticcoders.volant.AgentHost")
+        connection.remoteObjectInterface = NSXPCInterface(with: VolantAgentHostProtocol.self)
+        let lock = NSLock()
+        var finished = false
+        let finish: (Data?, String?, Bool) -> Void = { data, error, deliver in
+            lock.lock()
+            guard !finished else { lock.unlock(); return }
+            finished = true
+            lock.unlock()
+            connection.invalidate()
+            if deliver { DispatchQueue.main.async { completion(data, error) } }
+        }
+        let unavailable = HostMessage(.fileSearchUnavailable).wire
+        connection.invalidationHandler = { finish(nil, unavailable, true) }
+        connection.interruptionHandler = { finish(nil, unavailable, true) }
+        connection.resume()
+        DispatchQueue.main.asyncAfter(deadline: .now() + HomeFileSearch.timeLimit + 1) { finish(nil, unavailable, true) }
+        guard let proxy = connection.remoteObjectProxyWithErrorHandler({ _ in finish(nil, unavailable, true) }) as? VolantAgentHostProtocol else {
+            finish(nil, unavailable, true)
+            return {}
+        }
+        proxy.searchHomeFiles(term: term) { data, error in finish(data, error, true) }
+        return { finish(nil, nil, false) }
+    }
 }

@@ -98,7 +98,12 @@ export default function PrivacyAndSecurity() {
       <p>
         Opening a link hands it to another app. Running an Apple Shortcut hands
         execution to Shortcuts, whose workflows use their own permissions.
-        If you turn on fsearch file search, the local agent helper sends file
+        File search runs in the local agent helper too: the sandboxed app
+        can&rsquo;t see your files in Spotlight, so it sends the helper only
+        the name you typed, and the helper asks Spotlight on this Mac for at
+        most eight matching files in your home folder. Nothing is saved,
+        logged or sent over the network.
+        If you turn on fsearch file search, the helper instead sends file
         queries to the fsearch daemon you run on this Mac, and tells it which
         result you opened; nothing is sent over the network. See{' '}
         <a href="/docs/launcher">The launcher</a>. When you type{' '}

@@ -60,7 +60,7 @@ final class HerdrPublishTests: XCTestCase {
         let agents = AgentsModel()
         let model = LauncherModel(index: AppIndex(entries: []), clipboard: ClipboardStore(retention: 2, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
                                   notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),
-                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false }), agents: agents) { _ in }
+                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable), agents: agents) { _ in }
         model.searchesSecondarySources = false
         agents.connected = true
         let working = AgentSession(agent: "codex", agentStatus: "working", paneID: "w1:p1", terminalID: "t1")
@@ -84,7 +84,7 @@ final class HerdrPublishTests: XCTestCase {
         let agents = AgentsModel()
         let model = LauncherModel(index: AppIndex(entries: []), clipboard: ClipboardStore(retention: 2, storageURL: root.appendingPathComponent("clips.sqlite"), encryptionKey: SymmetricKey(size: .bits256)),
                                   notes: NotesStore(directory: root.appendingPathComponent("Notes")), config: Preferences(),
-                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(startQuery: { _ in false }), agents: agents) { _ in }
+                                  usage: UsageStore(url: root.appendingPathComponent("usage.sqlite")), files: FileSearch(home: .unavailable), agents: agents) { _ in }
         model.searchesSecondarySources = false
         model.query = "safari"
         var launcherEmissions = 0
