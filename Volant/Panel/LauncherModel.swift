@@ -516,6 +516,18 @@ final class LauncherModel: ObservableObject {
     var searchesSecondarySources = true
     let files: FileSearch
     @Published private(set) var filesUnavailable = false
+    /// True while a file search is in flight, has been for `fileSearchStatusDelay`, and no file rows
+    /// show yet. Alone (`/term`, the Files scope) it is the empty state; in merged search the view
+    /// adds one quiet line after the results, so nothing above it moves.
+    @Published private(set) var searchingFiles = false
+    /// True from the start of a `/term` or Files scope search until its reply, so the empty list
+    /// shows nothing rather than "No results" before the answer or the status arrives.
+    @Published private(set) var awaitingFilesAlone = false
+    /// Turns `searchingFiles` on once the delay passes, so fast replies never flicker it.
+    private var fileSearchStatusWork: DispatchWorkItem?
+    /// How long after asking before "Searching files…" shows: the search's own 150 ms typing pause
+    /// plus about 150 ms more for the reply.
+    static let fileSearchStatusDelay: TimeInterval = 0.3
     private var indexStateSubscription: AnyCancellable?
     private let contacts = ContactSearch()
     /// Searches Contacts for a term, asking for access only when the second argument is true (the
@@ -929,10 +941,46 @@ final class LauncherModel: ObservableObject {
         refresh()
         if let selected, let offset = rows.firstIndex(where: { $0.id == selected }) { selection = offset }
     }
-    private func receiveFiles(_ result: FileSearch.SearchResult, generation: Int, limit: Int) {
+    /// Starts a file search for `term` and the pending status behind it. `alone` is `/term` or the
+    /// Files scope, where a finished search with nothing found says so instead of an empty list.
+    private func searchFiles(_ term: String, generation gen: Int, limit: Int, alone: Bool) {
+        files.search(term) { [weak self] result in self?.receiveFiles(result, term: term, generation: gen, limit: limit, alone: alone) }
+        guard term.count >= 2 else { return }
+        awaitingFilesAlone = alone
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, gen == self.generation, self.fileRows.isEmpty else { return }
+            self.searchingFiles = true
+        }
+        fileSearchStatusWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.fileSearchStatusDelay, execute: work)
+    }
+
+    /// Clears the pending file status, as a reply, a new query or leaving a scope does.
+    private func endFileSearchStatus() {
+        fileSearchStatusWork?.cancel()
+        fileSearchStatusWork = nil
+        searchingFiles = false
+        awaitingFilesAlone = false
+    }
+
+    /// The line shown when there are no result rows: the pending file search, nothing while a lone
+    /// file search is about to answer, or the notice.
+    var emptyStateMessage: String {
+        if searchingFiles { return String(localized: "Searching files…", comment: "Launcher status while a file search is in progress") }
+        if awaitingFilesAlone { return "" }
+        return notice ?? (query.isEmpty ? String(localized: "Type to search", comment: "Launcher notice with an empty search") : String(localized: "No results", comment: "Launcher notice when nothing matches"))
+    }
+
+    private func receiveFiles(_ result: FileSearch.SearchResult, term: String, generation: Int, limit: Int, alone: Bool) {
         deliver(generation) { model in
+            model.endFileSearchStatus()
             switch result {
-            case .success(let hits): model.fileRows = hits.prefix(limit).map(ResultRow.file); model.filesUnavailable = false
+            case .success(let hits):
+                model.fileRows = hits.prefix(limit).map(ResultRow.file); model.filesUnavailable = false
+                if alone && hits.isEmpty {
+                    model.notice = term.count < HomeFileSearch.minimumTermLength ? SearchScope.files.prompt
+                        : String(localized: "No files match “\(term, format: .verbatim)”.", comment: "Launcher notice when a file search finds nothing; the value is the typed name")
+                }
             case .failure: model.fileRows = []; model.filesUnavailable = true
             }
         }
@@ -991,7 +1039,7 @@ final class LauncherModel: ObservableObject {
         if q.hasPrefix("/") {
             let term = String(q.dropFirst()).trimmingCharacters(in: .whitespaces)
             sections = []
-            files.search(term) { [weak self] result in self?.receiveFiles(result, generation: gen, limit: 8) }
+            searchFiles(term, generation: gen, limit: 8, alone: true)
             return true
         }
         if q.hasPrefix("@") {
@@ -1029,6 +1077,7 @@ final class LauncherModel: ObservableObject {
         let gen = generation
         immediate = []; contactRows = []; fileRows = []
         filesUnavailable = false
+        endFileSearchStatus()
         notice = nil
         actionFeedback = nil
         wifiJoin = nil
@@ -1203,7 +1252,7 @@ final class LauncherModel: ObservableObject {
             }
         }
         if searchesFiles {
-            files.search(q) { [weak self] result in self?.receiveFiles(result, generation: gen, limit: 5) }
+            searchFiles(q, generation: gen, limit: 5, alone: false)
         }
     }
 
