@@ -59,6 +59,17 @@ final class LauncherFileSearchStatusTests: XCTestCase {
         XCTAssertFalse(model.searchingFiles)
     }
 
+    func testAnAnswerThatArrivesAtOnceClearsThePendingState() async {
+        let files = HeldFileSearch()
+        files.immediate = .success([])
+        let model = model(files)
+        model.query = "/zzqx"
+        XCTAssertFalse(model.awaitingFilesAlone)
+        XCTAssertTrue(model.emptyStateMessage.contains("zzqx"), model.emptyStateMessage)
+        await waitForStatus()
+        XCTAssertFalse(model.searchingFiles, "The status never shows after the search already answered")
+    }
+
     func testNothingFoundSaysSoAlone() async {
         let files = HeldFileSearch()
         let model = model(files)
@@ -125,7 +136,13 @@ private final class HeldFileSearch: FileSearch {
 
     init() { super.init(home: .unavailable) }
 
-    override func search(_ term: String, completion: @escaping (SearchResult) -> Void) { held.append((term, completion)) }
+    /// When set, every search answers with it at once instead of being held.
+    var immediate: SearchResult?
+
+    override func search(_ term: String, completion: @escaping (SearchResult) -> Void) {
+        if let immediate { completion(immediate); return }
+        held.append((term, completion))
+    }
 
     override func cancel() {}
 

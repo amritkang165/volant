@@ -943,16 +943,18 @@ final class LauncherModel: ObservableObject {
     }
     /// Starts a file search for `term` and the pending status behind it. `alone` is `/term` or the
     /// Files scope, where a finished search with nothing found says so instead of an empty list.
+    /// The pending state is set before asking, so a reply that arrives at once still clears it.
     private func searchFiles(_ term: String, generation gen: Int, limit: Int, alone: Bool) {
-        files.search(term) { [weak self] result in self?.receiveFiles(result, term: term, generation: gen, limit: limit, alone: alone) }
-        guard term.count >= 2 else { return }
-        awaitingFilesAlone = alone
-        let work = DispatchWorkItem { [weak self] in
-            guard let self, gen == self.generation, self.fileRows.isEmpty else { return }
-            self.searchingFiles = true
+        if term.count >= 2 {
+            awaitingFilesAlone = alone
+            let work = DispatchWorkItem { [weak self] in
+                guard let self, gen == self.generation, self.fileRows.isEmpty else { return }
+                self.searchingFiles = true
+            }
+            fileSearchStatusWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.fileSearchStatusDelay, execute: work)
         }
-        fileSearchStatusWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.fileSearchStatusDelay, execute: work)
+        files.search(term) { [weak self] result in self?.receiveFiles(result, term: term, generation: gen, limit: limit, alone: alone) }
     }
 
     /// Clears the pending file status, as a reply, a new query or leaving a scope does.
