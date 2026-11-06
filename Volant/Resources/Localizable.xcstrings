@@ -106734,6 +106734,95 @@
     "⇥": {
       "shouldTranslate": false
     },
+    "Copy text and images to your clipboard when you choose them": {
+      "comment": "Extension permission summary item, joined with commas",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Copiar texto e imágenes en tu portapapeles cuando los elijas"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Text und Bilder in deine Zwischenablage kopieren, wenn du sie auswählst"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Copier du texte et des images dans votre presse-papiers lorsque vous les choisissez"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Copiare testo e immagini negli appunti quando li scegli"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "選択したときにテキストと画像をクリップボードにコピー"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在你选择时将文本和图像拷贝到剪贴板"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Copiar texto e imagens para a sua área de transferência quando você os escolher"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Copiar texto e imagens para a área de transferência quando os escolher"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "선택할 때 텍스트와 이미지를 클립보드에 복사"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tekst en afbeeldingen naar je klembord kopiëren wanneer je ze kiest"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kopiowanie tekstu i obrazów do schowka, gdy je wybierzesz"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Копировать текст и изображения в буфер обмена, когда вы их выбираете"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Копіювати текст і зображення в буфер обміну, коли ви їх обираєте"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Seçtiğinizde metin ve görüntüleri panonuza kopyalama"
+          }
+        }
+      }
+    },
     "Automation": {
       "comment": "Launcher section title when Automation access needs attention",
       "localizations": {

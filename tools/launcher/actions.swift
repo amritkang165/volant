@@ -681,6 +681,45 @@ func extensionRowsScenario() throws {
     print("PASS: storage list extension receives and saves data, and row actions run from Actions")
 }
 
+/// A list extension with `clipboard-write`: the first-run prompt says it copies text and images when
+/// the owner chooses them, the row's Actions lists its copy after the links, and choosing it copies to
+/// a fake clipboard and confirms in the footer. Nothing is downloaded or written to the real clipboard.
+func extensionRowCopyScenario() throws {
+    let (copyDirectory, _) = try copyExtension("copy-logos") { manifest in
+        manifest.id = "fixture.logos"; manifest.name = "Fixture Logos"; manifest.output = "items"
+        manifest.hosts = ["assets.example.com"]; manifest.permissions = ["clipboard-write"]
+    }
+    let copyManager = ExtensionManager(configURL: panel.model.actionConfigURL, roots: [copyDirectory], dataDirectory: root.appendingPathComponent("CopyData-" + UUID().uuidString))
+    copyManager.reload()
+    try copyManager.setCommunityAllowed(true, expected: copyManager.communityAllowed)
+    let prompt = NSHostingView(rootView: ExtensionPermissionView(
+        request: ExtensionPermissionRequest(extensionItem: copyManager.extensions.first!, input: "", hosts: ["assets.example.com"]), enable: { _ in }, cancel: {}))
+    prompt.frame = NSRect(x: 0, y: 0, width: 390, height: 330); prompt.layoutSubtreeIfNeeded(); settle()
+    try render("extension-copy-prompt", view: prompt)
+    try copyManager.setEnabled(copyManager.extensions.first!, true)
+    var copied: [ExtensionCopyContent] = []
+    copyManager.writeClipboard = { copied.append($0) }
+    copyManager.fetchCopy = { _, _, _ in verify(false, "Listing and text copies never download") }
+    copyManager.invokeOverride = { _, _, completion in
+        completion(.success(#"{"items":[{"title":"Fictional logo","subtitle":"assets.example.com","url":"https://assets.example.com/logo","copy":{"text":"<svg xmlns=\"http://www.w3.org/2000/svg\"/>","title":"Copy SVG"},"actions":[{"id":"pin","title":"Pin Logo"}]}]}"#))
+    }
+    panel.model.extensions = copyManager
+    panel.toggle(); panel.model.query = "Fixture Logos"; settle()
+    key("\r", 36)
+    verify(waitUntil { panel.model.rows.first.map { if case .extensionItem = $0 { return true }; return false } == true }, "The copy extension shows its row")
+    key("k", 40, .command); settle()
+    verify(panel.model.actionTarget?.menuEntries == [.item(.open), .item(.copyPath), .copy("Copy SVG"), .custom(ExtensionItemAction(id: "pin", title: "Pin Logo"))],
+           "A row's copy follows its links in Actions")
+    key("\u{F701}", 125); key("\u{F701}", 125); settle()
+    try render("extension-row-copy-actions")
+    key("\r", 36); settle()
+    verify(copied == [.text(#"<svg xmlns="http://www.w3.org/2000/svg"/>"#)] && panel.model.actionFeedback == "Copied SVG", "Choosing the copy copies and confirms")
+    try render("extension-row-copied")
+    panel.orderOut(nil)
+    try copyManager.setCommunityAllowed(false, expected: true)
+    print("PASS: a clipboard-write extension asks first, lists its copy after the links, and copies only when chosen")
+}
+
 /// Dictation Settings with a fictional vocabulary, and the sheet that adds a word. Output stays on
 /// Copy, so the input helper is never started.
 func dictationVocabularyScenario() throws {
@@ -1614,6 +1653,7 @@ let scenarios: [Scenario] = [
     Scenario(name: "community-launcher", sizeSensitive: true, run: communityLauncherScenario),
     Scenario(name: "community-settings", sizeSensitive: false, run: communitySettingsScenario),
     Scenario(name: "extension-rows", sizeSensitive: true, run: extensionRowsScenario),
+    Scenario(name: "extension-row-copy", sizeSensitive: false, run: extensionRowCopyScenario),
     Scenario(name: "extension-settings", sizeSensitive: false, run: extensionSettingsScenario),
     Scenario(name: "dictation-vocabulary", sizeSensitive: false, run: dictationVocabularyScenario),
     Scenario(name: "catalog", sizeSensitive: true, run: catalogScenario),

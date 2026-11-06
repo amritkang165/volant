@@ -103,23 +103,24 @@ public enum ExtensionNetwork {
     /// The longest confirmation Volant shows, such as "Completed “Ship 0.3.3”".
     public static let maximumNoticeLength = 120
 
-    public static func reply(from output: String, appLinks: Set<String> = []) throws -> Reply {
+    public static func reply(from output: String, appLinks: Set<String> = [], copyHosts: Set<String>? = nil) throws -> Reply {
         guard let data = output.data(using: .utf8), let raw = try? JSONDecoder().decode(RawReply.self, from: data) else {
             throw ExtensionNetworkError.malformedItems
         }
         let notice = raw.notice.map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).prefix(maximumNoticeLength)) }.flatMap { $0.isEmpty ? nil : $0 }
         guard raw.items != nil || raw.storage != nil || notice != nil || raw.text != nil else { throw ExtensionNetworkError.malformedItems }
-        return Reply(items: raw.items.map { Array($0.prefix(maximumItems)).compactMap { $0.sanitized(appLinks: appLinks) } }, storage: raw.storage, notice: notice,
+        return Reply(items: raw.items.map { Array($0.prefix(maximumItems)).compactMap { $0.sanitized(appLinks: appLinks, copyHosts: copyHosts) } }, storage: raw.storage, notice: notice,
                      text: raw.text)
     }
 
     /// The rows a render returned, trimmed to the launcher's limits. Links other than http, https and the
-    /// manifest's declared `appLinks` schemes are dropped, so a row can never open anything else.
-    public static func items(from output: String, appLinks: Set<String> = []) throws -> [ExtensionItem] {
+    /// manifest's declared `appLinks` schemes are dropped, so a row can never open anything else. A row's
+    /// `copy` is kept only when `copyHosts` is given, which it is for a manifest declaring `clipboard-write`.
+    public static func items(from output: String, appLinks: Set<String> = [], copyHosts: Set<String>? = nil) throws -> [ExtensionItem] {
         guard let data = output.data(using: .utf8), let list = try? JSONDecoder().decode(ItemList.self, from: data) else {
             throw ExtensionNetworkError.malformedItems
         }
-        return list.items.prefix(maximumItems).compactMap { $0.sanitized(appLinks: appLinks) }
+        return list.items.prefix(maximumItems).compactMap { $0.sanitized(appLinks: appLinks, copyHosts: copyHosts) }
     }
 
     private struct Plan: Decodable { let fetch: [String]; let state: String? }
@@ -169,17 +170,22 @@ public struct ExtensionItem: Codable, Hashable {
     /// Up to three short facts shown at the row's end in place of the extension's name, such as points
     /// and comments (see `ExtensionItemBadge`).
     public var badges: [ExtensionItemBadge]?
+    /// Text or a downloadable image the row copies when the owner chooses it (see `ExtensionItemCopy`),
+    /// kept only for an extension that declares `clipboard-write`.
+    public var copy: ExtensionItemCopy?
 
     public init(title: String, subtitle: String? = nil, url: String? = nil, secondaryURL: String? = nil, secondaryTitle: String? = nil,
                 actions: [ExtensionItemAction]? = nil, onOpen: Bool? = nil, primaryAction: String? = nil, symbol: String? = nil,
-                badges: [ExtensionItemBadge]? = nil) {
+                badges: [ExtensionItemBadge]? = nil, copy: ExtensionItemCopy? = nil) {
         self.title = title; self.subtitle = subtitle; self.url = url; self.secondaryURL = secondaryURL; self.secondaryTitle = secondaryTitle
         self.actions = actions; self.onOpen = onOpen; self.primaryAction = primaryAction; self.symbol = symbol; self.badges = badges
+        self.copy = copy
     }
 
     /// Trims text to display limits and drops links that are not http or https, or a scheme from
-    /// `appLinks`, the manifest's declared app links. A row without a title is dropped.
-    func sanitized(appLinks: Set<String> = []) -> ExtensionItem? {
+    /// `appLinks`, the manifest's declared app links. A row without a title is dropped. Its `copy` survives
+    /// only when `copyHosts`, the declared hosts of a manifest with `clipboard-write`, is given.
+    func sanitized(appLinks: Set<String> = [], copyHosts: Set<String>? = nil) -> ExtensionItem? {
         let title = String(title.prefix(300)).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return nil }
         func link(_ value: String?) -> String? {
@@ -197,7 +203,8 @@ public struct ExtensionItem: Codable, Hashable {
                              actions: unique.isEmpty ? nil : Array(unique), onOpen: onOpen == true ? true : nil,
                              primaryAction: primaryAction.flatMap { ExtensionItemAction(id: $0, title: $0).sanitized()?.id },
                              symbol: symbol.flatMap(ExtensionItemSymbol.init(rawValue:))?.rawValue,
-                             badges: badges.isEmpty ? nil : Array(badges))
+                             badges: badges.isEmpty ? nil : Array(badges),
+                             copy: copyHosts.flatMap { hosts in copy?.sanitized(hosts: hosts) })
     }
 }
 

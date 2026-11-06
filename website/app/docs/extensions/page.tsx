@@ -25,6 +25,12 @@ const manifest = `{
 const jsonCommandManifest = `"input": "json",
 "permissions": ["clipboard"]`;
 
+const copyRow = `"permissions": ["clipboard-write"]
+
+{"title": "Fictional logo", "url": "https://example.com/brand",
+ "copy": {"url": "https://cdn.example.com/logo.svg", "type": "svg",
+          "title": "Copy SVG"}}`;
+
 const preferencesManifest = `"preferences": [
   {"id": "hideDomains", "type": "text", "title": "Hidden sites",
    "placeholder": "example.com", "maxLength": 200},
@@ -334,6 +340,49 @@ export default function Extensions() {
           capability.
         </li>
       </ul>
+
+      <h2>Copying text and images</h2>
+      <p>
+        Coming in the next release. A list extension can offer rows that copy
+        something longer than their title, such as a company&rsquo;s SVG logo
+        or a PNG icon. When you enable it, Volant says{' '}
+        <strong>Copy text and images to your clipboard when you choose them</strong>.
+      </p>
+      <ul>
+        <li>
+          <strong>Only when you choose it.</strong> The copy appears in the
+          row&rsquo;s Actions (Command-K), after its links. Return copies when
+          the row has no link of its own; otherwise Return still opens the
+          link. Volant confirms with a short note such as &ldquo;Copied
+          SVG&rdquo;.
+        </li>
+        <li>
+          <strong>Text or a file you allowed.</strong> Up to 64 KB of text, or
+          an SVG, PNG, JPEG, WebP, ICO or text file on a site you approved for
+          the extension, downloaded only when you choose it, at most 512 KB,
+          with no redirects.
+        </li>
+        <li>
+          <strong>Checked before copying.</strong> Volant checks the download
+          really is the kind the extension said (images are decoded, SVG is
+          checked as text and never displayed) and copies nothing when it
+          isn&rsquo;t, explaining why.
+        </li>
+        <li>
+          <strong>Not seen by the extension.</strong> The extension never gets
+          the downloaded file, and nothing is copied while you search or while
+          its list loads.
+        </li>
+      </ul>
+      <p>
+        For extension authors: declare the permission, and give a row a{' '}
+        <code>copy</code> with either <code>text</code> or a <code>url</code>{' '}
+        and <code>type</code>. Older Volant versions ignore it, so keep a link
+        or a useful title on the row.
+      </p>
+      <pre>
+        <code>{copyRow}</code>
+      </pre>
 
       <h2>Text commands with JSON input</h2>
       <p>
