@@ -242,11 +242,16 @@ Added in 0.3.32:
 | Click-away hides Translate and AI Chat; Escape steps back in AI Chat; Translate clears on dismissal | Yes | #352; launcher check and Actions translate and panel-chat scenarios; owner tried a Volant Dev build | Release notes |
 | Star on GitHub in Settings › About and the website header | Yes | #349; the website count is read at build time; the app shows no count because the main app has no network access | Website header |
 
-Merged after 0.3.32, not in the current download:
+Added in 0.3.33:
+
+| Story | In 0.3.33 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Settings › Your Volant: your own launcher activity for the last 30 days and your most used apps, commands and extensions, counted only on this Mac | Yes | #357; UsageStatsTests, FrecencyTests, seeded Settings renders in light and dark; owner tried a Volant Dev build, including Clear Activity History; daily counts start with the build that adds them; calculator answers, extension results and Shortcuts are not counted | Release notes; say "stays on your Mac, never sent anywhere", never "analytics" or "telemetry" |
+
+Merged after 0.3.33, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
-| Settings › Your Volant: your own launcher activity for the last 30 days and your most used apps, commands and extensions, counted only on this Mac | Not yet | #357; UsageStatsTests, FrecencyTests, seeded Settings renders in light and dark; owner tried a Volant Dev build; daily counts start with the build that adds them; calculator answers, extension results and Shortcuts are not counted | Release notes; say "stays on your Mac, never sent anywhere", never "analytics" or "telemetry" |
 
 ## Privacy language
 
