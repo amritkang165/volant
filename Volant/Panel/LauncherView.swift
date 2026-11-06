@@ -173,6 +173,7 @@ struct LauncherView: View {
                 .help("Drag to align Volant. Hold Option to move freely.")
             if model.showingACP || model.wifiJoin != nil { CaffeinateStatusView(service: model.caffeinate) }
             if let ext = model.scopedExtension { ExtensionScopeChip(ext: ext, running: model.extensionRunning, back: model.exitScope) }
+            if let source = model.searchScope { SearchScopeChip(source: source, back: model.exitScope) }
             TextField(model.searchPlaceholder, text: Binding(get: { model.searchText }, set: { model.searchText = $0 }))
                 .textFieldStyle(.plain)
                 .font(.system(size: 22, weight: .regular))
@@ -474,6 +475,8 @@ private extension CoreCommand {
         case .emoji: return .green
         case .notes: return Color(red: 0.93, green: 0.66, blue: 0.0)
         case .clipboard: return Color(red: 0.36, green: 0.46, blue: 0.62)
+        case .contacts: return Color(red: 0.55, green: 0.45, blue: 0.35)
+        case .files: return .cyan
         case .agents: return Color(white: 0.22)
         case .servers: return Color(red: 0.2, green: 0.55, blue: 0.35)
         case .wifi, .bluetooth: return .blue
@@ -803,6 +806,29 @@ private struct ExtensionScopeChip: View {
         .help("Back to Volant (Esc)")
         .accessibilityLabel("Back from \(ext.name)")
         .accessibilityIdentifier("launcher-extension-back")
+    }
+}
+
+/// The Back chip inside Volant's own Contacts, Files or Clipboard scope, shaped like an extension's.
+private struct SearchScopeChip: View {
+    let source: SearchScope
+    let back: () -> Void
+
+    var body: some View {
+        Button(action: back) {
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                Image(systemName: source.command.symbol).font(.system(size: 13)).foregroundStyle(source.command.tint)
+                Text(source.title).lineLimit(1)
+            }
+            .font(.system(size: 13, weight: .medium))
+            .padding(.horizontal, 8).padding(.vertical, 4)
+            .background(Color.secondary.opacity(0.15), in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .help("Back to Volant (Esc)")
+        .accessibilityLabel("Back from \(source.title)")
+        .accessibilityIdentifier("launcher-scope-back")
     }
 }
 

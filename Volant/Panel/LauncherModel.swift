@@ -19,6 +19,12 @@ enum LauncherAction {
     case checkForUpdates, whatsNew, about, quit
 }
 
+/// What the launcher's search field is inside of: a list extension, or one of Volant's own sources.
+enum LauncherScope: Hashable {
+    case listExtension(InstalledExtension)
+    case source(SearchScope)
+}
+
 enum ResultRow: Identifiable, Hashable {
     case core(CoreCommand)
     case systemAction(SystemAction)
@@ -468,9 +474,14 @@ final class LauncherModel: ObservableObject {
     @Published private(set) var scopeFilter: String?
     /// Each extension's last chosen filter while Volant runs, so entering it again keeps the choice.
     private var chosenFilters: [String: String] = [:]
-    /// The list extension the launcher is inside, if any. While set, the search field's text is that
-    /// extension's query: every edit runs it again, and no other source sees the text.
-    @Published private(set) var scopedExtension: InstalledExtension?
+    /// What the launcher is inside, if anything: a list extension, whose query the field's text is
+    /// (every edit runs it again, and no other source sees the text), or one of Volant's own sources,
+    /// searched through its typed shortcut. Escape or Delete on an empty field leaves either.
+    @Published private(set) var scope: LauncherScope?
+    /// The list extension the launcher is inside, if any.
+    var scopedExtension: InstalledExtension? { if case .listExtension(let ext)? = scope { return ext }; return nil }
+    /// The built-in source the launcher is inside, if any.
+    var searchScope: SearchScope? { if case .source(let source)? = scope { return source }; return nil }
     /// The scoped run waiting for typing to pause.
     private var scopeRun: DispatchWorkItem?
     /// Set when the scoped query changed while the extension was still running, so it runs again after.
@@ -480,10 +491,19 @@ final class LauncherModel: ObservableObject {
     /// How long typing must pause before a scoped extension runs again; each run may fetch.
     static let scopeDelay: TimeInterval = 0.3
     /// The query the launcher's own sources route on: empty inside an extension, whose text is its own.
-    private var routedQuery: String { scopedExtension == nil ? query : "" }
+    /// Inside a built-in scope, or for a one-go query such as `contacts jane`, it is the matching typed
+    /// shortcut (`@jane`), so both ways in search the same way.
+    private var routedQuery: String {
+        switch scope {
+        case .listExtension?: return ""
+        case .source(let source)?: return source.shortcutQuery(query.trimmingCharacters(in: .whitespaces))
+        case nil: return SearchScope.oneShot(query).map { $0.scope.shortcutQuery($0.term) } ?? query
+        }
+    }
     /// The search field's prompt: the scoped extension's own, emoji search, or the launcher's.
     var searchPlaceholder: String {
         if let ext = scopedExtension { return ext.manifest.placeholder ?? String(localized: "Search \(ext.name)…", comment: "Search field placeholder inside a list extension") }
+        if let source = searchScope { return source.placeholder }
         return showingEmoji ? Self.emojiSearchPlaceholder : Self.defaultSearchPlaceholder
     }
     static let defaultSearchPlaceholder = String(localized: "Search for apps, files, contacts, or calculate…", comment: "Launcher search field placeholder")
@@ -498,6 +518,11 @@ final class LauncherModel: ObservableObject {
     @Published private(set) var filesUnavailable = false
     private var indexStateSubscription: AnyCancellable?
     private let contacts = ContactSearch()
+    /// Searches Contacts for a term, asking for access only when the second argument is true (the
+    /// `@` shortcut and the Contacts scope). Tests replace it so no host ever prompts.
+    lazy var searchContacts: (String, Bool, @escaping ([ContactEntry]) -> Void) -> Void = { [contacts] term, ask, completion in
+        contacts.search(term, askIfNeeded: ask, completion: completion)
+    }
     let dictation = SpeechDictation()
     var dictationVolume = DictationVolumeDuck()
     var dictationSounds = DictationSounds()
@@ -679,7 +704,7 @@ final class LauncherModel: ObservableObject {
     /// the extension, and from then on every edit runs it, until Back, or Escape or Delete on an empty field.
     func enterScope(_ ext: InstalledExtension, input: String) {
         scopeRun?.cancel()
-        scopedExtension = ext
+        scope = .listExtension(ext)
         let filters = ext.manifest.declaredFilters
         scopeFilter = chosenFilters[ext.id].flatMap { id in filters.contains { $0.id == id } ? id : nil } ?? filters.first?.id
         scopeRunsNow = true
@@ -687,13 +712,30 @@ final class LauncherModel: ObservableObject {
         searchFocusRequest = UUID()
     }
 
-    /// Leaves the scoped extension for the launcher's own search, with an empty field.
+    /// Enters one of Volant's own sources with `input` in the field. Contacts and files wait for
+    /// typing, so entering never asks for Contacts access; clipboard lists recent items at once.
+    func enterSearchScope(_ source: SearchScope, input: String = "") {
+        if scopedExtension != nil { scopeRun?.cancel(); scopeRerun = false; extensions.cancelItemsRun(); scopeFilter = nil }
+        scope = .source(source)
+        if query == input { refresh() } else { query = input }
+        searchFocusRequest = UUID()
+    }
+
+    /// Tab on a scope's command row enters it, as Return does. False when the selected row is not one.
+    func enterSelectedSearchScope() -> Bool {
+        guard scope == nil, case .core(let command)? = selectedRow, let source = SearchScope(command: command) else { return false }
+        usage.record(key: "core:" + command.rawValue, query: query)
+        enterSearchScope(source)
+        return true
+    }
+
+    /// Leaves the scoped extension or built-in source for the launcher's own search, with an empty field.
     func exitScope() {
-        guard scopedExtension != nil else { return }
+        guard scope != nil else { return }
         scopeRun?.cancel()
         scopeRerun = false
         extensions.cancelItemsRun()
-        scopedExtension = nil
+        scope = nil
         scopeFilter = nil
         if query.isEmpty { refresh() } else { query = "" }
         searchFocusRequest = UUID()
@@ -717,9 +759,9 @@ final class LauncherModel: ObservableObject {
         return true
     }
 
-    /// Escape inside an extension: clears typed text first, then leaves. False outside an extension.
+    /// Escape inside a scope: clears typed text first, then leaves. False outside one.
     func backOutOfScope() -> Bool {
-        guard scopedExtension != nil else { return false }
+        guard scope != nil else { return false }
         if query.isEmpty { exitScope() } else { query = "" }
         return true
     }
@@ -754,7 +796,7 @@ final class LauncherModel: ObservableObject {
         scopeRun?.cancel()
         scopeRerun = false
         extensions.cancelItemsRun()
-        scopedExtension = nil
+        scope = nil
         scopeFilter = nil
         pendingExtension = nil
         showingACP = false
@@ -788,7 +830,7 @@ final class LauncherModel: ObservableObject {
 
     func refreshForAppIndex() {
         rowState.clearIcons()
-        guard isPresented, scopedExtension == nil, query.isEmpty || searchesAppIndex else { return }
+        guard isPresented, scope == nil, query.isEmpty || searchesAppIndex else { return }
         if query.isEmpty {
             let selectedID = selectedRow?.id
             showSuggestions()
@@ -933,13 +975,39 @@ final class LauncherModel: ObservableObject {
     func retryClipboard() { guard showingClipboard else { return }; clipboard.retry() }
     private func refreshClipboardResults() {
         let selected = selectedRow?.id
-        let q = query.trimmingCharacters(in: .whitespaces)
+        let q = routedQuery.trimmingCharacters(in: .whitespaces)
         let term = q.dropFirst(4).trimmingCharacters(in: .whitespaces)
         let clips = clipboard.recent(limit: 12, matching: term).map { ResultRow.clip($0) }
         sections = clips.isEmpty ? [] : [ResultSection(title: String(localized: "Clipboard History", comment: "Launcher section title"), rows: clips)]
         notice = clipboard.state.message == nil ? (term.isEmpty ? String(localized: "No clipboard history yet") : String(localized: "No matching clipboard items")) : nil
         if let selected, let index = rows.firstIndex(where: { $0.id == selected }) { selection = index }
         else { selection = 0 }
+    }
+
+    /// Searches only files (`/term`), contacts (`@term`) or clipboard history (`clip term`), the typed
+    /// shortcuts that the Contacts, Files and Clipboard scopes and their one-go queries route through.
+    /// Contacts asks for access only here, once there is something to search. False for any other query.
+    private func searchSingleSource(_ q: String, generation gen: Int) -> Bool {
+        if q.hasPrefix("/") {
+            let term = String(q.dropFirst()).trimmingCharacters(in: .whitespaces)
+            sections = []
+            files.search(term) { [weak self] result in self?.receiveFiles(result, generation: gen, limit: 8) }
+            return true
+        }
+        if q.hasPrefix("@") {
+            let term = String(q.dropFirst()).trimmingCharacters(in: .whitespaces)
+            sections = []
+            searchContacts(term, true) { [weak self] hits in
+                self?.deliver(gen) { $0.cacheContactImages(hits); $0.contactRows = hits.map { .contact($0) } }
+            }
+            return true
+        }
+        if showingClipboard {
+            prefixBranch = "clip"
+            refreshClipboardResults()
+            return true
+        }
+        return false
     }
 
     /// Contacts and files found for the previous query stay visible while their replacements are
@@ -969,9 +1037,15 @@ final class LauncherModel: ObservableObject {
         notesSearch?.cancel()
         notesSearch = nil
         scopeRun?.cancel()
-        let q = query.trimmingCharacters(in: .whitespaces)
         if !showingDictionary { dictionary.clear() }
-        if let ext = scopedExtension { refreshScope(ext, input: q, generation: gen); return }
+        if let ext = scopedExtension { refreshScope(ext, input: query.trimmingCharacters(in: .whitespaces), generation: gen); return }
+        if let source = searchScope, source.waitsForInput, query.trimmingCharacters(in: .whitespaces).isEmpty {
+            sections = []
+            notice = source.prompt
+            return
+        }
+        let q = routedQuery.trimmingCharacters(in: .whitespaces)
+        if searchScope != nil || SearchScope.oneShot(query) != nil, searchSingleSource(q, generation: gen) { return }
         if showingServers {
             sections = []
             servers.refresh()
@@ -986,8 +1060,8 @@ final class LauncherModel: ObservableObject {
         }
         guard !q.isEmpty else { showSuggestions(); return }
 
-        if let term = DictionaryQuery.term(query) { dictionary.input = term; sections = []; return }
-        if let term = CatalogQuery.term(query) {
+        if let term = DictionaryQuery.term(routedQuery) { dictionary.input = term; sections = []; return }
+        if let term = CatalogQuery.term(routedQuery) {
             extensions.configURL = actionConfigURL
             extensions.reload()
             catalog.manager = { [weak self] in self?.extensions ?? ExtensionManager() }
@@ -1046,20 +1120,7 @@ final class LauncherModel: ObservableObject {
             refreshAgentResults()
             return
         }
-        if q.hasPrefix("/") {
-            let term = String(q.dropFirst()).trimmingCharacters(in: .whitespaces)
-            sections = []
-            files.search(term) { [weak self] result in self?.receiveFiles(result, generation: gen, limit: 8) }
-            return
-        }
-        if q.hasPrefix("@") {
-            let term = String(q.dropFirst()).trimmingCharacters(in: .whitespaces)
-            sections = []
-            contacts.search(term, askIfNeeded: true) { [weak self] hits in
-                self?.deliver(gen) { $0.cacheContactImages(hits); $0.contactRows = hits.map { .contact($0) } }
-            }
-            return
-        }
+        if (q.hasPrefix("/") || q.hasPrefix("@")) && searchSingleSource(q, generation: gen) { return }
         if q.lowercased() == "cal" || q.lowercased() == "today" || q.lowercased().hasPrefix("cal ") {
             sections = []
             agenda.upcoming { [weak self] outcome in
@@ -1113,11 +1174,7 @@ final class LauncherModel: ObservableObject {
             }
             return
         }
-        if showingClipboard {
-            prefixBranch = "clip"
-            refreshClipboardResults()
-            return
-        }
+        if showingClipboard && searchSingleSource(q, generation: gen) { return }
 
         searchesAppIndex = true
         onCalculationQuery(q)
@@ -1139,7 +1196,7 @@ final class LauncherModel: ObservableObject {
         if searchesSecondarySources && q.count >= 2 { appleShortcuts.refresh() }
 
         if searchesContacts {
-            contacts.search(q, askIfNeeded: false) { [weak self] hits in
+            searchContacts(q, false) { [weak self] hits in
                 let needle = q.lowercased()
                 let tight = Array(hits.filter { Self.contact($0, matches: needle) }.prefix(3))
                 self?.deliver(gen) { $0.cacheContactImages(tight); $0.contactRows = tight.map { .contact($0) } }
@@ -1156,7 +1213,10 @@ final class LauncherModel: ObservableObject {
         var immediate: [ResultSection] = []
         let answers = CalculationAnswer.answers(for: q).enumerated().map { ResultRow.calculation($0.element, slot: $0.offset) }
         let builtins: [(String, ResultRow)] = [("Volant Settings", .settings), ("Reload Configuration", .reloadConfig)]
-        let matchingCommands = CoreCommand.search(q).map(ResultRow.core) + builtins.filter { $0.0.localizedCaseInsensitiveContains(q) }.map { $0.1 }
+        // A query that names a scope, such as `people`, puts its command first so Return or Tab enters it.
+        let scopeCommand = SearchScope.command(for: q)?.command
+        if let scopeCommand { immediate.append(ResultSection(title: "Volant", rows: [.core(scopeCommand)])) }
+        let matchingCommands = CoreCommand.search(q).filter { $0 != scopeCommand }.map(ResultRow.core) + builtins.filter { $0.0.localizedCaseInsensitiveContains(q) }.map { $0.1 }
         let words = q.split(separator: " ", maxSplits: 1).map(String.init)
         let head = words.first?.lowercased() ?? ""
         let tail = words.count > 1 ? words[1] : ""
@@ -1564,6 +1624,7 @@ final class LauncherModel: ObservableObject {
         case .server(let server): openURL(server.url)
         case .systemAction(let action): onNote(.systemAction(action)); return
         case .core(let command):
+            if let source = SearchScope(command: command) { enterSearchScope(source); return }
             if command == .catalog { query = command.query + " "; catalog.load(); return }
             if command == .ai { presentAIChat() }
             else if command == .talk { toggleDictation() }
@@ -1681,7 +1742,7 @@ final class LauncherModel: ObservableObject {
     }
 
     var canTabToAIChat: Bool {
-        scopedExtension == nil && !showingACP && !showingDictionary && !showingCatalog && !showingTranslation && !showingEmoji &&
+        scope == nil && !showingACP && !showingDictionary && !showingCatalog && !showingTranslation && !showingEmoji &&
         !showingAppleShortcuts && !showingServers && !showingAgents && !showingRex && wifiJoin == nil && entryForm == nil && actionTarget == nil
     }
 

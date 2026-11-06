@@ -111,7 +111,7 @@ final class LauncherEntriesTests: XCTestCase {
             (Quicklink(name: "Term", url: "https://example.com"), "already used"),
             (Quicklink(name: "new snippet", url: "https://example.com"), "built-in"),
             (Quicklink(name: "notes", url: "https://example.com"), "built-in"),
-            (Quicklink(name: "Files", url: "file:///etc/passwd"), "https://"),
+            (Quicklink(name: "Local", url: "file:///etc/passwd"), "https://"),
             (Quicklink(name: "Script", url: "javascript:alert(1)"), "https://"),
             (Quicklink(name: "Spaces", url: "https://example.com/a b"), "https://"),
             (Quicklink(name: "Hostless", url: "https:///path"), "address"),
