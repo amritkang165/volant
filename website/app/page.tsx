@@ -1,23 +1,16 @@
 'use client';
-
-// oxlint-disable next/no-html-link-for-pages -- Keep the site's working plain-anchor
-// navigation while vinext's production next/link handler is broken. See QUALITY.md.
-
+// oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import Image from 'next/image';
-
 import {
-  ArrowUpRight,
   ArrowRight,
-  Command,
+  ArrowUpRight,
+  Search,
+  Calculator,
   Clipboard,
-  LockKeyhole,
-  Zap,
   FileText,
   Code2,
-  CornerDownLeft,
-  Calculator,
   SlidersHorizontal,
-  Sparkles,
+  Check,
 } from 'lucide-react';
 import {
   Accordion,
@@ -25,7 +18,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-
 import {
   SiteFooter,
   SiteHeader,
@@ -33,17 +25,7 @@ import {
   appVersion,
   repositoryURL,
 } from '@/components/site-chrome';
-
-const answerExamples = [
-  ['35% of 260', '91', 'Percentages'],
-  ['$45/hour * 37.5 hours', '$1,687.50', 'Pay for time'],
-  ['1 1/2 cups bread flour in g', '180 g · approximate', 'Cooking'],
-  [
-    '#3a7bd5 in swiftui',
-    'Color(red: 0.227, green: 0.482, blue: 0.835)',
-    'Design',
-  ],
-];
+import './home.css';
 
 const questions = [
   [
@@ -72,661 +54,236 @@ const questions = [
   ],
 ];
 
+const benefits = [
+  {
+    id: 'launcher',
+    icon: Search,
+    title: 'Get there without the detour.',
+    text: 'Find apps, files, and contacts. Join your next meeting. Keep the keyboard, lose the hunt.',
+    link: '/docs/launcher',
+    label: 'Explore the launcher',
+  },
+  {
+    id: 'answers',
+    icon: Calculator,
+    title: 'An answer. Then back to work.',
+    text: 'Calculate, convert units and currencies, or check a time zone right where you search.',
+    link: '/docs/calculator',
+    label: 'Explore the calculator',
+  },
+  {
+    id: 'notes',
+    icon: Clipboard,
+    title: 'Keep the useful bits close.',
+    text: 'Find that thing you copied. Jot down a Markdown note. Reuse a snippet instead of typing it again.',
+    link: '/docs/clipboard-and-snippets',
+    label: 'Explore clipboard & snippets',
+  },
+];
+
 export default function Home() {
   return (
-    <>
+    <div className="home-refresh">
       <a className="skip" href="#main">
         Skip to content
       </a>
       <SiteHeader />
       <main id="main">
-        <section className="hero wrap">
-          <div className="hero-copy">
-            <a className="eyebrow open-source-label" href={repositoryURL}>
-              <Code2 size={16} aria-hidden="true" /> OPEN SOURCE · MIT LICENSED
-            </a>
+        <section className="home-hero wrap">
+          <div className="home-hero-copy">
+            <p className="home-kicker">
+              A LITTLE LESS FRICTION. A LOT MORE FLOW.
+            </p>
             <h1>
-              Your Mac.
+              Less clicking.
               <br />
-              Your agents.
-              <br />
-              <span>One shortcut away.</span>
+              More <em>doing.</em>
             </h1>
-            <p className="intro">
-              Find what you need, answer everyday questions, and keep your
-              agents moving—all from a native Mac launcher. Your notes and
-              clipboard stay local; you choose what to share with AI.
+            <p className="home-intro">
+              Launch apps, find what you copied, get quick answers, and reach
+              your AI agents. One native Mac launcher. One shortcut to keep
+              moving.
             </p>
-            <div className="hero-actions">
-              <a href={downloadURL} className="button" download>
-                Download for Mac <ArrowRight size={17} />
+            <div className="home-actions">
+              <a className="button" href={downloadURL} download>
+                Download for Mac <ArrowRight size={18} />
               </a>
-              <a href="#get" className="text-link">
-                What’s in the download <ArrowUpRight size={15} />
+              <a className="home-secondary" href="#features">
+                See what it can do <ArrowUpRight size={16} />
               </a>
             </div>
-            <p className="availability">
-              Made for macOS 15+ <span>·</span> Local first <span>·</span> Early
-              release
+            <p className="home-requirements">
+              Free & open source · macOS 15+ · Apple silicon
             </p>
           </div>
-          <div className="hero-visual">
-            <div className="orbit-label">
-              <Command size={14} /> One place to keep work moving.
+          <figure className="home-product">
+            <div className="home-product-label">
+              <span /> YOUR NEXT MOVE, WITHIN REACH
             </div>
-            <figure className="native-launcher-preview">
-              {/* oxlint-disable-next-line next/no-html-link-for-pages -- Direct PNG asset, not a Next.js route. */}
-              <a
-                href="/images/launcher-dark.png"
-                aria-label="View the full-size Volant launcher capture"
-              >
-                <Image
-                  unoptimized
-                  src="/images/launcher-dark.png"
-                  alt="Volant’s native launcher with coral accents, Safari results, and expanded Herdr pane details showing each fictional project, provider, and status."
-                  width={1500}
-                  height={960}
-                  preload
-                />
-              </a>
-            </figure>
-            <div className="preview-caption">
-              <span className="tiny-line" /> Native Volant capture · fictional
-              activity
-            </div>
-          </div>
+            <a
+              href="/images/launcher-dark.png"
+              aria-label="View the full-size native Volant launcher"
+            >
+              <Image
+                unoptimized
+                src="/images/launcher-dark.png"
+                alt="Volant’s native launcher showing Safari results and fictional agent sessions with their status."
+                width={1500}
+                height={960}
+                preload
+              />
+            </a>
+            <figcaption>
+              Actual Volant interface · fictional activity
+            </figcaption>
+          </figure>
         </section>
-        <div className="principles wrap">
+        <div className="home-proof wrap">
           <span>
-            <Command size={17} /> Keyboard first
+            <Check size={15} /> Native to your Mac
           </span>
           <span>
-            <LockKeyhole size={17} /> Local by design
+            <Check size={15} /> No Volant account
           </span>
           <span>
-            <Calculator size={17} /> Answers as you type
+            <Check size={15} /> No telemetry
           </span>
-          <span>
-            <Code2 size={17} /> Agent conversations
-          </span>
+          <a href={repositoryURL}>
+            Open source. MIT licensed. <ArrowUpRight size={14} />
+          </a>
         </div>
         <section
-          className="answers-section wrap"
-          id="answers"
-          aria-labelledby="answers-title"
+          className="home-benefits wrap"
+          id="features"
+          aria-labelledby="benefits-title"
         >
-          <div className="features-heading">
-            <div>
-              <p className="eyebrow">
-                01 / ANSWERS AS YOU TYPE
-              </p>
-              <h2 id="answers-title">
-                Ask it.
-                <br />
-                <span>Carry on.</span>
-              </h2>
-            </div>
-            <p>
-              Work out a percentage, plan across time zones, convert currencies,
-              or find the right color. One search field. An answer you can copy
-              and use.
-            </p>
+          <div className="home-section-heading">
+            <p className="home-kicker">SMALL TASKS. FEWER INTERRUPTIONS.</p>
+            <h2 id="benefits-title">Stay with what you’re doing.</h2>
           </div>
-          <div className="answer-showcase">
-            <figure className="product-capture">
-              <a
-                href="/images/calculator-dark.png"
-                aria-label="View the full-size native calculator preview"
-              >
-                <Image
-                  unoptimized
-                  src="/images/calculator-dark.png"
-                  alt="Native Volant development preview answering 35% of 260 with 91 in a two-sided calculator card."
-                  width={1500}
-                  height={960}
-                />
-              </a>
-              <figcaption>
-                Native development capture · next-release calculator
-              </figcaption>
-            </figure>
-            <div
-              className="answer-examples"
-              aria-label="Examples supported by the next-release calculator"
-            >
-              {answerExamples.map(([query, answer, category]) => (
-                <div className="answer-example" key={query}>
-                  <span>{category}</span>
-                  <code>{query}</code>
-                  <strong>{answer}</strong>
-                </div>
-              ))}
-            </div>
+          <div className="home-benefit-grid">
+            {benefits.map(({ id, icon: Icon, title, text, link, label }) => (
+              <article id={id} key={id}>
+                <Icon size={24} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{text}</p>
+                <a href={link}>
+                  {label} <ArrowUpRight size={15} />
+                </a>
+              </article>
+            ))}
           </div>
-          <p className="section-footnote">
-            Time zones, dates, units, and colors work on your Mac. Currency and
-            crypto conversions fetch rates on demand.{' '}
-            <a href="/docs/calculator">
-              Explore the calculator <ArrowUpRight size={14} />
-            </a>
-          </p>
         </section>
         <section
-          className="notes-section wrap"
+          className="home-agents wrap"
           id="agents"
           aria-labelledby="agents-title"
         >
-          <div className="section-intro">
-            <p className="eyebrow">
-              02 / KEEP YOUR AGENTS MOVING
-            </p>
-            <h2 id="agents-title">
-              When they need you.
-              <br />
-              <span>You’re right there.</span>
-            </h2>
-            <p>
-              Find the session that needs a decision, see its question, and
-              respond without losing your place.
-            </p>
-            <a className="text-link" href="/docs/agents">
-              See agent workflows <ArrowUpRight size={15} />
-            </a>
-          </div>
-          <div className="notes-details">
-            <figure className="product-capture">
-              <a
-                href="/images/agent-attention-dark.png"
-                aria-label="View the full-size native agent question preview"
-              >
-                <Image
-                  unoptimized
-                  src="/images/agent-attention-dark.png"
-                  alt="Native Volant with fictional Herdr activity and a Codex question waiting for an explicit answer."
-                  width={1500}
-                  height={960}
-                />
-              </a>
-              <figcaption>Native development capture · fictional agent question</figcaption>
-            </figure>
-            <article>
-              <span className="detail-number">01</span>
-              <div>
-                <h3>Find the right session.</h3>
-                <p>
-                  Search Herdr panes by project, provider, or status. The launcher
-                  footer shows how many are waiting on you, and you can answer supported
-                  Claude Code and Codex questions and approvals. Saved remote
-                  machines need compatible Herdr installations.
-                </p>
-              </div>
-            </article>
-            <figure className="product-capture">
-              <a
-                href="/images/rex-overview-dark.webp"
-                aria-label="View the full-size native Rex Overview"
-              >
-                <Image
-                  unoptimized
-                  src="/images/rex-overview-dark.webp"
-                  alt="The native Rex Overview window with fictional sessions: tabs drawn as their real split layouts, a Claude Code question waiting in one pane, a running server log, finished work and a cargo build, each showing the last lines of its screen."
-                  width={1290}
-                  height={1180}
-                />
-              </a>
-              <figcaption>Native development capture · fictional Rex sessions and screen text</figcaption>
-            </figure>
-            <article>
-              <span className="detail-number">02</span>
-              <div>
-                <h3>Watch your Rex sessions.</h3>
-                <p>
-                  Type <code>rex</code> to see which programs in Rex are waiting
-                  on you, and press Return to jump straight to the pane. Open the
-                  Rex Overview to see every session and tab laid out as it is in
-                  Rex, with the last lines of each pane&rsquo;s screen once you
-                  turn on pane previews. Switching sessions needs Rex&rsquo;s
-                  Remote Control setting.
-                </p>
-              </div>
-            </article>
-            <article>
-              <span className="detail-number">03</span>
-              <div>
-                <h3>The agents you already use.</h3>
-                <p>
-                  Start a new native conversation with OpenCode, Claude Code, or
-                  Codex. Read streamed replies and tool activity, make explicit
-                  permission choices, and cancel a turn. Claude Code and Codex
-                  use ACP adapters.
-                </p>
-              </div>
-            </article>
-            <article>
-              <span className="detail-number">04</span>
-              <div>
-                <h3>Keep your place.</h3>
-                <p>
-                  Your active conversation and draft survive hiding the
-                  launcher. Return when you’re ready. New conversations are
-                  separate from existing terminal sessions; Cursor’s ACP
-                  connection remains unverified.
-                </p>
-              </div>
-            </article>
-          </div>
-        </section>
-        <section
-          className="features-section"
-          id="ai"
-          aria-labelledby="ai-title"
-        >
-          <div className="wrap">
-            <div className="features-heading">
-              <div>
-                <p className="eyebrow">AI ON YOUR TERMS</p>
-                <h2 id="ai-title">
-                  Choose the model.
-                  <br />
-                  <span>Choose the context.</span>
-                </h2>
-              </div>
-              <p>
-                Use your coding agent, bring an API key, connect a local model
-                server, or use Apple Intelligence on an eligible Mac with macOS
-                26.
-              </p>
-            </div>
-            <div className="ai-showcase">
-              <figure className="product-capture">
-                <a
-                  href="/images/chat-context-dark.png"
-                  aria-label="View the full-size native chat attachment preview"
-                >
-                  <Image
-                    unoptimized
-                    src="/images/chat-context-dark.png"
-                    alt="Native Volant AI Chat with an unsent draft and an explicitly attached fictional Markdown note."
-                    width={1500}
-                    height={960}
-                  />
-                </a>
-                <figcaption>
-                  Native development capture · fictional draft, no prompt sent
-                </figcaption>
-              </figure>
-              <div className="notes-details">
-                <article>
-                  <Sparkles aria-hidden="true" />
-                  <div>
-                    <h3>A conversation within reach.</h3>
-                    <p>
-                      Open AI Chat when you need it. Cloud models use your API
-                      account; local servers use your selected model. Apple
-                      Intelligence runs on device when available.
-                    </p>
-                  </div>
-                </article>
-                <article>
-                  <FileText aria-hidden="true" />
-                  <div>
-                    <h3>Bring just what matters.</h3>
-                    <p>
-                      Type @ in chat to choose a note or recent clipboard text.
-                      Review the attachment chips before sending. Nothing is
-                      attached automatically.
-                    </p>
-                  </div>
-                </article>
-                <article>
-                  <LockKeyhole aria-hidden="true" />
-                  <div>
-                    <h3>You decide what leaves your Mac.</h3>
-                    <p>
-                      API keys stay in Keychain. A cloud connection receives
-                      your submitted prompt and selected context. Local models
-                      have no automatic cloud fallback.
-                    </p>
-                  </div>
-                </article>
-                <a className="text-link" href="/docs/agents">
-                  Setup, requirements, and current limits{' '}
-                  <ArrowUpRight size={15} />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section
-          className="answers-section wrap"
-          id="launcher"
-          aria-labelledby="launcher-title"
-        >
-          <div className="features-heading">
-            <div>
-              <p className="eyebrow">03 / MOVE AROUND YOUR MAC</p>
-              <h2 id="launcher-title">
-                Find it.
-                <br />
-                <span>Get there.</span>
-              </h2>
-            </div>
-            <p>
-              Apps, files, people, and everyday actions. A familiar starting
-              point that learns the way you work.
-            </p>
-          </div>
-          <div className="feature-grid">
-            <article>
-              <Zap aria-hidden="true" />
-              <h3>A faster way there.</h3>
-              <p>
-                Launch apps with ranking that learns from your choices. Use
-                aliases and per-app hotkeys to bring an app forward, then hide
-                it when you’re done.
-              </p>
-              <div className="mini-search">
-                <span>
-                  <Command size={16} /> sa
-                </span>
-                <span>
-                  Safari <CornerDownLeft size={15} />
-                </span>
-              </div>
-            </article>
-            <article>
-              <SlidersHorizontal aria-hidden="true" />
-              <h3>Your Mac, within reach.</h3>
-              <p>
-                Switch audio routes, adjust volume, find Wi-Fi networks, or keep
-                your Mac awake. Open the right System Settings pane from a
-                search.
-              </p>
-              <a className="feature-link" href="/docs/system-control">
-                Explore Mac controls <ArrowUpRight size={14} />
-              </a>
-            </article>
-            <article>
-              <CornerDownLeft aria-hidden="true" />
-              <h3>Make the next meeting.</h3>
-              <p>
-                Find files and contacts. Type cal for today and tomorrow’s
-                agenda, then press Return to join a meeting. Run your explicitly
-                configured Apple Shortcuts.
-              </p>
-            </article>
-          </div>
-        </section>
-        <section className="notes-section wrap" id="notes">
-          <div className="section-intro">
-            <p className="eyebrow">04 / KEEP USEFUL THINGS CLOSE</p>
-            <h2>
-              Open. Write.
-              <br />
-              <span>Carry on.</span>
-            </h2>
-            <p>
-              A note shouldn’t become another project. Bring up a quiet space,
-              get it down, and get back to what you were doing.
-            </p>
-            <a className="text-link" href="/docs/notes">
-              Explore Live Notes <ArrowUpRight size={15} />
-            </a>
-          </div>
-          <div className="notes-details">
-            <Image
-              unoptimized
-              className="notes-preview"
-              src="/images/live-notes.png"
-              width="1120"
-              height="1240"
-              alt="Development preview of Live Notes with Markdown and a Python code block, language selection, and Copy Code."
-            />
-            <article>
-              <span className="detail-number">01</span>
-              <div>
-                <h3>Markdown that keeps up.</h3>
-                <p>
-                  Type a code fence and keep writing. Live mode styles your
-                  Markdown as you go. Pick a language, or let Auto make a local
-                  guess.
-                </p>
-                <div
-                  className="code-sample"
-                  aria-label="Example Markdown code fence"
-                >
-                  <code>
-                    <span>```</span>python
-                  </code>
-                  <span className="code-tag">Auto · Python</span>
-                </div>
-              </div>
-            </article>
-            <article>
-              <span className="detail-number">02</span>
-              <div>
-                <h3>The useful bits, within reach.</h3>
-                <p>
-                  Copy code without its fences. Pin the note you keep coming
-                  back to. Search your notes without leaving the keyboard.
-                </p>
-                <div className="key-row">
-                  <kbd>⌘</kbd>
-                  <kbd>P</kbd>
-                  <span>Find a note</span>
-                  <kbd>⌘</kbd>
-                  <kbd>K</kbd>
-                  <span>Find an action</span>
-                </div>
-              </div>
-            </article>
-            <article>
-              <span className="detail-number">03</span>
-              <div>
-                <h3>Your words. Your files.</h3>
-                <p>
-                  Ordinary .md files, right on your Mac. Open them in another
-                  editor whenever you like.
-                </p>
-              </div>
-            </article>
-          </div>
-        </section>
-        <section className="features-section" id="features">
-          <div className="wrap">
-            <div className="features-heading">
-              <div>
-                <p className="eyebrow">YOUR EVERYDAY TOOLKIT</p>
-                <h2>
-                  Less repeat.
-                  <br />
-                  <span>More rhythm.</span>
-                </h2>
-              </div>
-              <p>
-                Save what matters. Reuse what works. Keep your everyday tools
-                together, with storage and settings you control.
-              </p>
-            </div>
-            <div className="feature-grid">
-              <article>
-                <LockKeyhole />
-                <h3>Make it yours.</h3>
-                <p>
-                  Choose shortcuts and aliases, bring supported notes and
-                  snippets from Raycast, and keep preferences in portable text
-                  configuration.
-                </p>
-                <a className="feature-link" href="/docs/importing-from-raycast">
-                  Bring your setup <ArrowUpRight size={14} />
-                </a>
-              </article>
-              <article>
-                <Clipboard />
-                <h3>Keep the good copies.</h3>
-                <p>
-                  A local, encrypted history for text and images. Choose how
-                  many items to keep, with password-manager copies skipped.
-                </p>
-                <div className="retention">
-                  <span>Clipboard history</span>
-                  <strong>
-                    500 <small>items by default</small>
-                  </strong>
-                </div>
-              </article>
-              <article>
-                <FileText />
-                <h3>Write it once.</h3>
-                <p>
-                  Reuse snippets with date and clipboard placeholders. Give your
-                  favorite links an alias. Keep it all in portable text
-                  configuration.
-                </p>
-                <div className="snippet">
-                  <code>
-                    Today’s update — <span>{'{date}'}</span>
-                  </code>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-        <section
-          className="next-release wrap"
-          id="next"
-          aria-labelledby="next-title"
-        >
-          <p className="eyebrow">
-            MORE TO EXPLORE
-          </p>
-          <h2 id="next-title">More ways to make it yours.</h2>
-          <div className="feature-grid">
-            <article>
-              <h3>Color that fits your Mac.</h3>
-              <p>
-                Follow your macOS accent, choose a color theme, or import a
-                Raycast theme from a file or link. Notes follows your active
-                theme too.
-              </p>
-            </article>
-            <article>
-              <h3>One shortcut to step away.</h3>
-              <p>
-                Lock your screen, sleep your Mac or displays, and start the
-                screen saver. Restart, shut down, and log out use macOS
-                confirmation dialogs.
-              </p>
-            </article>
-            <article>
-              <h3>Your setup on another Mac.</h3>
-              <p>
-                Opt-in iCloud sync for selected shortcuts, snippets, quicklinks,
-                aliases, and appearance. Notes, clipboard history, and keys stay
-                out.
-              </p>
-            </article>
-          </div>
-          <p className="section-footnote">
-            Download {appVersion} today, see{' '}
-            <a href={`${repositoryURL}/releases`}>what changed in each release</a>, or{' '}
-            <a href={`${repositoryURL}/pulls?q=is%3Apr+is%3Amerged`}>
-              follow development on GitHub <ArrowUpRight size={14} />
-            </a>
-            .
-          </p>
-        </section>
-        <section className="philosophy wrap">
-          <p className="eyebrow">05 / DELIBERATELY PERSONAL</p>
-          <h2>
-            Open source.
-            <br />
-            MIT licensed. <span>Yours to make.</span>
-          </h2>
-          <p>
-            Built in the open, with the code on GitHub. Use it, change it, and
-            make it yours. No Volant account. No telemetry. Notes and encrypted
-            clipboard history stay on your Mac. Sharing context with AI is
-            always your choice.
-          </p>
-          <a href={repositoryURL} className="text-link">
-            <Image
-              unoptimized
-              src="/icons/github.svg"
-              alt=""
-              width={18}
-              height={18}
-              className="social-icon"
-            />{' '}
-            Explore the source <ArrowUpRight size={15} />
-          </a>
-        </section>
-        <section className="faq wrap" id="details">
           <div>
-            <p className="eyebrow">A FEW DETAILS</p>
-            <h2>Good to know.</h2>
+            <p className="home-kicker">FOR THE WAY YOU WORK NOW</p>
+            <h2 id="agents-title">
+              Your agents need you.
+              <br />
+              <em>Skip the tab hunt.</em>
+            </h2>
+            <p>
+              Find the session waiting for a decision. Jump to a Rex pane,
+              answer supported Herdr questions, or open a native AI conversation
+              without leaving your flow.
+            </p>
+            <a href="/docs/agents">
+              Meet your agent workspace <ArrowUpRight size={16} />
+            </a>
+            <p className="home-fineprint">
+              Uses your installed agents and integrations. Cloud chat uses your
+              chosen provider; local model servers are supported too.
+            </p>
           </div>
-          <Accordion>
-            {questions.map(([q, a]) => (
-              <AccordionItem key={q} value={q}>
-                <AccordionTrigger>{q}</AccordionTrigger>
-                <AccordionContent>
-                  <p>
-                    {a}
-                    {q === 'Is Volant open source?' && (
-                      <>
-                        {' '}
-                        <a className="faq-source" href={repositoryURL}>
-                          View the source
-                        </a>{' '}
-                        ·{' '}
-                        <a
-                          className="faq-source"
-                          href={`${repositoryURL}/blob/main/LICENSE`}
-                        >
-                          Read the MIT license
-                        </a>
-                        .
-                      </>
-                    )}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <figure>
+            <a
+              href="/images/agent-attention-dark.png"
+              aria-label="View the full-size native agent question"
+            >
+              <Image
+                unoptimized
+                src="/images/agent-attention-dark.png"
+                alt="Native Volant showing a fictional Codex question waiting for a decision."
+                width={1500}
+                height={960}
+              />
+            </a>
+            <figcaption>
+              Native development capture · fictional question
+            </figcaption>
+          </figure>
         </section>
-        <section className="get wrap" id="get">
-          <Image
-            unoptimized
-            src="/images/volant-icon.png"
-            alt="Volant app icon"
-            width="84"
-            height="84"
-          />
-          <p className="eyebrow">YOUR MAC. YOUR AGENTS. YOUR WORKSPACE.</p>
-          <h2>Move faster with Volant.</h2>
-          <p>
-            Keep your work moving. One shortcut away.
-            <br />
-            Open source. MIT licensed.
-          </p>
-          <a className="button" href={downloadURL} download>
-            Download for Mac <ArrowRight size={17} />
+        <section
+          className="home-more wrap"
+          aria-label="More ways to use Volant"
+        >
+          <a href="/docs/notes">
+            <FileText size={20} />
+            <span>
+              <strong>Think in Markdown.</strong> Notes that stay ordinary
+              files.
+            </span>
+            <ArrowUpRight size={16} />
           </a>
-          <span className="availability">
-            Version {appVersion} · macOS 15+ · Apple silicon
-          </span>
-          <p className="brew-install">
-            Or with Homebrew: <code>brew install --cask mysticcoders/tap/volant</code>
-          </p>
-          <p className="download-scope">
-            Since 0.3.28: calculator answers follow your Mac's language and
-            region, and dictation pastes on any keyboard layout. See{' '}
-            <a href={`${repositoryURL}/releases`}>every release</a>.
+          <a href="/docs/system-control">
+            <SlidersHorizontal size={20} />
+            <span>
+              <strong>Keep your Mac in reach.</strong> Audio, Wi-Fi, and
+              everyday controls.
+            </span>
+            <ArrowUpRight size={16} />
+          </a>
+        </section>
+        <section className="home-bottom wrap">
+          <div className="home-privacy">
+            <Code2 size={25} aria-hidden="true" />
+            <h2>
+              Your tools.
+              <br />
+              Your say.
+            </h2>
+            <p>
+              Your notes and encrypted clipboard history stay on your Mac. You
+              choose what to send to AI. No Volant account. No telemetry.
+            </p>
+            <a href="/docs/privacy-and-security">
+              Read the privacy details <ArrowUpRight size={15} />
+            </a>
+          </div>
+          <div className="home-faq" id="details">
+            <p className="home-kicker">GOOD TO KNOW</p>
+            <Accordion>
+              {questions.map(([q, a]) => (
+                <AccordionItem key={q} value={q}>
+                  <AccordionTrigger>{q}</AccordionTrigger>
+                  <AccordionContent>
+                    <p>{a}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+        <section className="home-download wrap" id="get">
+          <div>
+            <p className="home-kicker">MAKE ROOM FOR THE WORK.</p>
+            <h2>Your next move starts here.</h2>
+            <p>Volant {appVersion} · Free & open source · Early release</p>
+          </div>
+          <a className="button" href={downloadURL} download>
+            Download for Mac <ArrowRight size={18} />
+          </a>
+          <p className="home-brew">
+            Prefer Homebrew?{' '}
+            <code>brew install --cask mysticcoders/tap/volant</code>
           </p>
         </section>
       </main>
       <SiteFooter />
-    </>
+    </div>
   );
 }
