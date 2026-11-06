@@ -33,6 +33,16 @@ let bundledExtension = Bundle.main.url(forResource: "HelloWorld", withExtension:
 // A fictional solid-color WebP icon, so launcher and Settings renders show an extension icon.
 let fixtureIcon = Data(base64Encoded: "UklGRh4AAABXRUJQVlA4TBEAAAAvH8AHAAdQvKIUuf+BiOh/AAA=")!
 
+/// File search for the fixture: fictional hits while `fixtureFiles` is set, otherwise Spotlight
+/// refused as before, so the Spotlight recovery scenario keeps its failure.
+var fixtureFiles: [FileEntry]?
+final class FixtureFileSearch: FileSearch {
+    override func search(_ term: String, completion: @escaping (SearchResult) -> Void) {
+        guard let files = fixtureFiles else { super.search(term, completion: completion); return }
+        completion(.success(files.filter { $0.name.localizedCaseInsensitiveContains(term) }))
+    }
+}
+
 var launched = 0
 var spotlightAvailable = false
 var clipboardAvailable = true
@@ -54,6 +64,7 @@ let fakeCredentials = AICredentials(read: { _ in nil }, write: { _, _ in credent
 func freshLauncher() {
     panel?.orderOut(nil)
     launched = 0; spotlightAvailable = false; clipboardAvailable = true; clipboardRetryDelay = 0
+    fixtureFiles = nil
     chatRequests = 0; settingsRequests = 0; extensionSettingsRequests = 0; credentialWrites = 0
     chatConfig = nil; copied = []
     let id = UUID().uuidString
@@ -68,7 +79,7 @@ func freshLauncher() {
     positions.removeObject(forKey: "launcherPosition")
     panel = LauncherPanel(index: index, clipboard: clipboard, notes: NotesStore(directory: root.appendingPathComponent("Notes-\(id)")), config: preferences,
                           usage: UsageStore(url: root.appendingPathComponent("actions-usage-\(id).sqlite")), positionStore: positions,
-                          files: FileSearch(startQuery: { _ in false })) { action in
+                          files: FixtureFileSearch(startQuery: { _ in false })) { action in
         switch action {
         case .ai:
             chatRequests += 1
@@ -1473,6 +1484,7 @@ struct Scenario {
 /// - herdr: question cards clicked at fixed offsets from the panel height, machine rows and the footer.
 /// - translate: the Translate screen drawn in the panel, and its draft across focus loss and dismissal.
 /// - rex: Rex pane rows and the footer status drawn in the panel.
+/// - search-scopes: the Contacts, Files and Clipboard scopes' Back chip and rows drawn in the panel.
 /// - clipboard-recovery, spotlight-recovery: error, progress and Retry states drawn in the panel.
 /// Default size only, because they draw standalone windows that ignore the launcher size:
 /// - community-settings, extension-settings: Extension Settings states and the location prompt.
@@ -1511,6 +1523,70 @@ func serversScenario() throws {
     verify(copied == ["http://localhost:3000"], "Command-Return in the menu copies the URL: \(copied)")
 }
 
+/// Volant's own Contacts, Files and Clipboard scopes, entered from their command rows with Return
+/// and Tab, searched, and left with Escape and Delete. Contacts, files and clips are fictional, and
+/// contact search is replaced so the guest never asks for access.
+func searchScopesScenario() throws {
+    var contactTerms: [String] = []
+    let people = [
+        ContactEntry(id: "fixture-ana", name: "Ana Fictional", organization: "Orbit Studio",
+                     fields: [ContactField(id: "ana-email", kind: .email, label: "work", value: "ana@example.com")]),
+        ContactEntry(id: "fixture-ben", name: "Ben Example", organization: "Fictional Labs",
+                     fields: [ContactField(id: "ben-phone", kind: .phone, label: "mobile", value: "+1 555 0100")]),
+    ]
+    panel.model.searchContacts = { term, _, completion in
+        contactTerms.append(term)
+        completion(people.filter { $0.name.localizedCaseInsensitiveContains(term) || $0.organization.localizedCaseInsensitiveContains(term) })
+    }
+    fixtureFiles = ["Quarterly report.pdf", "Report draft.md", "Orbit launch plan.key"].map { name in
+        FileEntry(id: "/Users/fictional/Documents/" + name, name: name, url: URL(fileURLWithPath: "/Users/fictional/Documents/" + name), kind: "Document")
+    }
+    clipboard.record("Invoice 2026-114, fictional amount 420.00")
+    clipboard.record("ana@example.com")
+    summon()
+
+    panel.model.query = "people"; settle()
+    verify(panel.model.rows.first?.id == "core:contacts", "people puts Search Contacts first: \(panel.model.rows.map(\.id))")
+    try render("scope-contacts-command")
+    key("\t", 48)
+    verify(panel.model.searchScope == .contacts && panel.model.query.isEmpty, "Tab enters the Contacts scope: \(focusState())")
+    verify(waitUntil(stable: 0.1) { focusedField()?.placeholderString == SearchScope.contacts.placeholder }, "The field shows the Contacts placeholder: \(focusState())")
+    verify(contactTerms.isEmpty && panel.model.notice == SearchScope.contacts.prompt, "Entering Contacts searches nothing and asks for nothing")
+    try render("scope-contacts-empty")
+    panel.model.query = "a"; settle()
+    verify(contactTerms.last == "a" && panel.model.rows.map(\.id) == ["contact:fixture-ana", "contact:fixture-ben"], "Typing searches only contacts: \(panel.model.rows.map(\.id))")
+    try render("scope-contacts")
+    key("\u{1b}", 53)
+    verify(panel.model.searchScope == .contacts && panel.model.query.isEmpty && panel.isVisible, "Escape with text only clears it")
+    key("\u{7f}", 51)
+    verify(waitUntil { panel.model.scope == nil }, "Delete in an empty field leaves the scope")
+
+    panel.model.query = "files"; settle()
+    verify(panel.model.rows.first?.id == "core:files", "files puts Search Files first")
+    key("\r", 36)
+    verify(panel.model.searchScope == .files && panel.isVisible, "Return enters the Files scope")
+    panel.model.query = "report"; settle()
+    verify(waitUntil { panel.model.rows.count == 2 }, "Typing searches only files: \(panel.model.rows.map(\.id))")
+    try render("scope-files")
+    key("\u{1b}", 53); key("\u{1b}", 53)
+    verify(waitUntil { panel.model.scope == nil } && panel.isVisible, "Escape twice leaves the Files scope without closing Volant")
+
+    panel.model.query = "clipboard"; settle()
+    verify(panel.model.rows.first?.id == "core:clipboard", "clipboard puts Search Clipboard first")
+    key("\r", 36)
+    verify(panel.model.searchScope == .clipboard && panel.model.rows.count == 2, "The Clipboard scope lists recent items at once: \(panel.model.rows.map(\.id))")
+    try render("scope-clipboard")
+    panel.model.query = "invoice"; settle()
+    verify(panel.model.rows.count == 1, "Typing searches only clipboard history")
+    key("\u{1b}", 53); key("\u{1b}", 53)
+    verify(waitUntil { panel.model.scope == nil }, "Escape twice leaves the Clipboard scope")
+
+    panel.model.query = "contacts ben"; settle()
+    verify(panel.model.scope == nil && panel.model.rows.map(\.id) == ["contact:fixture-ben"], "A one-go query searches at once")
+    panel.orderOut(nil)
+    print("PASS: Contacts, Files and Clipboard scopes enter with Return and Tab, search one source, and leave with Escape and Delete")
+}
+
 let scenarios: [Scenario] = [
     Scenario(name: "actions", sizeSensitive: true, run: actionsMenuScenario),
     Scenario(name: "volant-menu", sizeSensitive: true, run: volantMenuScenario),
@@ -1524,6 +1600,7 @@ let scenarios: [Scenario] = [
     Scenario(name: "herdr", sizeSensitive: true, run: herdrScenario),
     Scenario(name: "rex", sizeSensitive: true, run: rexScenario),
     Scenario(name: "servers", sizeSensitive: true, run: serversScenario),
+    Scenario(name: "search-scopes", sizeSensitive: true, run: searchScopesScenario),
     Scenario(name: "rex-overview", sizeSensitive: false, run: rexOverviewScenario),
     Scenario(name: "api-settings", sizeSensitive: false, run: apiSettingsScenario),
     Scenario(name: "acp-detection", sizeSensitive: false, run: acpDetectionScenario),

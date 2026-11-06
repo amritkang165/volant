@@ -252,6 +252,7 @@ Merged after 0.3.33, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| Search Contacts, Search Files and Search Clipboard: type the name, press Return or Tab, and search only that source; or type it in one go, such as `contacts jane` | Not yet | Launcher search scopes PR; SearchScopeTests, LauncherSearchScopeTests, Actions fixture `search-scopes` with fictional contacts, files and clips in light and dark at every size; the real Contacts prompt from the scope and live Spotlight results inside it not exercised | Launcher docs; release notes |
 
 ## Privacy language
 
