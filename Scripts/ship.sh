@@ -3,6 +3,7 @@
 #
 #   Scripts/ship.sh 0.2.3            prepare, wait for the release PR's merge, then publish
 #   Scripts/ship.sh 0.2.3 --publish  publish an already-merged release PR (resume)
+#   Scripts/ship.sh --site-only     publish merged website changes, preserving app distribution
 #
 # Prepare builds from `release/<version>` (or a fresh branch from main), which must contain
 # docs/releases/<version>.md and any website copy for the release. It sets the version and next
@@ -23,8 +24,8 @@ set -euo pipefail
 
 VERSION="${1:-}"
 MODE="${2:-}"
-[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && ( -z "$MODE" || "$MODE" == --publish ) ]] \
-  || { echo "Usage: Scripts/ship.sh <major.minor.patch> [--publish]"; exit 64; }
+[[ ( "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && ( -z "$MODE" || "$MODE" == --publish ) ) || ( "$VERSION" == --site-only && -z "$MODE" ) ]] \
+  || { echo "Usage: Scripts/ship.sh <major.minor.patch> [--publish] | --site-only"; exit 64; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SITE="https://usevolant.com"
 BRANCH="release/$VERSION"
@@ -102,9 +103,59 @@ gh auth status > /dev/null 2>&1 || fail "gh is not signed in"
 git -C "$ROOT" fetch -q origin
 LOGS="$(mktemp -d "$ROOT/dist-release.ship-$VERSION.XXXXXX")"
 WT="$LOGS/worktree"
-gh release view "v$VERSION" > /dev/null 2>&1 && fail "GitHub release v$VERSION already exists"
+if [[ "$VERSION" != --site-only ]]; then
+  gh release view "v$VERSION" > /dev/null 2>&1 && fail "GitHub release v$VERSION already exists"
+fi
 [[ "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "http://${SITE#https://}/")" =~ ^30[18]\ $SITE/$ ]] \
   || fail "http://${SITE#https://}/ does not redirect permanently to $SITE/; turn on Always Use HTTPS for the zone"
+
+# Website-only publication uses the latest merged main with green PR checks. The app feed
+# and checksum manifest must already match production; this mode never prepares an app release.
+if [[ "$VERSION" == --site-only ]]; then
+  step "Verify merged website source and PR checks"
+  MERGED="$(git -C "$ROOT" rev-parse origin/main)"
+  [[ "$(git -C "$ROOT" rev-parse HEAD)" == "$MERGED" ]] || fail "check out current main before publishing the website"
+  [[ -z "$(git -C "$ROOT" status --porcelain)" ]] || fail "the checkout has uncommitted changes"
+  PR="$(gh api "repos/{owner}/{repo}/commits/$MERGED/pulls" --jq ".[] | select(.merged_at != null and .merge_commit_sha == \"$MERGED\") | .number" | head -1)"
+  [[ -n "$PR" ]] || fail "current main is not a merged pull request"
+  gh pr checks "$PR" --json name,state > "$LOGS/checks.json"
+  jq -e 'any(.[]; .name == "PR gate" and .state == "SUCCESS") and all(.[]; .state == "SUCCESS" or .state == "SKIPPED")' "$LOGS/checks.json" > /dev/null \
+    || fail "the merged PR does not have all successful checks"
+  git -C "$ROOT" worktree add -q --detach "$WT" "$MERGED"
+  CURRENT="$(sed -n "s/export const appVersion = '\(.*\)';/\1/p" "$WT/website/components/site-chrome.tsx")"
+  [[ "$CURRENT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "could not read the current download version"
+  for file in appcast.xml SHA256SUMS; do
+    curl --max-time 60 -fsSL "$SITE/updates/$file" -o "$LOGS/before-$file"
+    cmp -s "$LOGS/before-$file" "$WT/website/public/updates/$file" \
+      || fail "production $file differs; website-only publishing cannot change app distribution"
+  done
+  SHA="$(awk -v f="Volant-$CURRENT.dmg" '$2 == f {print $1}' "$WT/website/public/updates/SHA256SUMS")"
+  [[ -n "$SHA" && "$(shasum -a 256 "$WT/website/public/updates/Volant-$CURRENT.dmg" | awk '{print $1}')" == "$SHA" ]] \
+    || fail "the existing download does not match its checksum"
+  step "Publish website from $MERGED"
+  DEPLOY="$(deploy_site website-only)"
+  STATE="website deployed in Worker $DEPLOY; verification pending"
+  for file in appcast.xml SHA256SUMS; do
+    fetch_until "$SITE/updates/$file" "$LOGS/after-$file" "cmp -s '$LOGS/before-$file' '$LOGS/after-$file'" \
+      || fail "published $file changed"
+  done
+  fetch_until "$SITE/updates/Volant-$CURRENT.dmg" "$LOGS/public.dmg" "[[ \$(shasum -a 256 '$LOGS/public.dmg' | awk '{print \$1}') == $SHA ]]" \
+    || fail "existing public download checksum mismatch"
+  step "Verify production website"
+  (cd "$WT/website" && VOLANT_WEBSITE_ARTIFACTS="$LOGS/site-smoke" npm run --silent test:security:production) > "$LOGS/site-smoke.log" 2>&1 \
+    || fail "production browser checks failed; see $LOGS/site-smoke.log"
+  STATE="website published and verified; app distribution unchanged"
+  cat > "$LOGS/report.md" <<EOF
+Published $SITE from $MERGED through Scripts/ship.sh --site-only.
+Worker version: $DEPLOY
+Production browser/security smoke passed. Appcast and SHA256SUMS are byte-for-byte unchanged; the existing $CURRENT public DMG matches SHA-256 $SHA.
+Logs and browser captures: $LOGS
+EOF
+  trap - ERR
+  git -C "$ROOT" worktree remove --force "$WT"
+  cat "$LOGS/report.md"
+  exit 0
+fi
 
 if [[ -z "$MODE" ]]; then
   CURRENT="$(git -C "$ROOT" show origin/main:project.yml | sed -n 's/.*MARKETING_VERSION: "\(.*\)"/\1/p' | head -1)"
