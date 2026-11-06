@@ -87,7 +87,7 @@ final class ExtensionRowCopyTests: XCTestCase {
         let (manager, ext) = try manager()
         reply = (Data("\u{FEFF}<?xml version=\"1.0\"?>\n<svg/>".utf8), 200)
         XCTAssertEqual(try copy(manager, ext, url("svg")).get(), "Copied Logo")
-        XCTAssertEqual(written, [.text("<?xml version=\"1.0\"?>\n<svg/>")], "Foundation drops the byte order mark")
+        XCTAssertEqual(written, [.text("<?xml version=\"1.0\"?>\n<svg/>")], "A leading byte order mark is never copied")
         XCTAssertEqual(fetched.first?.0.url.absoluteString, "https://assets.example.com/logo")
         XCTAssertEqual(fetched.first?.0.method, "GET")
         XCTAssertEqual(fetched.first?.1, [host], "The helper gets only approved declared hosts")

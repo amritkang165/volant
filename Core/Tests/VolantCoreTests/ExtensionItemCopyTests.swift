@@ -84,7 +84,9 @@ final class ExtensionItemCopyTests: XCTestCase {
 
     func testDownloadedSVGMustBeUTF8Markup() {
         XCTAssertEqual(ExtensionItemCopy.downloadedText(Data(#"<svg xmlns="http://www.w3.org/2000/svg"/>"#.utf8), kind: .svg), #"<svg xmlns="http://www.w3.org/2000/svg"/>"#)
-        XCTAssertNotNil(ExtensionItemCopy.downloadedText(Data("\u{FEFF}\n  <?xml version=\"1.0\"?>\n<svg/>".utf8), kind: .svg))
+        XCTAssertEqual(ExtensionItemCopy.downloadedText(Data("\u{FEFF}\n  <?xml version=\"1.0\"?>\n<svg/>".utf8), kind: .svg),
+                       "\n  <?xml version=\"1.0\"?>\n<svg/>", "The byte order mark is removed on every macOS version")
+        XCTAssertEqual(ExtensionItemCopy.downloadedText(Data("\u{FEFF}notes".utf8), kind: .text), "notes")
         XCTAssertNil(ExtensionItemCopy.downloadedText(Data("<?xml version=\"1.0\"?><html/>".utf8), kind: .svg), "A prolog without an svg element")
         XCTAssertNil(ExtensionItemCopy.downloadedText(Data("<html><svg/></html>".utf8), kind: .svg))
         XCTAssertNil(ExtensionItemCopy.downloadedText(Data([0x89, 0x50, 0x4E, 0x47]), kind: .svg), "PNG bytes are not SVG")

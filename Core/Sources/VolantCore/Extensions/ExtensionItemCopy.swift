@@ -94,13 +94,17 @@ public struct ExtensionItemCopy: Codable, Hashable, Sendable {
         }
     }
 
+    static let utf8ByteOrderMark: [UInt8] = [0xEF, 0xBB, 0xBF]
+
     /// The text to copy from downloaded `svg` or `text` bytes: valid UTF-8 without NUL characters, and for
-    /// SVG starting, after an optional byte order mark and whitespace, with `<svg` or an XML prolog and
-    /// containing an `<svg` element. Nil when the bytes are not that. The markup is never rendered.
+    /// SVG starting, after whitespace, with `<svg` or an XML prolog and containing an `<svg` element. A
+    /// leading byte order mark is removed here, since Foundation keeps it on some macOS versions and drops
+    /// it on others. Nil when the bytes are not that. The markup is never rendered.
     public static func downloadedText(_ data: Data, kind: Kind) -> String? {
-        guard !kind.isImage, !data.isEmpty, !data.contains(0), let text = String(data: data, encoding: .utf8) else { return nil }
+        let body = data.starts(with: utf8ByteOrderMark) ? data.dropFirst(utf8ByteOrderMark.count) : data[...]
+        guard !kind.isImage, !body.isEmpty, !body.contains(0), let text = String(data: Data(body), encoding: .utf8) else { return nil }
         guard kind == .svg else { return text }
-        let start = text.drop { $0 == "\u{FEFF}" || $0.isWhitespace }
+        let start = text.drop { $0.isWhitespace }
         guard start.hasPrefix("<svg") || start.hasPrefix("<?xml"), start.contains("<svg") else { return nil }
         return text
     }
