@@ -66,6 +66,31 @@ Kingdom's mixed system reads as metric).
 - **Link actions.** A row's Actions menu (Command-K) lists Open Link, its second link under the row's
   `secondaryTitle` (Command-Return), and Copy Link, each only when the row has that link, before the
   row's own `actions`.
+- **Copying.** A list extension that declares `"permissions": ["clipboard-write"]` can give a row a
+  `"copy"`: `{"text": "<svg …>…</svg>", "title": "Copy SVG"}`, up to 64 KB of UTF-8 copied as plain
+  text, or `{"url": "https://cdn.example.com/logo.png", "type": "png", "title": "Copy Image"}` with
+  `type` one of `svg`, `png`, `jpeg`, `webp`, `ico` or `text`. `title` is one line of at most 40
+  characters, "Copy" when absent. Without the permission, or with a text over 64 KB, an unknown type, or
+  a URL that is not https on the default port to a declared host, the copy is dropped while sanitizing
+  and the row stays. The prompt and Settings say "Copy text and images to your clipboard when you
+  choose them"; the permission is part of the approval fingerprint, so adding it needs enabling again
+  and a catalog update that adds it turns the extension off (`ExtensionItemCopy`).
+  - The Actions menu lists the copy right after the link entries. Return performs it when the row has
+    no `url` (and no `primaryAction`); otherwise Return still opens the link. The launcher stays open
+    and confirms "Copied SVG" in the footer.
+  - A URL copy is fetched only when the owner chooses it, never while listing: Volant checks the
+    extension is still enabled, unchanged, not revoked and not blocked by the community switch, and that
+    the host is declared and allowed, then fetches it once through `VolantFetchHost` with the same rules
+    as a plan (https, no redirects, at most 512 KB, the host's declared token). It checks the bytes
+    match `type` before copying: `svg` and `text` must be UTF-8 without NUL characters, and SVG must
+    start with `<svg` or an XML prolog and contain an `<svg` element; it is never parsed or rendered.
+    Images must carry the type's signature, be reported by ImageIO as that type, be at most 8192 pixels
+    on a side and 32 megapixels, and decode; they are copied as PNG and TIFF. Approval and the host are
+    checked again after the download. An unapproved host, a failed or non-2xx fetch, a wrong type or an
+    oversized file shows why in the footer and copies nothing.
+  - The module never sees the downloaded bytes. Each copy is recorded as a clipboard write in
+    `ExtensionActivity`, with the host for a URL copy and its GET, never the content.
+  - Older Volant versions ignore `copy`, so give such rows a `url` or a title that is useful to copy.
 
 `VolantFetchHost` is the only process with network access for this. It is a sandboxed XPC service
 with just `network.client`, built like `VolantRatesHost`: it re-checks each URL against the hosts it
@@ -75,7 +100,8 @@ response past 512 KB. Requests to the module are limited to 1 MiB and its replie
 at 16 MiB. In the production host a 730 KB render request parses in about 60 ms.
 
 Items are trimmed before display: at most 100 rows, titles and subtitles cut to 300 characters, and
-any link that is not http, https or a declared app link dropped.
+any link that is not http, https or a declared app link dropped. A row's `copy` carries longer text,
+such as an SVG logo, without changing the 300-character title limit.
 
 **Location.** A list extension may declare `"permissions": ["location"]`. The first-run prompt
 then also asks to share the owner's approximate location (about 11 km) with that extension and the
@@ -170,6 +196,13 @@ from their row, without a scope.
 
 - `swift test --package-path Core --filter ExtensionNetworkTests`: host names, URL permission, plans,
   item trimming and shared host approvals.
+- `swift test --package-path Core --filter ExtensionItemCopyTests`: the `clipboard-write` permission,
+  dropping copies while sanitizing, size, type, title and host limits, and the SVG and image checks.
+- `VolantTests/ExtensionRowCopyTests` (a fake fetch helper and clipboard): text, SVG, text and each image
+  type; wrong types, oversized and failed downloads, unapproved hosts, a host removed mid-download,
+  and disabled, blocked, revoked or unpermitted extensions; the fingerprint. `LauncherExtensionCopyTests`:
+  Actions entries and Return. The Actions fixture's `extension-row-copy` scenario renders the prompt and
+  the menu. Pasting into real apps and a copy through the signed fetch helper are not verified.
 - `VolantTests/ExtensionTests`: enabling allows hosts, a removed host asks again, uninstall prunes only
   orphaned hosts, and a cancelled run stops its reads and never renders.
 - `tools/check-extensions.sh`: the list fixture runs in the production JavaScriptCore host, plans only

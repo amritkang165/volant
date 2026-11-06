@@ -173,7 +173,9 @@ enum ResultRow: Identifiable, Hashable {
         case .newNote: return String(localized: "Create Note", comment: "Footer and Actions label for Return")
         case .extensionRun(let ext, _): return ext.communityBlocked ? String(localized: "Open Extension Settings", comment: "Footer and Actions label for Return") : (ext.enabled ? String(localized: "Run Extension", comment: "Footer and Actions label for Return") : String(localized: "Enable and Run…", comment: "Footer and Actions label for Return"))
         case .extensionResult: return String(localized: "Copy Result", comment: "Footer and Actions label for Return")
-        case .extensionItem(let item, _): return item.url == nil ? String(localized: "Copy Title", comment: "Footer and Actions label for Return") : String(localized: "Open Link", comment: "Footer and Actions label for Return")
+        case .extensionItem(let item, _):
+            if item.returnCopies, let copy = item.copy { return copy.displayTitle }
+            return item.url == nil ? String(localized: "Copy Title", comment: "Footer and Actions label for Return") : String(localized: "Open Link", comment: "Footer and Actions label for Return")
         case .snippet: return String(localized: "Copy Snippet", comment: "Footer and Actions label for Return")
         case .emoji: return String(localized: "Copy Emoji", comment: "Footer and Actions label for Return")
         case .quicklink: return String(localized: "Open Link", comment: "Footer and Actions label for Return")
@@ -1767,6 +1769,7 @@ final class LauncherModel: ObservableObject {
         case .extensionResult(let text): copy(text)
         case .extensionItem(let item, let source):
             if let primary = item.primaryAction { runItemAction(source, item: item, action: primary); return }
+            if item.returnCopies { copyItem(source, item: item); return }
             guard let link = item.url, let url = URL(string: link) else { copy(item.title); return }
             _ = Self.openExtensionLink(url, fallback: item.secondaryURL.flatMap(URL.init(string:)))
             if item.onOpen == true { runItemAction(source, item: item, action: nil) }
@@ -1950,11 +1953,27 @@ final class LauncherModel: ObservableObject {
             case .item(.copyPath): if let link = item.url { copy(link) }
             case .item: activate(rowID: target.id)
             case .custom(let action): runItemAction(source, item: item, action: action.id)
+            case .copy: copyItem(source, item: item)
             }
             return
         }
         guard case .item(let action) = entry else { actionTarget = nil; return }
         performAction(action, target: snapshot)
+    }
+
+    /// Copies an extension row's `copy` because the owner chose it, from Return or the Actions menu. The
+    /// launcher stays open and shows "Copied SVG" or why nothing was copied; a download that finishes after
+    /// the launcher moved on still copies but shows nothing.
+    func copyItem(_ ext: InstalledExtension, item: ExtensionItem) {
+        let gen = generation
+        extensions.copy(ext, item: item) { [weak self] result in
+            guard let self, gen == self.generation else { return }
+            switch result {
+            case .success(let confirmation): self.actionFeedback = confirmation
+            case .failure(let error): self.actionFeedback = "\(ext.name): \(error.localizedDescription)"
+            }
+        }
+        searchFocusRequest = UUID()
     }
 
     /// Runs a list extension's row action, or tells it a row was opened when `action` is nil, and shows
