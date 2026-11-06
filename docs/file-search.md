@@ -44,6 +44,13 @@ app can't read, so only the query moved.
 - A search starts 150 ms after typing pauses (fsearch: 50 ms). Terms shorter than three characters
   answer with no files without asking the helper.
 - Only the newest search's answer is shown; an older one is cancelled and never completes.
+- About 300 ms after typing (the 150 ms pause plus about 150 ms for the reply), if no file rows
+  show yet, the launcher says "Searching files…" with a spinner: as the empty state for `/term` and
+  the Files scope, and as one quiet line after the results in ordinary search, so rows above it
+  never move. Until then a lone file search shows nothing rather than "No results". Matching rows
+  from the previous query stay while refreshing. The status clears on results, an empty answer, a
+  failure, a new query and leaving the scope. A lone search that finds nothing says
+  No files match "term"; a term too short to search shows the Files prompt.
 - If the helper is unavailable, times out (4 s on the app side) or replies with something malformed,
   file search reports a failure, and the launcher shows Retry Spotlight beside the other results.
   It never falls back to the sandboxed query, which would look like a healthy empty search.
@@ -63,4 +70,11 @@ app can't read, so only the query moved.
   for each of three real terms in 0.3–1.0 s (one matched about 28,000 files), matched an accented
   term without its accents, replied empty to a superseded search, refused a two-character term, and
   treated quotes and a wildcard as plain text.
-- Not verified: delivery through the signed helper in the installed app.
+- `LauncherFileSearchStatusTests` (app): pending to results, fast and immediate replies never
+  showing the status, nothing found, unavailable, a new query and leaving the scope clearing it,
+  and merged search keeping previous matching rows instead of the status. The native Actions
+  fixture `search-scopes` renders the pending and nothing-found states in the Files scope and the
+  quiet line in ordinary search, light and dark, in Tart.
+- The owner used Volant Dev builds of `579b3e2e` and `fcee10fa` on November 6, 2026: file search
+  found home-folder files through the helper, and the Searching files… status showed.
+- Not verified: delivery through the Release-signed helper in an installed Developer ID build.
