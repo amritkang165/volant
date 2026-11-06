@@ -259,6 +259,7 @@ Merged after 0.3.34, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| Extension rows copy text and images: list extensions with the `clipboard-write` permission give rows a `copy` (up to 64 KB of text, or an SVG, PNG, JPEG, WebP, ICO or text file on an approved host, fetched only when the owner chooses it and checked against its type) | Not yet | ExtensionItemCopyTests, ExtensionRowCopyTests (fake fetch helper and clipboard), LauncherExtensionCopyTests, Actions fixture `extension-row-copy` renders of the prompt and the Actions menu in light and dark; no catalog extension uses it yet; pasting into real apps and a copy through the signed fetch helper are unverified | Extensions docs, marked as coming in the next release; say "when you choose it", never that extensions read or write the clipboard on their own |
 
 ## Privacy language
 

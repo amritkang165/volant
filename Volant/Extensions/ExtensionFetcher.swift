@@ -42,6 +42,16 @@ enum ExtensionFetcher {
         }
     }
 
+    /// Downloads a row's copy as raw bytes, which may be an image, for `ExtensionManager.copy`. The owner
+    /// asked for it, so a newer query never cancels it. Completes with no data and the HTTP status (0 when
+    /// none) when the helper refused it, failed or stopped past the size limit.
+    static func fetchData(_ request: ExtensionRequest, hosts: [String], completion: @escaping (Data?, Int) -> Void) {
+        call(timeout: 35, { proxy, reply in
+            proxy.request(url: request.url.absoluteString, method: request.method, body: request.body, headers: request.headers,
+                          allowedHosts: hosts, maximumBytes: ExtensionItemCopy.maximumDownloadBytes, reply: reply)
+        }) { data, status, error in completion(error == nil ? data : nil, status) }
+    }
+
     /// Reads one extension catalog file through the helper's fixed-location method. Anything other than
     /// a complete 200 response is an error; the caller verifies signatures and hashes.
     static func catalogFile(_ path: String, maximumBytes: Int, completion: @escaping (Result<Data, Error>) -> Void) {
