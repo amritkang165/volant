@@ -15,6 +15,7 @@ enum LauncherAction {
     case open(String)
     case create(String)
     case confetti
+    case camera
     case systemAction(SystemAction)
     case checkForUpdates, whatsNew, about, quit
 }
@@ -28,6 +29,12 @@ enum LauncherScope: Hashable {
 enum ResultRow: Identifiable, Hashable {
     case core(CoreCommand)
     case systemAction(SystemAction)
+    /// Appearance or menu bar hiding, with its current state when it could be read.
+    case systemToggle(SystemToggle, on: Bool?)
+    /// The last color picked from the screen, in one format.
+    case pickedColor(PickedColor, PickedColor.Format)
+    /// Opens the Privacy & Security pane a refused command needs.
+    case privacySettings(PrivacyPane)
     case appleShortcut(AppleShortcut)
     case server(ListeningServer)
     case caffeinate(CaffeinateCommand)
@@ -65,6 +72,9 @@ enum ResultRow: Identifiable, Hashable {
         case .server(let server): return "server:" + server.id
         case .core(let command): return "core:" + command.rawValue
         case .systemAction(let action): return "system-action:" + action.rawValue
+        case .systemToggle(let toggle, _): return "system-toggle:" + toggle.rawValue
+        case .pickedColor(_, let format): return "picked-color:" + format.rawValue
+        case .privacySettings(let pane): return "privacy:" + pane.rawValue
         case .caffeinate(let command): return "caffeinate:" + command.id
         case .agentSession(let session): return "agent:" + session.id
         case .herdrMachine(let machine, _, _): return "herdr-machine:" + (machine?.id ?? "local")
@@ -102,7 +112,9 @@ enum ResultRow: Identifiable, Hashable {
         case .server(let server):
             return server.exposed ? String(localized: "Network", comment: "Server row label: other machines can connect")
                 : String(localized: "Local", comment: "Server row label: only this Mac can connect")
-        case .core, .caffeinate, .systemAction: return String(localized: "Command", comment: "Result row kind label")
+        case .core, .caffeinate, .systemAction, .systemToggle: return String(localized: "Command", comment: "Result row kind label")
+        case .pickedColor: return String(localized: "Color", comment: "Result row kind label: a color picked from the screen")
+        case .privacySettings: return String(localized: "System Settings", comment: "Result row kind label")
         case .agentSession(let session): return session.status
         case .herdrMachine(_, let enabled, _): return enabled ? String(localized: "Enabled", comment: "Result row kind label: a Herdr machine that is on") : String(localized: "Disabled", comment: "Result row kind label: a Herdr machine that is off")
         case .rexPane(let pane): return pane.state.title
@@ -132,7 +144,7 @@ enum ResultRow: Identifiable, Hashable {
 
     var isCoreCommand: Bool {
         switch self {
-        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction: return true
+        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .privacySettings: return true
         default: return false
         }
     }
@@ -144,6 +156,9 @@ enum ResultRow: Identifiable, Hashable {
         case .server: return String(localized: "Open in Browser", comment: "Footer and Actions label for Return on a server row")
         case .core: return String(localized: "Open Command", comment: "Footer and Actions label for Return")
         case .systemAction(let action): return action.title.replacingOccurrences(of: "…", with: "")
+        case .systemToggle(let toggle, let on): return toggle.actionTitle(on: on)
+        case .pickedColor(_, let format): return String(localized: "Copy as \(format.label, format: .verbatim)", comment: "Footer and Actions label for Return on a picked color; the value is a format such as HEX or RGB")
+        case .privacySettings: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .caffeinate(let command): return command.stop ? String(localized: "Stop", comment: "Footer label for Return: stop Caffeinate") : String(localized: "Start", comment: "Footer label for Return: start Caffeinate")
         case .agentSession: return String(localized: "Focus in Herdr", comment: "Footer and Actions label for Return")
         case .herdrMachine(let machine, let enabled, let busy):
@@ -202,6 +217,7 @@ struct ResultSection: Identifiable, Equatable {
     /// Titles the launcher also finds sections by, so building and finding use the same text.
     static let calculatorTitle = String(localized: "Calculator", comment: "Launcher section title for calculator answers")
     static let appleShortcutsTitle = String(localized: "Apple Shortcuts", comment: "Launcher section title for shortcuts from the Shortcuts app")
+    static let pickedColorTitle = String(localized: "Picked Color", comment: "Launcher section title for the color picked from the screen")
 }
 
 /// What a result row draws besides its own payload: the selected identity, the current row for
@@ -326,6 +342,21 @@ final class LauncherModel: ObservableObject {
     @Published var connectivityBusy = false
     @Published var notice: String? = nil
     var dismiss: () -> Void = {}
+    /// Shows the launcher again after something hid it to work, such as Pick Color's loupe.
+    var reopen: () -> Void = {}
+    /// The screen sampler behind Pick Color; tests supply a fake.
+    var colorSampler: ColorSampling = ScreenColorSampler()
+    /// The last color picked this session, kept in memory only and shown under the Pick Color phrases.
+    @Published private(set) var pickedColor: PickedColor?
+    private(set) var samplingColor = false
+    var cameraAccess: CameraAccess = SystemCameraAccess()
+    var systemToggles = SystemToggleService()
+    private(set) var systemToggleBusy = false
+    /// States written by a toggle this session, preferred over the global preferences, which can
+    /// lag a moment behind System Events.
+    private var systemToggleStates: [SystemToggle: Bool] = [:]
+    /// A fresh read of the global preferences domain, for the toggles' row descriptions.
+    var globalDefaults: () -> [String: Any]? = { UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain) }
     let appleShortcuts = AppleShortcutsModel()
     private var shortcutsSubscription: AnyCancellable?
     private var shortcutRunQuery: String?
@@ -817,6 +848,7 @@ final class LauncherModel: ObservableObject {
         wifiJoin = nil
         entryForm = nil
         actionFeedback = nil
+        systemToggleStates = [:]
         files.cancel()
         notesSearch?.cancel()
         if showingTranslation { translation.clear() }
@@ -1275,6 +1307,9 @@ final class LauncherModel: ObservableObject {
             immediate.append(ResultSection(title: String(localized: "Alias", comment: "Launcher section title for the app an alias opens"), rows: [.app(app)]))
         }
         if !answers.isEmpty { immediate.append(ResultSection(title: ResultSection.calculatorTitle, rows: answers)) }
+        if let pickedColor, LauncherRouting.colorPickerPhrases.contains(q.lowercased()) {
+            immediate.append(ResultSection(title: ResultSection.pickedColorTitle, rows: PickedColor.Format.allCases.map { .pickedColor(pickedColor, $0) }))
+        }
         let snips = config.snippets.filter { $0.keyword.lowercased() == q.lowercased() }.map { ResultRow.snippet($0) }
         if !snips.isEmpty { immediate.append(ResultSection(title: String(localized: "Snippets", comment: "Launcher section title"), rows: snips)) }
         let links = QuicklinkResolver.search(config.quicklinks, head).map { ResultRow.quicklink($0, query: tail) }
@@ -1287,7 +1322,10 @@ final class LauncherModel: ObservableObject {
         let aliased = Set(immediate.flatMap(\.rows).map(\.id))
         let apps = index.search(q, limit: 6, usage: usage).map { ResultRow.app($0) }.filter { !aliased.contains($0.id) }
         if !apps.isEmpty { immediate.append(ResultSection(title: String(localized: "Applications", comment: "Launcher section title"), rows: apps)) }
+        let toggles = SystemToggle.search(q)
+        let defaults = toggles.isEmpty ? nil : globalDefaults()
         let actions = SystemAction.search(q).map(ResultRow.systemAction)
+            + toggles.map { ResultRow.systemToggle($0, on: systemToggleStates[$0] ?? $0.state(inGlobalDefaults: defaults)) }
         if !actions.isEmpty { immediate.append(ResultSection(title: String(localized: "System", comment: "Launcher section title for system actions such as Lock Screen"), rows: actions)) }
         let panes = SystemSettingsDestination.search(q).map { ResultRow.systemSettings($0) }
         if !panes.isEmpty { immediate.append(ResultSection(title: String(localized: "System Settings", comment: "Launcher section title for System Settings panes"), rows: panes)) }
@@ -1667,19 +1705,24 @@ final class LauncherModel: ObservableObject {
     func activateSelection() {
         guard let row = selectedRow else { return }
         switch row {
-        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation: break
+        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation, .pickedColor, .privacySettings: break
         default: usage.record(key: row.id, query: query)
         }
         switch row {
         case .appleShortcut(let shortcut): shortcutRunQuery = query; appleShortcuts.run(shortcut); return
         case .server(let server): openURL(server.url)
         case .systemAction(let action): onNote(.systemAction(action)); return
+        case .systemToggle(let toggle, _): toggleSystemSetting(toggle); return
+        case .pickedColor(let color, let format): copy(color.value(format))
+        case .privacySettings(let pane): openURL(pane.url)
         case .core(let command):
             if let source = SearchScope(command: command) { enterSearchScope(source); return }
             if command == .catalog { query = command.query + " "; catalog.load(); return }
             if command == .ai { presentAIChat() }
             else if command == .talk { toggleDictation() }
             else if command == .confetti { onNote(.confetti); dismiss(); return }
+            else if command == .colorPicker { pickColor() }
+            else if command == .camera { openCamera() }
             else if command == .newSnippet { openEntryForm(.snippet) }
             else if command == .newQuicklink { openEntryForm(.quicklink) }
             else { query = command.query }
@@ -1790,6 +1833,93 @@ final class LauncherModel: ObservableObject {
             }
         }
         dismiss()
+    }
+
+    /// Hides the launcher, shows macOS's color loupe, and reopens on the Pick Color results with
+    /// the new color's formats, HEX selected. Escape in the loupe reopens without a new color.
+    func pickColor() {
+        guard !samplingColor else { return }
+        samplingColor = true
+        let typed = query.trimmingCharacters(in: .whitespaces).lowercased()
+        let phrase = LauncherRouting.colorPickerPhrases.contains(typed) ? typed : Self.colorPickerQuery
+        dismiss()
+        colorSampler.sample { [weak self] color in
+            guard let self else { return }
+            self.samplingColor = false
+            if let color { self.pickedColor = color }
+            self.reopen()
+            if self.query == phrase { self.refresh() } else { self.query = phrase }
+            if let color, let index = self.rows.firstIndex(where: { $0.id == ResultRow.pickedColor(color, .hex).id }) { self.selection = index }
+        }
+    }
+    static let colorPickerQuery = "color picker"
+
+    /// Opens the camera preview when macOS allows it, asking for permission the first time;
+    /// otherwise explains why not, with the Camera privacy pane one Return away.
+    func openCamera() {
+        guard cameraAccess.hasCamera else {
+            actionFeedback = String(localized: "No camera is connected to this Mac.", comment: "Footer feedback when Open Camera finds no camera")
+            return
+        }
+        switch cameraAccess.authorization {
+        case .authorized: dismiss(); onNote(.camera)
+        case .notDetermined:
+            let gen = generation
+            PermissionGate.begin()
+            cameraAccess.requestAccess { [weak self] granted in
+                PermissionGate.end()
+                guard let self else { return }
+                if granted { self.dismiss(); self.onNote(.camera) }
+                else if gen == self.generation { self.showPrivacyProblem(.camera, message: Self.cameraDeniedMessage) }
+            }
+        case .denied: showPrivacyProblem(.camera, message: Self.cameraDeniedMessage)
+        case .restricted:
+            showPrivacyProblem(.camera, message: String(localized: "Camera access is restricted on this Mac, for example by a configuration profile or Screen Time.", comment: "Launcher message when camera access is restricted"))
+        }
+    }
+    static let cameraDeniedMessage = String(localized: "Volant isn’t allowed to use the camera. Turn it on in System Settings › Privacy & Security › Camera.", comment: "Launcher message when camera access was denied")
+
+    /// Flips appearance or menu bar hiding through System Events and keeps the launcher open with
+    /// the row showing the new state. A refused Automation request offers its privacy pane.
+    func toggleSystemSetting(_ toggle: SystemToggle) {
+        guard !systemToggleBusy else { return }
+        systemToggleBusy = true
+        let gen = generation
+        systemToggles.toggle(toggle) { [weak self] result in
+            guard let self else { return }
+            self.systemToggleBusy = false
+            switch result {
+            case .success(let on):
+                self.systemToggleStates[toggle] = on
+                guard gen == self.generation else { return }
+                self.replaceRows { row in
+                    if case .systemToggle(let shown, _) = row, shown == toggle { return .systemToggle(toggle, on: on) }
+                    return row
+                }
+                self.actionFeedback = toggle.confirmation(on: on)
+            case .failure(let failure):
+                guard gen == self.generation else { return }
+                if failure.needsPrivacySettings { self.showPrivacyProblem(.automation, message: failure.message) }
+                else { self.actionFeedback = failure.message }
+            }
+        }
+    }
+
+    /// Rewrites visible rows in place, keeping their identities and the selection.
+    private func replaceRows(_ transform: (ResultRow) -> ResultRow) {
+        immediate = immediate.map { ResultSection(title: $0.title, rows: $0.rows.map(transform)) }
+        sections = sections.map { ResultSection(title: $0.title, rows: $0.rows.map(transform)) }
+    }
+
+    /// Replaces the results with the one row that opens the privacy pane, and says why.
+    private func showPrivacyProblem(_ pane: PrivacyPane, message: String) {
+        generation += 1
+        files.cancel()
+        immediate = []; contactRows = []; fileRows = []
+        sections = [ResultSection(title: pane.sectionTitle, rows: [.privacySettings(pane)])]
+        selection = 0
+        notice = message
+        actionFeedback = message
     }
 
     var canTabToAIChat: Bool {

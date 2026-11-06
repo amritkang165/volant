@@ -259,6 +259,9 @@ Merged after 0.3.34, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| Pick Color: sample a color on screen and copy it as HEX, RGB, HSL or OKLCH | No | DesignToolCommandsTests and DesignToolCommandTests with a fake sampler; VM launcher fixture renders of the color card in light and dark; `NSColorSampler` on real displays (wide gamut, several displays) unverified | System control docs; "no permission needed", never "eyedropper for any app" beyond the screen |
+| Open Camera: a small mirrored camera preview window, Camera permission asked on first use | No | Fake authorization tests for every state and no camera; VM renders of the denied state; a real camera preview, the Camera prompt from the signed app and the indicator light going out unverified | System control and Privacy docs; "nothing is recorded, saved or sent"; never a recording or photo claim |
+| Toggle System Appearance and Toggle Menu Bar Hiding through System Events, Automation consent on first use | No | Fake System Events tests; a Developer ID signed sandboxed probe of the shipped Apple Event code in a macOS 27.0 guest raised the real Automation prompt and switched both settings both ways, and a refusal changed nothing; the signed Volant app's own prompt unverified; the menu bar toggle switches only between Always and Never hiding | System control and Privacy docs; say "asks to control System Events", never "no permissions" |
 
 ## Privacy language
 

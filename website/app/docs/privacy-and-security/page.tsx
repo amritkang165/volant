@@ -178,6 +178,24 @@ export default function PrivacyAndSecurity() {
                 and removes these.
               </td>
             </tr>
+            <tr>
+              <td>Camera</td>
+              <td>
+                Only for the <code>camera</code> preview window, asked the
+                first time you open it. The camera runs only while that window
+                is open; nothing is recorded, saved or sent.
+              </td>
+            </tr>
+            <tr>
+              <td>Automation (System Events)</td>
+              <td>
+                Only for <code>dark mode</code> and <code>menu bar</code>,
+                asked the first time you use one. Volant asks System Events to
+                switch Light and Dark or menu bar hiding, and automates no
+                other app. Restart, Shut Down and Log Out ask macOS&rsquo;s own
+                loginwindow to show its confirmation, which needs no prompt.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

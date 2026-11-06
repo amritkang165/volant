@@ -25,11 +25,13 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Volant asks macOS to show its restart, shut down and log out confirmations when you choose those commands.</string>
+	<string>Volant asks macOS to show its restart, shut down and log out confirmations, and asks System Events to switch Light and Dark appearance or menu bar hiding, only when you choose those commands.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Volant lists connected Bluetooth devices when you open the Bluetooth command.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Volant lists connected Bluetooth devices on request.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Volant shows a live preview from your camera only while the Open Camera window is open. Nothing is recorded, saved or sent.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Volant shows today's events and their meeting links. Read-only.</string>
 	<key>NSContactsUsageDescription</key>

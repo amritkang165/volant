@@ -924,9 +924,11 @@ final class FixtureCaffeinateAssertions: CaffeinateAssertions {
 let power = FixtureCaffeinateAssertions()
 let awake = CaffeinateService(assertions: power, automaticTimer: false)
 var requestedSystemActions: [SystemAction] = []
+var cameraOpenings = 0
 let corePanel = LauncherPanel(index: AppIndex(entries: []), clipboard: clipboard, notes: notes,
     config: Preferences(), usage: usage, positionStore: positionDefaults, caffeinate: awake, onNote: { action in
         if case .systemAction(let system) = action { requestedSystemActions.append(system) }
+        if case .camera = action { cameraOpenings += 1 }
     })
 corePanel.model.searchesSecondarySources = false
 var copiedEmoji: [String] = []
@@ -1036,6 +1038,90 @@ verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!
 sendCoreKey("\r", code: 36)
 verify(requestedSystemActions == [.lockScreen], "Return hands Lock Screen to the app delegate once")
 print("PASS: system actions are searchable, render as commands, and run only on Return")
+// Pick Color, Open Camera and the System Events toggles with a fake loupe, camera and System Events:
+// no magnifier, camera, consent prompt or Apple Event in the fixture.
+final class FixtureSampler: ColorSampling {
+    var requests = 0
+    var next: PickedColor? = PickedColor(red: 1, green: 99.0 / 255, blue: 99.0 / 255)
+    func sample(_ completion: @escaping (PickedColor?) -> Void) {
+        requests += 1
+        let color = next
+        DispatchQueue.main.async { completion(color) }
+    }
+}
+final class FixtureCamera: CameraAccess {
+    var hasCamera = true
+    var authorization = CameraAuthorization.denied
+    var requests = 0
+    func requestAccess(_ completion: @escaping (Bool) -> Void) { requests += 1; completion(false) }
+}
+final class FixtureSystemEvents: SystemEventsRunning {
+    var values = ["aprp/thme": false, "dpas/dahm": false]
+    var refuses = false
+    func prepare() throws { if refuses { throw SystemEventsFailure.denied } }
+    func readBoolean(container: String, property: String) throws -> Bool { values[container + "/" + property] ?? false }
+    func writeBoolean(container: String, property: String, value: Bool) throws { values[container + "/" + property] = value }
+}
+let fixtureSampler = FixtureSampler()
+corePanel.model.colorSampler = fixtureSampler
+var copiedColors: [String] = []
+corePanel.model.copyText = { copiedColors.append($0) }
+corePanel.model.query = "color picker"
+verify(waitUntil { corePanel.model.selectedRow?.id == "core:colorPicker" }, "Pick Color is offered for its name")
+try renderCore("color-picker-command")
+verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!), "Restore native editor before Pick Color")
+sendCoreKey("\r", code: 36)
+verify(fixtureSampler.requests == 1, "Return starts one sample")
+verify(waitUntil { corePanel.isVisible && corePanel.model.selectedRow?.id == "picked-color:hex" }, "The launcher returns with HEX selected")
+verify(corePanel.model.rows.filter { $0.id.hasPrefix("picked-color:") }.count == 4, "HEX, RGB, HSL and OKLCH rows")
+try renderCore("color-card")
+corePanel.model.moveSelection(1)
+verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!), "Restore native editor before copying")
+sendCoreKey("\r", code: 36)
+verify(copiedColors == ["rgb(255 99 99)"], "Return copies the selected format: \(copiedColors)")
+corePanel.toggle()
+fixtureSampler.next = nil
+corePanel.model.query = "pick color"
+verify(waitUntil { corePanel.model.rows.contains { $0.id == "picked-color:hex" } }, "The last picked color shows under its phrase")
+corePanel.model.selection = corePanel.model.rows.firstIndex { $0.id == "core:colorPicker" }!
+verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!))
+sendCoreKey("\r", code: 36)
+verify(waitUntil { corePanel.isVisible && corePanel.model.query == "pick color" }, "Escape in the loupe returns to Pick Color")
+verify(copiedColors.count == 1, "Cancelling copies nothing")
+let fixtureCamera = FixtureCamera()
+corePanel.model.cameraAccess = fixtureCamera
+corePanel.model.query = "open camera"
+verify(waitUntil { corePanel.model.rows.contains { $0.id == "core:camera" } }, "Open Camera is offered for its name")
+corePanel.model.activate(rowID: "core:camera")
+verify(fixtureCamera.requests == 0 && cameraOpenings == 0, "A denied camera never asks or opens")
+verify(corePanel.model.selectedRow?.id == "privacy:camera", "Denied camera offers its privacy pane")
+try renderCore("camera-denied")
+fixtureCamera.authorization = .authorized
+corePanel.model.query = "camera"
+corePanel.model.activate(rowID: "core:camera")
+verify(cameraOpenings == 1 && !corePanel.isVisible, "An allowed camera opens its window and hides the launcher")
+corePanel.toggle()
+let fixtureEvents = FixtureSystemEvents()
+corePanel.model.systemToggles = SystemToggleService(runner: fixtureEvents, queue: nil)
+corePanel.model.globalDefaults = { [:] }
+corePanel.model.query = "dark mode"
+verify(waitUntil { corePanel.model.rows.contains { $0.id == "system-toggle:appearance" } }, "Dark mode finds the appearance toggle")
+corePanel.model.query = "toggle appearance"
+verify(waitUntil { corePanel.model.selectedRow?.id == "system-toggle:appearance" }, "Toggle appearance selects the toggle")
+try renderCore("appearance-toggle")
+verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!))
+sendCoreKey("\r", code: 36)
+verify(fixtureEvents.values["aprp/thme"] == true && corePanel.isVisible, "Return switches to Dark and keeps the launcher open")
+try renderCore("appearance-toggled")
+corePanel.model.query = "menu bar"
+verify(waitUntil { corePanel.model.selectedRow?.id == "system-toggle:menuBar" }, "Menu bar selects its toggle")
+fixtureEvents.refuses = true
+corePanel.model.activate(rowID: "system-toggle:menuBar")
+verify(corePanel.model.selectedRow?.id == "privacy:automation" && fixtureEvents.values["dpas/dahm"] == false, "Refused Automation offers its privacy pane")
+try renderCore("automation-denied")
+corePanel.model.query = ""
+corePanel.model.copyText = { copiedEmoji.append($0) }
+print("PASS: Pick Color, Open Camera and System Events toggles, including denied permissions")
 // Fictional Apple Shortcuts: native Return uses stable IDs and late catalogs keep selection.
 let recipe = AppleShortcut(id: "11111111-1111-4111-8111-111111111111", name: "Leftover Recipes")
 let volumeShortcut = AppleShortcut(id: "22222222-2222-4222-8222-222222222222", name: "Set Volume to 50%")

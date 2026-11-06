@@ -68,7 +68,8 @@ targets:
         NSLocationUsageDescription: "macOS requires Location access to show Wi-Fi network names. Volant also uses your approximate location (about 11 km) only for extensions you allow, which share it with the sites they read; it is never saved."
         NSCalendarsFullAccessUsageDescription: "Volant shows today's events and their meeting links. Read-only."
         NSMicrophoneUsageDescription: "Volant transcribes dictation on this Mac. Audio is never sent anywhere and is not saved."
-        NSAppleEventsUsageDescription: "Volant asks macOS to show its restart, shut down and log out confirmations when you choose those commands."
+        NSAppleEventsUsageDescription: "Volant asks macOS to show its restart, shut down and log out confirmations, and asks System Events to switch Light and Dark appearance or menu bar hiding, only when you choose those commands."
+        NSCameraUsageDescription: "Volant shows a live preview from your camera only while the Open Camera window is open. Nothing is recorded, saved or sent."
     dependencies:
       - package: VolantCore
       - package: Sparkle

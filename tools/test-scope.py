@@ -17,7 +17,7 @@ UI_PATTERNS = (
     "tools/check-launcher.sh", "tools/check-launcher-actions.sh", "tools/app-module.sh", "tools/check-dictation-hud.sh", "tools/run-bounded-check.py",
     # Launcher fixtures drive these directly: volume and audio routes, Wi-Fi and Bluetooth, system actions,
     # Caffeinate, snippet and quicklink forms, and app shortcut bindings.
-    "Volant/SystemControl/*", "Volant/Snippets/*", "Volant/Quicklinks/*", "Volant/Settings/AppBindingStore.swift",
+    "Volant/SystemControl/*", "Volant/Camera/*", "Volant/Snippets/*", "Volant/Quicklinks/*", "Volant/Settings/AppBindingStore.swift",
     "VolantTests/LiveMarkdownTests.swift", "VolantTests/NotesStoreTests.swift",
 )
 NATIVE_PATTERNS = ("Volant/*", "VolantTests/*", "VolantAgentHost/*", "VolantExtensionHost/*", "VolantAIHost/*", "VolantInputHost/*", "VolantFetchHost/*", "VolantRatesHost/*", "Integrations/*",
