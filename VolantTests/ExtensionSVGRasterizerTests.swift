@@ -97,6 +97,7 @@ final class ExtensionSVGRasterizerTests: XCTestCase {
         let listener: NWListener
         do { listener = try NWListener(using: parameters) } catch { throw XCTSkip("A loopback listener is not allowed here: \(error)") }
         let ready = expectation(description: "listening")
+        ready.assertForOverFulfill = false
         listener.newConnectionHandler = { connection in connections.add(); connection.cancel() }
         listener.stateUpdateHandler = { state in
             switch state {
@@ -105,7 +106,7 @@ final class ExtensionSVGRasterizerTests: XCTestCase {
             }
         }
         listener.start(queue: .global())
-        defer { listener.cancel() }
+        defer { listener.stateUpdateHandler = nil; listener.newConnectionHandler = nil; listener.cancel() }
         guard XCTWaiter().wait(for: [ready], timeout: 5) == .completed, case .ready = listener.state, let port = listener.port?.rawValue else {
             throw XCTSkip("A loopback listener could not start here (the sandboxed test host has no network); tools/check-extensions.sh runs this check unsandboxed")
         }
