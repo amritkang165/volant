@@ -37,7 +37,7 @@ enum PrivacyPane: String, Hashable {
         switch self {
         case .camera: return String(localized: "Camera", comment: "Launcher section title when camera access needs attention")
         case .automation: return String(localized: "Automation", comment: "Launcher section title when Automation access needs attention")
-        case .accessibility: return String(localized: "Accessibility", comment: "Launcher section title when Accessibility access needs attention")
+        case .accessibility: return String(localized: "Accessibility")
         }
     }
 

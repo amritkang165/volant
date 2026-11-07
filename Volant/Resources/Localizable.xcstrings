@@ -108691,6 +108691,1693 @@
           }
         }
       }
+    },
+    "%@ Menus": {
+      "comment": "Search Menu Items section title; the value is an app name such as TextEdit",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüs von %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menús de %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menus de %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu di %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@のメニュー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ 메뉴"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu's van %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu aplikacji %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menus do %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menus de %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Меню %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ Menüleri"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Меню %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ 菜单"
+          }
+        }
+      }
+    },
+    "Choose Menu Item": {
+      "comment": "Footer label for Return on a menu item row",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüeintrag wählen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elegir elemento de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Choisir l’élément de menu"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Scegli voce di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目を選択"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목 선택"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdeel kiezen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wybierz pozycję menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Escolher item de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Escolher item de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Выбрать пункт меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğesini Seç"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Вибрати пункт меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "选择菜单项"
+          }
+        }
+      }
+    },
+    "Menu Item": {
+      "comment": "Result row kind label for a menu item without a keyboard shortcut",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüeintrag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elemento de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Élément de menu"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Voce di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdeel"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pozycja menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Item de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Item de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункт меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğesi"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункт меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "菜单项"
+          }
+        }
+      }
+    },
+    "Menu Items": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüeinträge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Elementos de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Éléments de menu"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Voci di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdelen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pozycje menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Itens de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Itens de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункты меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğeleri"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункти меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "菜单项"
+          }
+        }
+      }
+    },
+    "No matching menu items": {
+      "comment": "Search Menu Items notice when nothing matches the typed filter",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Keine passenden Menüeinträge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No hay elementos de menú coincidentes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aucun élément de menu correspondant"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nessuna voce di menu corrispondente"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "一致するメニュー項目はありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "일치하는 메뉴 항목 없음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Geen overeenkomende menu-onderdelen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Brak pasujących pozycji menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nenhum item de menu correspondente"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nenhum item de menu correspondente"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нет подходящих пунктов меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Eşleşen menü öğesi yok"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Немає відповідних пунктів меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "没有匹配的菜单项"
+          }
+        }
+      }
+    },
+    "No menu items found.": {
+      "comment": "Search Menu Items notice when the app's menus are empty",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Keine Menüeinträge gefunden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No se encontraron elementos de menú."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aucun élément de menu trouvé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nessuna voce di menu trovata."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目が見つかりません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목을 찾을 수 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Geen menu-onderdelen gevonden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nie znaleziono pozycji menu."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nenhum item de menu encontrado."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nenhum item de menu encontrado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункты меню не найдены."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü öğesi bulunamadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пункти меню не знайдено."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "未找到菜单项。"
+          }
+        }
+      }
+    },
+    "Not Available Now": {
+      "comment": "Footer label for Return on a disabled menu item row",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Derzeit nicht verfügbar"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No disponible ahora"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Indisponible pour le moment"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Non disponibile ora"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "現在は使用できません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "지금은 사용할 수 없음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nu niet beschikbaar"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Teraz niedostępne"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Indisponível agora"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Indisponível de momento"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сейчас недоступно"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Şu Anda Kullanılamıyor"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Зараз недоступно"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "当前不可用"
+          }
+        }
+      }
+    },
+    "Off in Settings. Lets Volant read and press the menus of the app you were using.": {
+      "comment": "Launcher row subtitle while Search Menu Items is off",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "In den Einstellungen aus. Erlaubt Volant, die Menüs der zuletzt verwendeten App zu lesen und Einträge auszulösen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desactivado en Ajustes. Permite que Volant lea y pulse los menús de la app que estabas usando."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Désactivé dans les réglages. Permet à Volant de lire et d’activer les menus de l’app que vous utilisiez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Disattivato nelle impostazioni. Consente a Volant di leggere e attivare i menu dell’app che stavi usando."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "設定でオフです。使用中だったアプリのメニューをVolantが読み取って実行できるようにします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "설정에서 꺼져 있습니다. 사용하던 앱의 메뉴를 Volant가 읽고 실행할 수 있게 합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uit in Instellingen. Laat Volant de menu’s lezen en kiezen van de app die je gebruikte."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wyłączone w ustawieniach. Pozwala Volant odczytywać i wybierać menu aplikacji, której używałeś."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desativado nos Ajustes. Permite que o Volant leia e acione os menus do app que você estava usando."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desativado nas Definições. Permite que o Volant leia e acione os menus da app que estava a usar."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Выключено в настройках. Позволяет Volant читать меню приложения, которым вы пользовались, и выбирать пункты."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ayarlarda kapalı. Volant’ın kullandığınız uygulamanın menülerini okumasına ve öğeleri seçmesine izin verir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Вимкнено в налаштуваннях. Дозволяє Volant читати меню програми, якою ви користувалися, і вибирати пункти."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "已在设置中关闭。允许 Volant 读取并执行你正在使用的 App 的菜单。"
+          }
+        }
+      }
+    },
+    "Open Accessibility Privacy Settings": {
+      "comment": "Launcher row title: opens Privacy & Security › Accessibility",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Datenschutzeinstellungen für Bedienungshilfen öffnen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abrir ajustes de privacidad de Accesibilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ouvrir les réglages de confidentialité Accessibilité"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Apri impostazioni privacy di Accessibilità"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "アクセシビリティのプライバシー設定を開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "손쉬운 사용 개인정보 설정 열기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacyinstellingen voor Toegankelijkheid openen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Otwórz ustawienia prywatności Dostępności"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abrir ajustes de privacidade de Acessibilidade"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abrir definições de privacidade de Acessibilidade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Открыть настройки конфиденциальности Универсального доступа"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Erişilebilirlik Gizlilik Ayarlarını Aç"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Відкрити налаштування конфіденційності Універсального доступу"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "打开辅助功能隐私设置"
+          }
+        }
+      }
+    },
+    "Privacy & Security › Accessibility": {
+      "comment": "Launcher row subtitle for the Accessibility privacy settings row: where to turn on Volant",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Datenschutz & Sicherheit › Bedienungshilfen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacidad y seguridad › Accesibilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Confidentialité et sécurité › Accessibilité"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacy e sicurezza › Accessibilità"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "プライバシーとセキュリティ › アクセシビリティ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "개인정보 보호 및 보안 › 손쉬운 사용"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacy en beveiliging › Toegankelijkheid"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Prywatność i ochrona › Dostępność"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacidade e Segurança › Acessibilidade"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Privacidade e segurança › Acessibilidade"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Конфиденциальность и безопасность › Универсальный доступ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Gizlilik ve Güvenlik › Erişilebilirlik"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Приватність і безпека › Універсальний доступ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "隐私与安全性 › 辅助功能"
+          }
+        }
+      }
+    },
+    "Reading %@’s menus…": {
+      "comment": "Search Menu Items notice while reading an app's menus; the value is an app name",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüs von %@ werden gelesen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Leyendo los menús de %@…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lecture des menus de %@…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lettura dei menu di %@…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@のメニューを読み込み中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ 메뉴를 읽는 중…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu’s van %@ lezen…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Odczytywanie menu aplikacji %@…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lendo os menus do %@…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A ler os menus de %@…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Чтение меню %@…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%@ menüleri okunuyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Читання меню %@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "正在读取 %@ 的菜单…"
+          }
+        }
+      }
+    },
+    "Search Menu Items": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüeinträge suchen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar elementos de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rechercher dans les menus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cerca voci di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目を検索"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목 검색"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdelen zoeken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Szukaj pozycji menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar itens de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pesquisar itens de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Поиск по меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğelerinde Ara"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пошук у меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "搜索菜单项"
+          }
+        }
+      }
+    },
+    "Search Menu Items works on the app you were using. Switch to an app, then open Volant and type menus.": {
+      "comment": "Search Menu Items notice when no other app was in front; menus is a typed command and stays in English",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Menüeinträge suchen“ arbeitet mit der App, die du verwendet hast. Wechsle zu einer App, öffne dann Volant und tippe menus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar elementos de menú funciona con la app que estabas usando. Cambia a una app, abre Volant y escribe menus."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rechercher dans les menus agit sur l’app que vous utilisiez. Passez à une app, puis ouvrez Volant et tapez menus."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cerca voci di menu agisce sull’app che stavi usando. Passa a un’app, poi apri Volant e digita menus."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「メニュー項目を検索」は使用中だったアプリで動作します。アプリに切り替えてからVolantを開き、menus と入力してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목 검색은 사용하던 앱에서 작동합니다. 앱으로 전환한 다음 Volant를 열고 menus를 입력하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdelen zoeken werkt met de app die je gebruikte. Ga naar een app, open dan Volant en typ menus."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Szukanie pozycji menu działa w aplikacji, której używałeś. Przełącz się na aplikację, otwórz Volant i wpisz menus."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar itens de menu funciona no app que você estava usando. Mude para um app, abra o Volant e digite menus."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pesquisar itens de menu funciona na app que estava a usar. Mude para uma app, abra o Volant e escreva menus."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Поиск по меню работает с приложением, которым вы пользовались. Перейдите в приложение, затем откройте Volant и введите menus."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğelerinde Ara, kullandığınız uygulamada çalışır. Bir uygulamaya geçin, ardından Volant’ı açıp menus yazın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пошук у меню працює з програмою, якою ви користувалися. Перейдіть до програми, потім відкрийте Volant і введіть menus."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "“搜索菜单项”作用于你正在使用的 App。请切换到某个 App，然后打开 Volant 并输入 menus。"
+          }
+        }
+      }
+    },
+    "Shortcut %@": {
+      "comment": "Accessibility label for a menu item's keyboard shortcut",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kurzbefehl %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Atajo %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Raccourci %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abbreviazione %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ショートカット %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "단축키 %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toetscombinatie %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Skrót %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Atalho %@"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Atalho %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сочетание клавиш %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kısayol %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сполучення клавіш %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "快捷键 %@"
+          }
+        }
+      }
+    },
+    "Showing the first %lld menu items.": {
+      "comment": "Search Menu Items footer when a limit cut the list short",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Die ersten %lld Menüeinträge werden angezeigt."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Se muestran los primeros %lld elementos de menú."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Affichage des %lld premiers éléments de menu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Vengono mostrate le prime %lld voci di menu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "最初の%lld件のメニュー項目を表示しています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "처음 %lld개의 메뉴 항목을 표시합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De eerste %lld menu-onderdelen worden getoond."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wyświetlono pierwsze pozycje menu: %lld."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Mostrando os primeiros %lld itens de menu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A mostrar os primeiros %lld itens de menu."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Показаны первые пункты меню: %lld."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "İlk %lld menü öğesi gösteriliyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Показано перші пункти меню: %lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "显示前 %lld 个菜单项。"
+          }
+        }
+      }
+    },
+    "The input helper didn’t respond. Try again.": {
+      "comment": "Search Menu Items message when the input helper could not be reached",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Der Eingabehelfer hat nicht geantwortet. Versuche es erneut."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "El asistente de entrada no respondió. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’assistant de saisie n’a pas répondu. Réessayez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’helper di input non ha risposto. Riprova."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "入力ヘルパーが応答しませんでした。もう一度お試しください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "입력 도우미가 응답하지 않았습니다. 다시 시도하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De invoerhulp reageerde niet. Probeer het opnieuw."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pomocnik wprowadzania nie odpowiedział. Spróbuj ponownie."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O auxiliar de entrada não respondeu. Tente novamente."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O auxiliar de entrada não respondeu. Tente novamente."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Помощник ввода не ответил. Попробуйте ещё раз."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Giriş yardımcısı yanıt vermedi. Yeniden deneyin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Помічник введення не відповів. Спробуйте ще раз."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "输入助手没有响应。请重试。"
+          }
+        }
+      }
+    },
+    "Turn On Search Menu Items": {
+      "comment": "Launcher row title while Search Menu Items is off",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "„Menüeinträge suchen“ einschalten"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Activar Buscar elementos de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Activer Rechercher dans les menus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Attiva Cerca voci di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "「メニュー項目を検索」をオンにする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목 검색 켜기"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdelen zoeken inschakelen"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Włącz szukanie pozycji menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ativar Buscar itens de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ativar Pesquisar itens de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Включить поиск по меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğelerinde Ara’yı Aç"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Увімкнути пошук у меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "打开“搜索菜单项”"
+          }
+        }
+      }
+    },
+    "Type menus in the launcher to search the menu bar of the app you were using, then press Return to choose an item.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tippe menus im Launcher, um die Menüleiste der zuletzt verwendeten App zu durchsuchen, und drücke dann den Zeilenschalter, um einen Eintrag zu wählen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Escribe menus en el lanzador para buscar en la barra de menús de la app que estabas usando y pulsa Retorno para elegir un elemento."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tapez menus dans le lanceur pour rechercher dans la barre des menus de l’app que vous utilisiez, puis appuyez sur Retour pour choisir un élément."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Digita menus nel launcher per cercare nella barra dei menu dell’app che stavi usando, poi premi A capo per scegliere una voce."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ランチャーで menus と入力すると、使用中だったアプリのメニューバーを検索できます。項目を選ぶにはReturnキーを押します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "런처에서 menus를 입력하면 사용하던 앱의 메뉴 막대를 검색할 수 있으며, Return 키를 눌러 항목을 선택합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Typ menus in de launcher om de menubalk van de app die je gebruikte te doorzoeken en druk op Return om een onderdeel te kiezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wpisz menus w launcherze, aby przeszukać pasek menu aplikacji, której używałeś, a następnie naciśnij Return, aby wybrać pozycję."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Digite menus no iniciador para buscar na barra de menus do app que você estava usando e pressione Return para escolher um item."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Escreva menus no iniciador para pesquisar na barra de menus da app que estava a usar e prima Return para escolher um item."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Введите menus в лаунчере, чтобы искать в строке меню приложения, которым вы пользовались, и нажмите Return, чтобы выбрать пункт."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kullandığınız uygulamanın menü çubuğunda aramak için başlatıcıya menus yazın, ardından bir öğe seçmek için Return’e basın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Введіть menus у лаунчері, щоб шукати в рядку меню програми, якою ви користувалися, і натисніть Return, щоб вибрати пункт."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在启动器中输入 menus 可搜索你正在使用的 App 的菜单栏，然后按 Return 键选择一项。"
+          }
+        }
+      }
+    },
+    "When you run the command, Volant’s input helper reads the menu titles of the app in front and presses the item you choose. It uses the same Volant permission in Privacy & Security → Accessibility as Type at the cursor. Menu titles can include document names, so they stay in memory only while the launcher is open and are never saved, synced or logged. Volant never presses items in the Apple menu.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wenn du den Befehl ausführst, liest Volants Eingabehelfer die Menütitel der App im Vordergrund und löst den gewählten Eintrag aus. Er nutzt dieselbe Volant-Berechtigung unter Datenschutz & Sicherheit → Bedienungshilfen wie „An der Einfügemarke tippen“. Menütitel können Dokumentnamen enthalten, daher bleiben sie nur im Arbeitsspeicher, solange der Launcher offen ist, und werden nie gesichert, synchronisiert oder protokolliert. Volant löst nie Einträge im Apple-Menü aus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cuando ejecutas el comando, el asistente de entrada de Volant lee los títulos de los menús de la app en primer plano y pulsa el elemento que elijas. Usa el mismo permiso de Volant en Privacidad y seguridad → Accesibilidad que Escribir en el cursor. Los títulos de menú pueden incluir nombres de documentos, así que solo se guardan en memoria mientras el lanzador está abierto y nunca se almacenan, sincronizan ni registran. Volant nunca pulsa elementos del menú Apple."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Lorsque vous lancez la commande, l’assistant de saisie de Volant lit les titres des menus de l’app au premier plan et active l’élément choisi. Il utilise la même autorisation Volant dans Confidentialité et sécurité → Accessibilité que Saisir au curseur. Les titres de menu peuvent contenir des noms de documents : ils restent donc en mémoire uniquement tant que le lanceur est ouvert, et ne sont jamais enregistrés, synchronisés ni journalisés. Volant n’active jamais d’éléments du menu Pomme."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quando esegui il comando, l’helper di input di Volant legge i titoli dei menu dell’app in primo piano e attiva la voce scelta. Usa lo stesso permesso di Volant in Privacy e sicurezza → Accessibilità di Digita al cursore. I titoli dei menu possono contenere nomi di documenti, quindi restano in memoria solo mentre il launcher è aperto e non vengono mai salvati, sincronizzati o registrati. Volant non attiva mai voci del menu Apple."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "コマンドを実行すると、Volantの入力ヘルパーが前面のアプリのメニュータイトルを読み取り、選んだ項目を実行します。「カーソル位置に入力」と同じ、プライバシーとセキュリティ → アクセシビリティのVolantの許可を使用します。メニュータイトルには書類名が含まれることがあるため、ランチャーが開いている間だけメモリに保持され、保存、同期、ログ記録されることはありません。Volantがアップルメニューの項目を実行することはありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "명령을 실행하면 Volant의 입력 도우미가 앞에 있는 앱의 메뉴 제목을 읽고 선택한 항목을 실행합니다. 커서 위치에 입력과 동일한, 개인정보 보호 및 보안 → 손쉬운 사용의 Volant 권한을 사용합니다. 메뉴 제목에는 문서 이름이 포함될 수 있으므로 런처가 열려 있는 동안에만 메모리에 보관되며 저장, 동기화 또는 기록되지 않습니다. Volant는 Apple 메뉴의 항목을 실행하지 않습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Als je de opdracht uitvoert, leest de invoerhulp van Volant de menutitels van de app op de voorgrond en kiest het onderdeel dat je selecteert. Hij gebruikt dezelfde Volant-toestemming in Privacy en beveiliging → Toegankelijkheid als Typen bij de cursor. Menutitels kunnen documentnamen bevatten, dus ze blijven alleen in het geheugen zolang de launcher open is en worden nooit bewaard, gesynchroniseerd of gelogd. Volant kiest nooit onderdelen in het Apple-menu."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Po uruchomieniu polecenia pomocnik wprowadzania Volant odczytuje tytuły menu aplikacji na pierwszym planie i wybiera wskazaną pozycję. Korzysta z tego samego uprawnienia Volant w Prywatność i ochrona → Dostępność co Pisanie w miejscu kursora. Tytuły menu mogą zawierać nazwy dokumentów, więc są przechowywane w pamięci tylko wtedy, gdy launcher jest otwarty, i nigdy nie są zapisywane, synchronizowane ani rejestrowane. Volant nigdy nie wybiera pozycji z menu Apple."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quando você executa o comando, o auxiliar de entrada do Volant lê os títulos dos menus do app em primeiro plano e aciona o item que você escolher. Ele usa a mesma permissão do Volant em Privacidade e Segurança → Acessibilidade que Digitar no cursor. Os títulos de menu podem incluir nomes de documentos, por isso ficam na memória apenas enquanto o iniciador está aberto e nunca são salvos, sincronizados ou registrados. O Volant nunca aciona itens do menu Apple."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quando executa o comando, o auxiliar de entrada do Volant lê os títulos dos menus da app em primeiro plano e aciona o item que escolher. Usa a mesma permissão do Volant em Privacidade e segurança → Acessibilidade que Escrever no cursor. Os títulos de menu podem incluir nomes de documentos, por isso ficam em memória apenas enquanto o iniciador está aberto e nunca são guardados, sincronizados nem registados. O Volant nunca aciona itens do menu Apple."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Когда вы запускаете команду, помощник ввода Volant читает названия меню активного приложения и выбирает указанный пункт. Он использует то же разрешение Volant в разделе «Конфиденциальность и безопасность → Универсальный доступ», что и ввод в месте курсора. Названия меню могут содержать имена документов, поэтому они хранятся в памяти только пока лаунчер открыт и никогда не сохраняются, не синхронизируются и не записываются в журнал. Volant никогда не выбирает пункты меню Apple."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Komutu çalıştırdığınızda Volant’ın giriş yardımcısı öndeki uygulamanın menü başlıklarını okur ve seçtiğiniz öğeyi çalıştırır. İmlece Yaz ile aynı, Gizlilik ve Güvenlik → Erişilebilirlik’teki Volant iznini kullanır. Menü başlıkları belge adları içerebildiğinden yalnızca başlatıcı açıkken bellekte tutulur; asla kaydedilmez, eşzamanlanmaz veya günlüğe yazılmaz. Volant, Apple menüsündeki öğeleri asla çalıştırmaz."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Коли ви запускаєте команду, помічник введення Volant читає назви меню активної програми й вибирає вказаний пункт. Він використовує той самий дозвіл Volant у розділі «Приватність і безпека → Універсальний доступ», що й введення в місці курсора. Назви меню можуть містити імена документів, тому вони зберігаються в пам’яті лише поки лаунчер відкритий і ніколи не зберігаються, не синхронізуються й не записуються в журнал. Volant ніколи не вибирає пункти меню Apple."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "运行此命令时，Volant 的输入助手会读取前台 App 的菜单标题，并执行你选择的项目。它使用与“在光标处输入”相同的、位于“隐私与安全性 → 辅助功能”中的 Volant 权限。菜单标题可能包含文稿名称，因此只在启动器打开期间保存在内存中，从不存储、同步或记录。Volant 绝不会执行苹果菜单中的项目。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

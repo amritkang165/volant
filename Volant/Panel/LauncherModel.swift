@@ -164,7 +164,7 @@ enum ResultRow: Identifiable, Hashable {
         case .appleShortcut: return String(localized: "Run Shortcut", comment: "Footer and Actions label for Return")
         case .server: return String(localized: "Open in Browser", comment: "Footer and Actions label for Return on a server row")
         case .menuItem(let entry): return entry.item.enabled ? String(localized: "Choose Menu Item", comment: "Footer label for Return on a menu item row")
-            : String(localized: "Unavailable", comment: "Footer label for Return on a disabled menu item row")
+            : String(localized: "Not Available Now", comment: "Footer label for Return on a disabled menu item row")
         case .menuItemsOff: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .core: return String(localized: "Open Command", comment: "Footer and Actions label for Return")
         case .systemAction(let action): return action.title.replacingOccurrences(of: "…", with: "")
