@@ -343,7 +343,7 @@ export default function Extensions() {
 
       <h2>Copying text and images</h2>
       <p>
-        Coming in the next release. A list extension can offer rows that copy
+        A list extension can offer rows that copy
         something longer than their title, such as a company&rsquo;s SVG logo
         or a PNG icon. When you enable it, Volant says{' '}
         <strong>Copy text and images to your clipboard when you choose them</strong>.
