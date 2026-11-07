@@ -25,10 +25,11 @@ final class SettingsWindowController: NSWindowController {
     /// rebuilt after each change.
     private var sectionChanges: AnyCancellable?
 
-    /// `dictationAccess` defaults to a real helper connection, which connects only when typing is
-    /// chosen; fixtures pass one with a fake client.
+    /// `dictationAccess` and `menuItemsAccess` default to a real helper connection, which connects
+    /// only when typing is chosen or Search Menu Items is on; fixtures pass ones with a fake client.
     init(configURL: URL = Preferences.configURL, usageURL: URL = UsageStore.defaultURL, conversations: ACPConversations = ACPConversations(),
          dictationAccess: DictationTypingAccess = DictationTypingAccess(client: InputHostConnection()),
+         menuItemsAccess: MenuItemsAccess = MenuItemsAccess(client: InputHostConnection()),
          openAI: @escaping (AIConfiguration) -> Void = { _ in }, onChange: @escaping () -> Void) {
         self.onChange = onChange
         self.configURL = configURL
@@ -48,7 +49,7 @@ final class SettingsWindowController: NSWindowController {
         window.setFrameAutosaveName("VolantSettings")
         super.init(window: window)
         let hosting = NSHostingView(rootView: ThemedRoot(paletteText: false) {
-            SettingsView(state: state, conversations: conversations, dictationAccess: dictationAccess, configURL: configURL, usageURL: usageURL, onChange: onChange, openAI: openAI,
+            SettingsView(state: state, conversations: conversations, dictationAccess: dictationAccess, menuItemsAccess: menuItemsAccess, configURL: configURL, usageURL: usageURL, onChange: onChange, openAI: openAI,
                          chooseAIProject: { [weak self] completion in self?.chooseAIProject(completion) },
                          chooseAccountFolder: { [weak self] completion in self?.chooseAccountFolder(completion) },
                          importRaycast: { [weak self] in self?.showRaycastImport() })
@@ -105,6 +106,7 @@ private struct SettingsView: View {
     @ObservedObject var state: SettingsState
     @ObservedObject var conversations: ACPConversations
     let dictationAccess: DictationTypingAccess
+    let menuItemsAccess: MenuItemsAccess
     let configURL: URL
     let usageURL: URL
     let onChange: () -> Void
@@ -242,6 +244,7 @@ private struct SettingsView: View {
             } header: {
                 Text("Caffeinate")
             }
+            MenuItemsSettingsSection(config: state.config, access: menuItemsAccess, apply: apply, configURL: configURL)
         }
         .formStyle(.settings)
         .onAppear { loginStatus = SMAppService.mainApp.status }
