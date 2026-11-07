@@ -35,6 +35,24 @@ type Extension = { folder: string; keywords: string[]; manifest: Manifest };
 type Call = { output?: string; error?: string; ms?: number };
 type Reply = { items?: unknown; fetch?: string[]; state?: string; storage?: unknown; notice?: string };
 type Outcome = { items: Row[]; missed: boolean; notice: string | null; storage?: unknown };
+type CalcAnswer = { input: string; inputDetail?: string; result: string; resultDetail?: string; copyText: string };
+type FeedName = 'ecb' | 'world' | 'crypto';
+type FeedBody = { body: string; fetchedAt: number };
+type CalcState = 'idle' | 'loading' | 'ready' | 'error';
+
+/** The visitor's IANA zone and locale, so answers read as the app's would on their Mac. */
+function visitorContext() {
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const locale = (typeof navigator !== 'undefined' ? navigator.language : 'en-US').replace('-', '_');
+  return { zone, locale };
+}
+
+/** The required attribution for each rates feed, as the app's currency cards and About give it. */
+const feedCredits: Record<FeedName, { text: string; href: string }> = {
+  ecb: { text: 'European Central Bank reference rates', href: 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html' },
+  world: { text: 'Rates By Exchange Rate API', href: 'https://www.exchangerate-api.com' },
+  crypto: { text: 'Data provided by CoinGecko', href: 'https://www.coingecko.com' },
+};
 
 /** The extensions the demo ships, by folder, with the words that find their command row. */
 const shipped: { folder: string; keywords: string[] }[] = [
@@ -145,6 +163,106 @@ export function TryLauncher() {
   const generation = useRef(0);
   const storage = useRef(new Map<string, unknown>());
   const input = useRef<HTMLInputElement>(null);
+  const [calcAnswers, setCalcAnswers] = useState<CalcAnswer[]>([]);
+  const [calcQuery, setCalcQuery] = useState('');
+  const [calcState, setCalcState] = useState<CalcState>('idle');
+  const [calcLoad, setCalcLoad] = useState<string | null>(null);
+  const [credits, setCredits] = useState<FeedName[]>([]);
+  const [ratesNote, setRatesNote] = useState<string | null>(null);
+  const [fetchingRates, setFetchingRates] = useState(false);
+  const calcWorker = useRef<Worker | null>(null);
+  const calcPending = useRef(new Map<number, (call: Call) => void>());
+  const calcGeneration = useRef(0);
+  const feedBodies = useRef(new Map<FeedName, FeedBody>());
+
+  /** Starts the calculator worker; waiting calls on an old one fail. */
+  const startCalculator = useCallback(() => {
+    calcWorker.current?.terminate();
+    for (const resolve of calcPending.current.values()) resolve({ error: 'Calculator stopped' });
+    calcPending.current.clear();
+    const created = new Worker('/try/calculator-worker.js', { type: 'module' });
+    created.onmessage = (event: MessageEvent<Call & { id?: number; loaded?: boolean; fetchedMs?: number; compiledMs?: number; bytes?: number }>) => {
+      if (event.data.loaded) {
+        setCalcState('ready');
+        setCalcLoad(`Calculator loaded in ${Math.round((event.data.fetchedMs ?? 0) + (event.data.compiledMs ?? 0))} ms`);
+        return;
+      }
+      const resolve = calcPending.current.get(event.data.id ?? -1);
+      calcPending.current.delete(event.data.id ?? -1);
+      resolve?.(event.data);
+    };
+    calcWorker.current = created;
+  }, []);
+
+  /** Sends one request to the calculator; the first waits for the download, later ones get 3 s. */
+  const callCalculator = useCallback((request: Record<string, unknown>, loading: boolean) => new Promise<Call>((resolve) => {
+    if (!calcWorker.current) startCalculator();
+    const id = ++nextCall.current;
+    const timer = setTimeout(() => {
+      calcPending.current.delete(id);
+      startCalculator();
+      setCalcState('idle');
+      resolve({ error: 'The calculator took too long and was stopped' });
+    }, loading ? 120_000 : 3000);
+    calcPending.current.set(id, (result) => { clearTimeout(timer); resolve(result); });
+    calcWorker.current?.postMessage({ id, request: JSON.stringify(request) });
+  }), [startCalculator]);
+
+  /** Fetches one rates feed from the site's own route, once per visit. */
+  const feed = useCallback(async (name: FeedName): Promise<FeedBody | null> => {
+    const known = feedBodies.current.get(name);
+    if (known) return known;
+    try {
+      const response = await fetch(`/try/rates/${name}`);
+      if (!response.ok) return null;
+      const body = { body: await response.text(), fetchedAt: Number(response.headers.get('x-volant-fetched-at')) || Math.floor(Date.now() / 1000) };
+      feedBodies.current.set(name, body);
+      return body;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  /** Answers a top-level query with VolantCore's calculator: asks which rate feeds it needs,
+   * fetches only those, then asks for the answers with the feeds attached. */
+  const calculate = useCallback(async (typed: string) => {
+    const mine = ++calcGeneration.current;
+    const loading = calcState !== 'ready';
+    if (loading) setCalcState('loading');
+    const context = { ...visitorContext(), now: Math.floor(Date.now() / 1000) };
+    const needs = await callCalculator({ ...context, mode: 'feeds', query: typed }, loading);
+    if (mine !== calcGeneration.current) return;
+    if (needs.error) { setCalcState('error'); setCalcAnswers([]); return; }
+    const wanted = JSON.parse(needs.output ?? '{}') as { rates?: boolean; world?: boolean; crypto?: boolean };
+    const names: FeedName[] = [...(wanted.rates ? ['ecb' as const] : []), ...(wanted.world ? ['world' as const] : []), ...(wanted.crypto ? ['crypto' as const] : [])];
+    const fresh = names.some((name) => !feedBodies.current.has(name));
+    if (fresh) setFetchingRates(true);
+    const bodies = await Promise.all(names.map(async (name) => [name, await feed(name)] as const));
+    if (fresh) setFetchingRates(false);
+    if (mine !== calcGeneration.current) return;
+    const request: Record<string, unknown> = { ...context, query: typed };
+    for (const [name, body] of bodies) {
+      if (!body) continue;
+      request[name] = body.body;
+      if (name === 'crypto') request.cryptoFetchedAt = body.fetchedAt;
+    }
+    const result = await callCalculator(request, false);
+    if (mine !== calcGeneration.current) return;
+    if (result.error) { setCalcAnswers([]); setRatesNote(null); return; }
+    const answers = (JSON.parse(result.output ?? '[]') as CalcAnswer[]).slice(0, 5);
+    setCalcAnswers(answers);
+    setCalcQuery(typed);
+    const missing = bodies.some(([, body]) => !body);
+    setRatesNote(names.length && missing ? 'Live rates aren’t available here right now; Volant fetches them in the app.' : null);
+    // Credit only the feed an answer's own tag names: one conversion never mixes ECB and
+    // ExchangeRate-API, and a coin's price comes from CoinGecko.
+    const tags = answers.map((a) => a.resultDetail ?? '').join(' ');
+    const used: FeedName[] = [];
+    if (/CoinGecko/.test(tags)) used.push('crypto');
+    else if (/Exchange Rate API/.test(tags)) used.push('world');
+    else if (/ECB/.test(tags)) used.push('ecb');
+    setCredits(used);
+  }, [calcState, callCalculator, feed]);
 
   /** Starts a fresh worker; any calls still waiting on the old one fail. */
   const startWorker = useCallback(() => {
@@ -168,8 +286,18 @@ export function TryLauncher() {
       return { folder, keywords, manifest };
     })).then(setExtensions, () => setMessage('Couldn’t load the demo extensions.'));
     fetch('/try/samples.json').then((r) => r.json() as Promise<Samples>).then(setSamples, () => setSamples(null));
-    return () => worker.current?.terminate();
+    return () => {
+      worker.current?.terminate();
+      calcWorker.current?.terminate();
+    };
   }, [startWorker]);
+
+  useEffect(() => {
+    const typed = query.trim();
+    if (scope || !typed) return;
+    const timer = setTimeout(() => void calculate(typed), 150);
+    return () => clearTimeout(timer);
+  }, [scope, query, calculate]);
 
   /** Runs one module call with the extension's time limit, terminating the worker if it overruns. */
   const call = useCallback((ext: Extension, request: string) => new Promise<Call>((resolve) => {
@@ -242,6 +370,10 @@ export function TryLauncher() {
   const type = (value: string) => {
     setQuery(value);
     setSelected(0);
+    if (!scope && !value.trim()) {
+      calcGeneration.current++;
+      setCalcAnswers([]); setCredits([]); setRatesNote(null);
+    }
     if (scope && !value.trim() && (scope.manifest.mode === 'search' || scope.manifest.output !== 'items')) {
       generation.current++;
       setRows([]); setText(null); setStatus('idle'); setMessage(null); setTiming(null);
@@ -252,6 +384,8 @@ export function TryLauncher() {
   const enter = (ext: Extension) => {
     const words = query.trim();
     const keyword = ext.keywords.find((k) => words.toLowerCase().startsWith(k + ' '));
+    calcGeneration.current++;
+    setCalcAnswers([]); setCredits([]); setRatesNote(null);
     setScope(ext);
     setFilter(ext.manifest.filters?.[0]?.id);
     setQuery(keyword ? words.slice(keyword.length).trim() : '');
@@ -274,7 +408,9 @@ export function TryLauncher() {
     try { await navigator.clipboard.writeText(row.copy?.text ?? row.title); setMessage('Copied'); } catch { setMessage('Couldn’t copy in this browser'); }
   };
 
-  const count = scope ? (text !== null ? 1 : rows.length) : commands.length;
+  // Answers show only for the text they were computed from, never a previous query's.
+  const answersShown = scope || !query.trim() || calcQuery !== query.trim() ? [] : calcAnswers;
+  const count = scope ? (text !== null ? 1 : rows.length) : answersShown.length + commands.length;
 
   /** Keyboard navigation in the launcher's own terms: arrows move, Return runs, Command-Return
    * opens a second link, Tab enters a command, Escape clears then leaves, Delete on empty leaves. */
@@ -283,21 +419,23 @@ export function TryLauncher() {
     else if (event.key === 'ArrowUp') { event.preventDefault(); setSelected((s) => Math.max(0, s - 1)); }
     else if (event.key === 'Enter') {
       event.preventDefault();
-      if (!scope) { const ext = commands[selected]; if (ext) enter(ext); }
+      if (!scope && selected < answersShown.length) void activate({ title: answersShown[selected].copyText });
+      else if (!scope) { const ext = commands[selected - answersShown.length]; if (ext) enter(ext); }
       else if (text !== null) void activate({ title: text });
       else void activate(rows[selected], event.metaKey || event.ctrlKey);
-    } else if (event.key === 'Tab' && !scope && commands[selected]) { event.preventDefault(); enter(commands[selected]); }
+    } else if (event.key === 'Tab' && !scope && commands[selected - answersShown.length]) { event.preventDefault(); enter(commands[selected - answersShown.length]); }
     else if (event.key === 'Escape') { event.preventDefault(); if (query) type(''); else if (scope) leave(); }
     else if (event.key === 'Backspace' && !query && scope) { event.preventDefault(); leave(); }
   };
 
-  const placeholder = scope ? scope.manifest.placeholder ?? `Search ${scope.manifest.name}…` : 'Type an extension, such as hn, wiki, case or encode…';
+  const placeholder = scope ? scope.manifest.placeholder ?? `Search ${scope.manifest.name}…` : 'Calculate, convert, or type an extension such as hn…';
   const network = !!scope && (scope.manifest.hosts ?? []).length > 0;
   const capturedOn = samples ? new Date(samples.capturedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : null;
   const waiting = !!scope && (scope.manifest.mode === 'search' || scope.manifest.output !== 'items') && !query.trim();
   let note = 'Real Volant extensions, running in your browser';
   if (network && capturedOn) note = sampleMiss ? `Sample data from ${capturedOn} doesn’t cover this search.` : `Sample data recorded ${capturedOn}. In the app, Volant fetches it live.`;
   else if (scope) note = `${scope.manifest.name} ${scope.manifest.version} · running in your browser`;
+  else if (answersShown.length && calcLoad) note = `Volant’s own calculator, compiled to WebAssembly · ${calcLoad}`;
 
   return (
     <section className="try-launcher" aria-label="Volant demo running in your browser">
@@ -326,7 +464,20 @@ export function TryLauncher() {
         ) : null}
       </div>
       <ul className="try-results" aria-label="Results">
-        {!scope && commands.map((ext, i) => (
+        {answersShown.map((answer, i) => (
+          <li key={`calc-${i}-${answer.result}`}>
+            <button type="button" aria-current={i === selected} className="try-row try-answer" onMouseEnter={() => setSelected(i)} onClick={() => void activate({ title: answer.copyText })}>
+              <span className="try-row-text">
+                <span className="try-answer-result">{answer.result}</span>
+                <span className="try-subtitle">{answer.input}{answer.inputDetail ? ` · ${answer.inputDetail}` : ''}</span>
+              </span>
+              {answer.resultDetail ? <span className="try-kind">{answer.resultDetail}</span> : null}
+            </button>
+          </li>
+        ))}
+        {!scope && commands.map((ext, j) => {
+          const i = j + answersShown.length;
+          return (
           <li key={ext.folder}>
             <button type="button" aria-current={i === selected} className="try-row" onMouseEnter={() => setSelected(i)} onClick={() => enter(ext)}>
               <Icon ext={ext} size={22} />
@@ -337,7 +488,8 @@ export function TryLauncher() {
               <span className="try-kind">{(ext.manifest.hosts ?? []).length ? 'Extension · sample data' : 'Extension'}</span>
             </button>
           </li>
-        ))}
+          );
+        })}
         {scope && text !== null ? (
           <li>
             <button type="button" aria-current className="try-row" onClick={() => void activate({ title: text })}>
@@ -360,8 +512,19 @@ export function TryLauncher() {
           </li>
         ))}
       </ul>
-      {!scope && extensions.length > 0 && commands.length === 0 ? (
-        <p className="try-empty">No demo extension matches “{query.trim()}”. Volant’s calculator, files, contacts and AI run only in the app.</p>
+      {!scope && query.trim() && calcState === 'loading' ? <p className="try-empty">Loading Volant’s calculator (about 19 MB, once)…</p> : null}
+      {!scope && query.trim() && calcState === 'error' ? <p className="try-error">The calculator couldn’t load in this browser.</p> : null}
+      {!scope && query.trim() && fetchingRates ? <p className="try-empty">Fetching exchange rates…</p> : null}
+      {!scope && extensions.length > 0 && commands.length === 0 && answersShown.length === 0 && calcState === 'ready' && calcQuery === query.trim() && !fetchingRates ? (
+        <p className="try-empty">Nothing matches “{query.trim()}”. Files, contacts, clipboard and AI run only in the app.</p>
+      ) : null}
+      {!scope && ratesNote && calcQuery === query.trim() ? <p className="try-empty">{ratesNote}</p> : null}
+      {!scope && credits.length && answersShown.length ? (
+        <p className="try-hint">
+          {credits.map((name, i) => (
+            <span key={name}>{i ? ' · ' : ''}<a href={feedCredits[name].href} target="_blank" rel="noopener noreferrer">{feedCredits[name].text}</a></span>
+          ))}
+        </p>
       ) : null}
       {scope && status === 'running' && rows.length === 0 && text === null ? <p className="try-empty">Running {scope.manifest.name}…</p> : null}
       {waiting ? <p className="try-empty">{scope?.manifest.output === 'items' ? scope?.manifest.placeholder ?? 'Type to search' : 'Type a name'}.</p> : null}
@@ -375,7 +538,7 @@ export function TryLauncher() {
       <div className="try-footer">
         <span className="try-footer-note">{note}{timing !== null && scope ? ` · ${Math.round(timing)} ms` : ''}</span>
         {status !== 'error' && message ? <span className="try-notice">{message}</span> : null}
-        <span className="try-keys"><kbd>↩</kbd> {scope ? 'Open or copy' : 'Open'} <kbd>esc</kbd> {scope ? 'Back' : 'Clear'}</span>
+        <span className="try-keys"><kbd>↩</kbd> {scope ? 'Open or copy' : selected < answersShown.length ? 'Copy' : 'Open'} <kbd>esc</kbd> {scope ? 'Back' : 'Clear'}</span>
       </div>
     </section>
   );

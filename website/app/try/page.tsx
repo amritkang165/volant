@@ -20,14 +20,15 @@ export default function TryPage() {
         <p className="try-eyebrow">Interactive demo · runs in your browser</p>
         <h1>Try Volant now</h1>
         <p className="try-lede">
-          Running in your browser: real Volant extensions, the same WebAssembly modules the Mac app installs, with
-          Volant’s own extension host ported to JavaScript. Nothing you type leaves this page.
+          Running in your browser: real Volant extensions and Volant’s own calculator, compiled to WebAssembly. Nothing
+          you type leaves this page.
         </p>
         <TryLauncher />
         <ul className="try-facts">
-          <li>Type <strong>hn</strong>, <strong>wiki</strong>, <strong>case</strong>, <strong>encode</strong>, <strong>fancy</strong> or <strong>count</strong>, then press Return.</li>
-          <li>News and Wikipedia replay responses recorded once, so the demo makes no network requests on your behalf.</li>
-          <li>This is a web demo of the launcher, not the app. Calculator, files, contacts, clipboard and agents run only in Volant on your Mac.</li>
+          <li>Try <strong>2+2</strong>, <strong>15% of 80</strong>, <strong>5 km in miles</strong>, <strong>3pm tokyo in new york</strong> or <strong>100 usd in eur</strong>.</li>
+          <li>Or type <strong>hn</strong>, <strong>wiki</strong>, <strong>case</strong>, <strong>encode</strong>, <strong>fancy</strong> or <strong>count</strong>, then press Return.</li>
+          <li>For a currency answer, this site fetches public exchange rates once and caches them; your query never leaves the page. News and Wikipedia replay responses recorded once.</li>
+          <li>This is a web demo of the launcher, not the app. Files, contacts, clipboard and agents run only in Volant on your Mac. The demo answers in English.</li>
         </ul>
         <div className="try-actions">
           <a className="button" href={downloadURL} download>Download Volant for Mac</a>
