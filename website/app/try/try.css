@@ -266,6 +266,9 @@
 .hero-placeholder {
   color: var(--try-muted);
 }
+.hero-launcher input.hero-typing::placeholder {
+  color: transparent;
+}
 .hero-caret {
   display: inline-block;
   width: 2px;
@@ -274,11 +277,58 @@
   vertical-align: text-bottom;
   background: var(--try-accent);
 }
-.hero-launcher .try-results {
-  min-height: 72px;
+/* Suggestion rows: the saved examples, server-rendered so the card is never empty. Every row has
+   a fixed height, so nothing moves when the typing loop starts or a row is highlighted. */
+.hero-suggestions {
+  max-height: none;
+  overflow: visible;
 }
-.hero-launcher .try-row {
-  cursor: default;
+.hero-suggestion {
+  height: 58px;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+.hero-suggestion:hover,
+.hero-suggestion:focus-visible {
+  background: var(--try-chip);
+  outline: none;
+}
+.hero-suggestion[aria-current='true'] {
+  background: var(--try-select);
+}
+.hero-query {
+  flex: 0 0 34%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--try-muted);
+  font-size: 15px;
+}
+.hero-answer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 17px;
+}
+.hero-answer img {
+  border-radius: 4px;
+}
+.hero-open {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.hero-suggestion:hover .hero-open,
+.hero-suggestion:focus-visible .hero-open,
+.hero-suggestion[aria-current='true'] .hero-open {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-suggestion,
+  .hero-open {
+    transition: none;
+  }
 }
 .hero-try-link {
   color: inherit;
@@ -300,8 +350,13 @@
   font-size: 28px;
 }
 .hero-launcher-large .try-results {
-  min-height: 104px;
   padding: 10px;
+}
+.hero-launcher-large .hero-suggestion {
+  height: 64px;
+}
+.hero-launcher-large .hero-answer {
+  font-size: 20px;
 }
 .hero-launcher-large .try-footer {
   padding: 12px 24px;
@@ -371,5 +426,16 @@
   .hero-launcher-large .try-bar input,
   .hero-launcher-large .hero-ghost {
     font-size: 21px;
+  }
+  .hero-open {
+    display: none;
+  }
+  .hero-query {
+    flex-basis: 44%;
+    font-size: 13px;
+  }
+  .hero-answer,
+  .hero-launcher-large .hero-answer {
+    font-size: 15px;
   }
 }

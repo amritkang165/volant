@@ -111,12 +111,12 @@ async function heroRun(scheme, viewport, label, query = '') {
   page.on('pageerror', (e) => problems.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await page.goto(`${base}/${query}`, { waitUntil: 'networkidle' });
-  results[`hero ${label} prompt at rest`] = await page.locator('.hero-launcher .hero-placeholder').textContent().catch(() => '(none)');
-  await page.screenshot({ path: `${out}/hero-${label}-rest.png` });
-  await page.locator('.hero-launcher .try-answer-result').first().waitFor({ timeout: 15000 });
-  results[`hero ${label} answer`] = await page.locator('.hero-launcher .try-answer-result').first().textContent();
+  results[`hero ${label} prompt`] = await page.locator('.hero-launcher input').getAttribute('placeholder');
+  results[`hero ${label} rows`] = (await page.locator('.hero-suggestion .hero-answer').allTextContents()).join(' | ');
+  await page.locator('.hero-suggestion[aria-current="true"]').waitFor({ timeout: 15000 });
+  results[`hero ${label} highlighted`] = `${await page.locator('.hero-ghost').textContent()} → ${await page.locator('.hero-suggestion[aria-current="true"] .hero-answer').textContent()}`;
   results[`hero ${label} note`] = await page.locator('.hero-launcher .try-footer-note').textContent();
-  await page.screenshot({ path: `${out}/hero-${label}.png` });
+  await page.screenshot({ path: `${out}/hero-${label}-animating.png` });
   if (label === 'light') {
     const before = await page.locator('.home-refresh').getAttribute('data-theme');
     await page.locator('.home-appearance').click();
@@ -129,6 +129,17 @@ async function heroRun(scheme, viewport, label, query = '') {
   results[`hand-off ${label}`] = `${await page.locator('.try-bar input').inputValue()} → ${(await page.locator('.try-answer-result').allTextContents())[0]}`;
   await page.screenshot({ path: `${out}/handoff-${label}.png` });
   results[`hero ${label} problems`] = problems;
+  await context.close();
+}
+
+/** Captures the hero as first painted, with JavaScript disabled: the server-rendered card and its
+ * suggestion rows, which link to /try. */
+async function firstPaintRun(scheme, viewport, label, query = '') {
+  const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2, javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(`${base}/${query}`, { waitUntil: 'load' });
+  results[`first paint ${label}`] = `${await page.locator('.hero-suggestion').count()} rows; first links to ${await page.locator('.hero-suggestion').first().getAttribute('href')}`;
+  await page.screenshot({ path: `${out}/hero-${label}-first-paint.png` });
   await context.close();
 }
 
@@ -167,6 +178,10 @@ async function wasmRun(scheme, viewport, label) {
 await wasmRun('light', { width: 1280, height: 900 }, 'light');
 await wasmRun('dark', { width: 1280, height: 900 }, 'dark');
 await wasmRun('dark', { width: 390, height: 844 }, 'mobile-dark');
+for (const [scheme, viewport, label] of [['light', { width: 1280, height: 900 }, 'light'], ['dark', { width: 1280, height: 900 }, 'dark'], ['dark', { width: 390, height: 844 }, 'mobile-dark']]) {
+  await firstPaintRun(scheme, viewport, label);
+  await firstPaintRun(scheme, viewport, `launcher-${label}`, '?hero=launcher');
+}
 await heroRun('light', { width: 1280, height: 900 }, 'light');
 await heroRun('dark', { width: 1280, height: 900 }, 'dark');
 await heroRun('dark', { width: 390, height: 844 }, 'mobile-dark');

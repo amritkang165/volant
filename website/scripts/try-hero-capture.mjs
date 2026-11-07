@@ -75,7 +75,7 @@ function extensionRows(query, folder, count) {
 const fixture = {
   capturedAt: new Date(now * 1000).toISOString(),
   zone,
-  examples: [calculate('3pm tokyo in new york'), calculate('15% of 80'), extensionRows('hn', 'hackernews', 3)],
+  examples: [calculate('3pm tokyo in new york'), calculate('15% of 80'), calculate('5 km in miles'), extensionRows('hn', 'hackernews', 3)],
 };
 fs.writeFileSync(fixtureFile, `${JSON.stringify(fixture, null, 2)}\n`);
 console.log(`try-hero-capture: ${fixture.examples.map((e) => e.result ?? `${e.rows.length} rows`).join(', ')}`);

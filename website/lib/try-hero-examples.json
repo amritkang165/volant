@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-11-07T12:12:14.000Z",
+  "capturedAt": "2026-11-07T13:08:19.000Z",
   "zone": "America/New_York",
   "examples": [
     {
@@ -13,6 +13,12 @@
       "kind": "answer",
       "result": "12",
       "detail": "Twelve"
+    },
+    {
+      "query": "5 km in miles",
+      "kind": "answer",
+      "result": "3.106856 mi",
+      "detail": "Kilometers · Miles"
     },
     {
       "query": "hn",
