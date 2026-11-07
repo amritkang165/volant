@@ -2,7 +2,7 @@
 // oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import Image from 'next/image';
 import { useState } from 'react';
-import { LauncherDemo } from '@/components/launcher-demo';
+import { HeroLauncher } from '@/components/hero-launcher';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -135,7 +135,7 @@ export default function Home() {
         <AppearanceButton value={appearance} onChange={setAppearance} />
       </SiteHeader>
       <main id="main">
-        <section className="home-hero wrap">
+        <section className="home-hero home-hero-try wrap">
           <div className="home-hero-copy">
             <p className="home-kicker">
               A LITTLE LESS FRICTION. A LOT MORE FLOW.
@@ -162,7 +162,7 @@ export default function Home() {
               Free & open source · macOS 15+ · Apple silicon
             </p>
           </div>
-          <LauncherDemo />
+          <HeroLauncher />
         </section>
         <div className="home-proof wrap">
           <span>

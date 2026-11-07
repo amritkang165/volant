@@ -1,8 +1,8 @@
 // The "Try Volant" calculator worker: VolantCore's CalculationAnswer.answers built for WASI. The
-// page asks it to load as soon as it is idle; it streams the gzipped module (named by its content
-// hash, so the browser can cache it for good), reports download progress, decompresses it with
-// DecompressionStream, compiles it once, and answers each request with a fresh instance. The page
-// ends a request that runs too long by terminating this worker.
+// page asks it to load as soon as it is idle; it streams the module (served brotli- or gzip-encoded
+// and named by its content hash, so the browser can cache it for good), reports download progress,
+// compiles it once, and answers each request with a fresh instance. The page ends a request that
+// runs too long by terminating this worker.
 import { answer } from './calculator.js';
 
 let loading = null;
@@ -24,11 +24,12 @@ function load() {
   loading ??= (async () => {
     const started = performance.now();
     const manifest = await (await fetch('/try/calculator.json', { cache: 'no-cache' })).json();
-    if (!/^VolantAnswers-[0-9a-f]{16}\.wasm\.gz$/.test(manifest.file)) throw new Error('Calculator unavailable');
+    if (!/^VolantAnswers-[0-9a-f]{16}\.wasm$/.test(manifest.file)) throw new Error('Calculator unavailable');
     const response = await fetch(`/try/calculator/${manifest.file}`);
     if (!response.ok || !response.body) throw new Error('Calculator unavailable');
-    const declared = Number(response.headers.get('content-length'));
-    const total = declared > 0 ? declared : Number(manifest.bytes) > 0 ? Number(manifest.bytes) : 0;
+    // The module arrives brotli- or gzip-encoded and the browser decodes it, so the stream yields
+    // decoded bytes: progress is measured against the module's raw size from calculator.json.
+    const total = Number(manifest.bytes) > 0 ? Number(manifest.bytes) : 0;
     const report = reporter(total);
     let received = 0;
     const counted = response.body.pipeThrough(new TransformStream({
@@ -39,7 +40,7 @@ function load() {
       },
       flush() { self.postMessage({ preparing: true }); },
     }));
-    const bytes = await new Response(counted.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    const bytes = await new Response(counted).arrayBuffer();
     const downloadedMs = performance.now() - started;
     const compiled = await WebAssembly.compile(bytes);
     // Resource Timing reports a transfer size of 0 when the browser's cache answered.

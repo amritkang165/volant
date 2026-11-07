@@ -102,6 +102,37 @@ async function failureRun() {
   await context.close();
 }
 
+/** Captures the homepage hero card mid-loop with an answer showing, checks the appearance button
+ * still switches it, and that typing hands over to /try with the text and the calculator answering. */
+async function heroRun(scheme, viewport, label) {
+  const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  const problems = [];
+  page.on('pageerror', (e) => problems.push(String(e)));
+  page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
+  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+  await page.locator('.hero-launcher .try-answer-result').first().waitFor({ timeout: 15000 });
+  results[`hero ${label} answer`] = await page.locator('.hero-launcher .try-answer-result').first().textContent();
+  results[`hero ${label} note`] = await page.locator('.hero-launcher .try-footer-note').textContent();
+  await page.screenshot({ path: `${out}/hero-${label}.png` });
+  if (label === 'light') {
+    const before = await page.locator('.home-refresh').getAttribute('data-theme');
+    await page.locator('.home-appearance').click();
+    results['appearance button'] = `${before} -> ${await page.locator('.home-refresh').getAttribute('data-theme')}`;
+  }
+  await page.getByRole('textbox', { name: 'Try Volant in your browser now' }).pressSequentially('1');
+  await page.waitForURL('**/try?q=1', { timeout: 15000 });
+  await page.locator('.try-bar input').pressSequentially('5% of 80');
+  await page.locator('.try-answer').first().waitFor({ timeout: 120000 });
+  results[`hand-off ${label}`] = `${await page.locator('.try-bar input').inputValue()} → ${(await page.locator('.try-answer-result').allTextContents())[0]}`;
+  await page.screenshot({ path: `${out}/handoff-${label}.png` });
+  results[`hero ${label} problems`] = problems;
+  await context.close();
+}
+
+await heroRun('light', { width: 1280, height: 900 }, 'light');
+await heroRun('dark', { width: 1280, height: 900 }, 'dark');
+await heroRun('dark', { width: 390, height: 844 }, 'mobile-dark');
 await progressRun('light');
 await progressRun('dark');
 await failureRun();

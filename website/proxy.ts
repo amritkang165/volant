@@ -32,5 +32,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static/|images/|icons/|fonts/|updates/|favicon\\.svg).*)'],
+  // /try/calculator/ serves the content-hashed calculator module with a year-long cache; it isn't HTML.
+  matcher: ['/((?!_next/static/|images/|icons/|fonts/|updates/|try/calculator/|favicon\\.svg).*)'],
 };

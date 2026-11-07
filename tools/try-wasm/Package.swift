@@ -9,7 +9,6 @@ let package = Package(
     name: "VolantAnswers",
     targets: [
         .target(name: "VolantCalc"),
-        .executableTarget(name: "VolantAnswers", dependencies: ["VolantCalc"]),
-        .executableTarget(name: "Probe", dependencies: ["VolantCalc"])
+        .executableTarget(name: "VolantAnswers", dependencies: ["VolantCalc"])
     ]
 )

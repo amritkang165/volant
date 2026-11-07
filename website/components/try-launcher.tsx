@@ -163,10 +163,13 @@ function Icon({ ext, size }: { ext: Extension; size: number }) {
 
 /** The interactive demo: a launcher-like field that finds extension commands and runs real
  * extension modules in a Worker, replaying recorded responses for network extensions. */
-export function TryLauncher() {
+/** The interactive demo. `initialQuery` comes from the homepage hero (/try?q=…): the field starts
+ * with it, keeps focus, and the calculator starts loading at once rather than when the page is idle. */
+export function TryLauncher({ initialQuery = '' }: { initialQuery?: string }) {
   const [extensions, setExtensions] = useState<Extension[]>([]);
   const [samples, setSamples] = useState<Samples | null>(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery.slice(0, 200));
+  const handedOff = useRef(initialQuery.trim().length > 0);
   const [scope, setScope] = useState<Extension | null>(null);
   const [filter, setFilter] = useState<string | undefined>();
   const [rows, setRows] = useState<Row[]>([]);
@@ -320,11 +323,16 @@ export function TryLauncher() {
 
   useEffect(() => {
     startWorker();
-    input.current?.focus();
+    const field = input.current;
+    field?.focus();
+    if (field) field.setSelectionRange(field.value.length, field.value.length);
     // The calculator downloads in the background once the page is idle; typing never waits for it.
-    const idle = typeof window.requestIdleCallback === 'function'
-      ? window.requestIdleCallback(() => startCalculator(), { timeout: 2000 })
-      : window.setTimeout(() => startCalculator(), 300);
+    // Text handed over from the homepage hero starts it at once.
+    const idle = handedOff.current
+      ? window.setTimeout(() => startCalculator(), 0)
+      : typeof window.requestIdleCallback === 'function'
+        ? window.requestIdleCallback(() => startCalculator(), { timeout: 2000 })
+        : window.setTimeout(() => startCalculator(), 300);
     Promise.all(shipped.map(async ({ folder, keywords }) => {
       const manifest = (await (await fetch(`/try/extensions/${folder}/manifest.json`)).json()) as Manifest;
       return { folder, keywords, manifest };

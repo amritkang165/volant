@@ -2,6 +2,56 @@
   padding-block: 56px 80px;
   max-width: 880px;
 }
+
+/* The homepage hero's card (components/hero-launcher.tsx): the same card, full hero width, with a
+   typing loop of captured examples shown over the empty field. */
+.hero-launcher {
+  margin-top: 8px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+}
+.hero-launcher .try-bar {
+  position: relative;
+}
+.hero-launcher input {
+  cursor: text;
+}
+.hero-ghost {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.35rem;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.hero-placeholder {
+  color: var(--try-muted);
+}
+.hero-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: #0a84ff;
+}
+.hero-launcher .try-results {
+  min-height: 72px;
+}
+.hero-launcher .try-row {
+  cursor: default;
+}
+.hero-try-link {
+  color: inherit;
+  text-decoration: underline;
+}
+@media (max-width: 640px) {
+  .hero-ghost {
+    font-size: 1.1rem;
+  }
+}
 .try-page h1 {
   font-size: clamp(2rem, 5vw, 3.2rem);
   line-height: 1.05;
@@ -24,6 +74,15 @@
   opacity: 0.8;
   line-height: 1.6;
 }
+.try-credits {
+  margin: 0 0 24px;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.try-credits a {
+  color: inherit;
+  text-decoration: underline;
+}
 .try-actions {
   display: flex;
   flex-wrap: wrap;
@@ -35,32 +94,25 @@
   border: 1px solid rgba(245, 245, 247, 0.5);
 }
 
-/* The demo card follows the visitor's appearance, as Volant follows macOS. */
+/* The demo card follows the page's color scheme: the system appearance on /try, and the
+   homepage's appearance button on the hero, as Volant follows macOS. */
+.try-page {
+  color-scheme: light dark;
+}
 .try-launcher {
-  --try-bg: #f4f3f1;
-  --try-fg: #1d1d1f;
-  --try-muted: #6e6e73;
-  --try-line: rgba(0, 0, 0, 0.08);
-  --try-select: rgba(10, 132, 255, 0.16);
-  --try-chip: rgba(0, 0, 0, 0.06);
-  --try-error: #c4372b;
+  --try-bg: light-dark(#f4f3f1, #232325);
+  --try-fg: light-dark(#1d1d1f, #f5f5f7);
+  --try-muted: light-dark(#6e6e73, #a1a1a6);
+  --try-line: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.1));
+  --try-select: light-dark(rgba(10, 132, 255, 0.16), rgba(10, 132, 255, 0.3));
+  --try-chip: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.1));
+  --try-error: light-dark(#c4372b, #ff6b5e);
   color: var(--try-fg);
   background: var(--try-bg);
   border: 1px solid var(--try-line);
   border-radius: 18px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   overflow: hidden;
-}
-@media (prefers-color-scheme: dark) {
-  .try-launcher {
-    --try-bg: #232325;
-    --try-fg: #f5f5f7;
-    --try-muted: #a1a1a6;
-    --try-line: rgba(255, 255, 255, 0.1);
-    --try-select: rgba(10, 132, 255, 0.3);
-    --try-chip: rgba(255, 255, 255, 0.1);
-    --try-error: #ff6b5e;
-  }
 }
 .try-bar {
   display: flex;

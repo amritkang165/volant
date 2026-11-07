@@ -31,6 +31,7 @@ export function SiteHeader({ children }: { children?: ReactNode }) {
         <a href="/#agents">Agents</a>
         <a href="/#launcher">Launcher</a>
         <a href="/#notes">Notes</a>
+        <a href="/try">Try it</a>
         <a href="/docs">Docs</a>
       </nav>
       <div className="nav-actions">

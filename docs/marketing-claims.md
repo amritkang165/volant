@@ -274,6 +274,7 @@ Merged after 0.3.36, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| Try Volant in your browser (`/try`, and the homepage hero that hands off to it): real Volant extensions and VolantCore's calculator compiled to WebAssembly, with live exchange rates the site refreshes on a schedule | Website, not yet published | try-volant PR; the calculator's 26-query native comparison is identical, full and English-trimmed builds agree on 80 queries, headless Chromium light/dark/mobile against the built worker (hero, hand-off, loading bar, calculator and KV-backed currency answers); Cloudflare production cron, R2 brotli serving and the rate limit are unverified until deployed | Homepage hero and `/try`; "runs in your browser", "real Volant extensions and Volant's own calculator"; the demo answers in English only and says which features need the app; never "the full app in your browser" |
 
 ## Privacy language
 
