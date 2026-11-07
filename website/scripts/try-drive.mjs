@@ -144,6 +144,29 @@ async function tryPageRun(scheme, viewport, label) {
   await context.close();
 }
 
+/** Captures the header nav (Try it first), the hero's "Try it now" link, the homepage's WebAssembly
+ * section and its line on /try, and checks where the link goes. */
+async function wasmRun(scheme, viewport, label) {
+  const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+  results[`nav ${label}`] = (await page.locator('nav[aria-label="Main navigation"] a').allTextContents()).join(', ');
+  await page.locator('header.nav').screenshot({ path: `${out}/nav-${label}.png` });
+  const cta = page.locator('.home-hero .home-secondary');
+  results[`hero cta ${label}`] = `${(await cta.textContent()).trim()} -> ${await cta.getAttribute('href')}`;
+  await page.locator('.home-hero').screenshot({ path: `${out}/hero-cta-${label}.png` });
+  await page.locator('.home-wasm').scrollIntoViewIfNeeded();
+  await page.locator('.home-wasm').screenshot({ path: `${out}/wasm-home-${label}.png` });
+  results[`wasm home ${label}`] = await page.locator('.home-wasm h2').textContent();
+  await page.goto(`${base}/try`, { waitUntil: 'networkidle' });
+  await page.locator('.try-notes').screenshot({ path: `${out}/wasm-try-${label}.png` });
+  results[`wasm try ${label}`] = (await page.locator('.try-notes li').nth(1).textContent()).slice(0, 60);
+  await context.close();
+}
+
+await wasmRun('light', { width: 1280, height: 900 }, 'light');
+await wasmRun('dark', { width: 1280, height: 900 }, 'dark');
+await wasmRun('dark', { width: 390, height: 844 }, 'mobile-dark');
 await heroRun('light', { width: 1280, height: 900 }, 'light');
 await heroRun('dark', { width: 1280, height: 900 }, 'dark');
 await heroRun('dark', { width: 390, height: 844 }, 'mobile-dark');

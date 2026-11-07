@@ -136,8 +136,8 @@ export default function Home() {
               <a className="button" href={downloadURL} download>
                 Download for Mac <ArrowRight size={18} />
               </a>
-              <a className="home-secondary" href="#features">
-                See what it can do <ArrowUpRight size={16} />
+              <a className="home-secondary" href="/try">
+                Try it now <ArrowUpRight size={16} />
               </a>
             </div>
             <p className="home-requirements">
@@ -245,6 +245,28 @@ export default function Home() {
             </span>
             <ArrowUpRight size={16} />
           </a>
+        </section>
+        <section className="home-wasm wrap" aria-labelledby="wasm-title">
+          <p className="home-kicker">EXTENSIONS ARE WEBASSEMBLY</p>
+          <h2 id="wasm-title">One module. Your Mac and your browser.</h2>
+          <p>
+            A Volant extension is a small WebAssembly module. The file you
+            install in Volant runs in its sandboxed helper on your Mac, and
+            the very same file runs on the Try it page in a modern browser.
+            The module never reaches the network itself: Volant fetches only
+            the addresses you approve and hands it the answer.
+          </p>
+          <div className="home-wasm-links">
+            <a href="/try">
+              Run one in your browser <ArrowUpRight size={15} />
+            </a>
+            <a href="/docs/extensions">
+              How extensions work <ArrowUpRight size={15} />
+            </a>
+            <a href="https://github.com/mysticcoders/volant-extensions">
+              Browse the catalog <ArrowUpRight size={15} />
+            </a>
+          </div>
         </section>
         <section className="home-bottom wrap">
           <div className="home-privacy">

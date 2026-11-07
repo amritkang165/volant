@@ -133,6 +133,11 @@ Under reduced motion it stays on the prompt.
   `/?hero=launcher` makes the large card the first viewport: a one-line kicker above, Download and
   Star below, and the usual headline and copy after it.
 
+"Try it" is the first link in the site header, and the hero's secondary link ("Try it now") goes to
+`/try`. A homepage section and a line on `/try` say that extensions are WebAssembly: the same file
+runs in Volant's sandboxed helper on the Mac and on `/try` in a modern browser, and the host, not
+the module, does any fetching (see the claim's row in `docs/marketing-claims.md`).
+
 `/try` uses the same page frame as the homepage (`components/site-shell.tsx`): its header with the
 appearance button, home.css type, spacing, colors and buttons, and the footer.
 

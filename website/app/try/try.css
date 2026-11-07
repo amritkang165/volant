@@ -336,6 +336,10 @@
   line-height: 1.6;
   color: var(--muted-foreground);
 }
+.try-notes a {
+  color: inherit;
+  text-decoration: underline;
+}
 .try-notes strong {
   color: var(--foreground);
   font-weight: 600;

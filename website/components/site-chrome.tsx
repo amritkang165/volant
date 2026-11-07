@@ -27,11 +27,11 @@ export function SiteHeader({ children }: { children?: ReactNode }) {
         <Brand />
       </a>
       <nav aria-label="Main navigation">
+        <a href="/try">Try it</a>
         <a href="/#answers">Answers</a>
         <a href="/#agents">Agents</a>
         <a href="/#launcher">Launcher</a>
         <a href="/#notes">Notes</a>
-        <a href="/try">Try it</a>
         <a href="/docs">Docs</a>
       </nav>
       <div className="nav-actions">

@@ -29,6 +29,10 @@ export default async function TryPage({ searchParams }: { searchParams: Promise<
       <TryLauncher initialQuery={initialQuery} />
       <ul className="try-notes">
         <li>Try <strong>15% of 80</strong>, <strong>5 km in miles</strong>, <strong>3pm tokyo in new york</strong> or <strong>100 usd in eur</strong>. Type <strong>hn</strong>, <strong>wiki</strong> or <strong>case</strong> and press Return for an extension.</li>
+        <li>
+          Extensions are WebAssembly. The module you install in Volant is the same file running on this page; the host,
+          not the module, does any fetching. <a href="/docs/extensions">How extensions work</a>.
+        </li>
         <li>Currency uses public rates this site refreshes on a schedule, so your query never reaches the providers. News and Wikipedia replay responses recorded once.</li>
         <li>Files, contacts, clipboard and agents need Volant on your Mac. The demo answers in English only; the full app formats numbers, dates and units for your language and region.</li>
       </ul>

@@ -65,6 +65,42 @@
   align-items: center;
   padding-block: 68px 58px;
 }
+/* "Extensions are WebAssembly": a compact section after the feature links. */
+.home-wasm {
+  margin-block: 56px;
+  padding: 36px 40px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.home-wasm h2 {
+  margin-bottom: 14px;
+}
+.home-wasm p:not(.home-kicker) {
+  max-width: 680px;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+  margin: 0 0 20px;
+}
+.home-wasm-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+.home-wasm-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .home-wasm {
+    padding: 26px 22px;
+  }
+}
+
 /* ?hero=launcher: the launcher card is the first viewport, large and centered, with a one-line
    kicker above and Download and Star below; the usual hero copy follows. */
 .home-launcher-hero {
