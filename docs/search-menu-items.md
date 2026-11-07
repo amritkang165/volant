@@ -135,8 +135,24 @@ to config or backups, synced, included in diagnostics or activity, or recorded i
 - `tools/check-input-confinement.py` keeps Accessibility APIs, including the menu read and press
   calls, inside `VolantInputHost/`.
 
-TODO(parent): VM/e2e results (native fixture renders of the setting off/on, the command row when off
-and fictional menu rows in light and dark; the `tools/input-host-e2e/run-vm.py` TextEdit scenario).
+- Native fixture renders (`tools/render-vm.py`, macOS 27 guest, November 7, 2026), inspected in
+  light and dark: the Actions fixture's `menu-items-off` (the Turn On row), `menu-items` (nine
+  fictional items for an app called Quill, with paths, shortcut badges and the disabled Make Rich Text
+  dimmed and last) and `menu-items-filtered`, plus Return hiding the launcher and pressing by path
+  through a fake helper; the Settings preview's General section with the switch off, on without
+  Accessibility and on with it. The first run showed "Checking…" for both on states: the preview's fake
+  helper queued its reply on the main queue, which the render loop never drained. It now answers at
+  once, the preview fails unless the expected state shows, and quiet re-checks keep the last answer
+  so Settings doesn't flash "Checking…" when the section scrolls back into view.
+- Real Accessibility, only in a disposable clone of `volant-ui-xcode` (macOS 15.7.7), with
+  `tools/input-host-e2e/run-vm.py --only menus` and the Developer ID signed helper. Before the grant,
+  listing TextEdit was refused as `notTrusted`. After it, TextEdit listed 171 items under TextEdit,
+  File, Edit, Format, View, Window and Help in 264 ms, with no Apple menu, real shortcuts (⇧⌘T, ⌥⌘C,
+  ⌘{) and disabled items reported as such. Pressing Format › Make Rich Text on a plain-text document
+  returned `pressed`, and UI scripting read Format's item change to Make Plain Text. Pressing the old
+  title again was refused as `notFound`, Apple › About This Mac as `appleMenu`, the Format › Font
+  submenu as `notFound`, listing Volant itself as `excludedApp`, and both calls with Finder in front
+  as `appChanged`. The helper exited after each connection ended, and the clone was deleted.
 
 ## Not verified
 

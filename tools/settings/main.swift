@@ -16,12 +16,12 @@ let configURL = root.appendingPathComponent("config.json")
 try Data(#"{"aliases":{"safari":"/Applications/Safari.app"},"appHotKeys":[],"syncSettingsWithICloud":true}"#.utf8).write(to: configURL)
 let apps = [AppEntry(id: "/System/Applications/Calculator.app", name: "Calculator", url: URL(fileURLWithPath: "/System/Applications/Calculator.app"), lastUsed: nil), AppEntry(id: "/Applications/Safari.app", name: "Safari", url: URL(fileURLWithPath: "/Applications/Safari.app"), lastUsed: nil)]
 /// Stands in for the input helper so the preview never launches it or prompts for Accessibility.
-/// It reports Accessibility as not allowed until `trusted` is set.
+/// It reports Accessibility as not allowed until `trusted` is set, answering at once: the renders run
+/// inside a main-queue block, where a reply queued on the main queue would arrive only after them.
 final class PreviewInputHost: InputHostClient {
     var trusted = false
     func status(prompt: Bool, completion: @escaping (InputHostStatus?) -> Void) {
-        let trusted = self.trusted
-        DispatchQueue.main.async { completion(InputHostStatus(trusted: trusted, secureInput: false)) }
+        completion(InputHostStatus(trusted: trusted, secureInput: false))
     }
     func beginSession(completion: @escaping (InputSessionStart?) -> Void) { completion(InputSessionStart(refusal: .notTrusted)) }
     func insert(phrase: String, token: Data, completion: @escaping (InputInsertion?) -> Void) { completion(.refused(.notTrusted)) }
