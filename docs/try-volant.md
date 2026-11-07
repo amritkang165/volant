@@ -114,13 +114,27 @@ Requests follow no redirects and have size caps, and the bodies are checked befo
 
 ## The hero
 
-`components/hero-launcher.tsx` is the `/try` card in plain HTML. It loops through three examples
-(`3pm tokyo in new york`, `15% of 80`, `hn`), showing the answers `/try` gave when they were
-captured. They're stored with their date in `lib/try-hero-examples.json` by
-`scripts/try-hero-capture.mjs`, and `publish-calculator.sh` refreshes them. The hero computes
-nothing, and the homepage's policy has no `'wasm-unsafe-eval'`. Under reduced motion it shows the
-first example without the loop. Clicking it, typing or pressing Return opens `/try?q=…`, and
-keyboard focus alone only pauses the loop.
+`components/hero-launcher.tsx` is the `/try` card in plain HTML, with the same styles (`app/try/try.css`,
+on the site's tokens, so both follow the appearance button). At rest it shows the prompt "Try Volant
+in your browser now…". After a pause it types one of three examples (`3pm tokyo in new york`,
+`15% of 80`, `hn`), shows the answer `/try` gave when it was captured, and returns to the prompt.
+Under reduced motion it stays on the prompt.
+
+- **Examples.** `scripts/try-hero-capture.mjs` captures them into `lib/try-hero-examples.json` on
+  every website build (prebuild). It uses the published module (a local build, or the R2 copy), and
+  keeps the existing file if neither is reachable.
+- **No stale dates.** Text that depends on the capture day ("Saturday, November 7 · Today",
+  "19h ago") is left out; the footer says when the examples were captured.
+- **Nothing computed.** The hero computes nothing, and the homepage's policy has no
+  `'wasm-unsafe-eval'`.
+- **Hand-off.** Clicking it, typing or pressing Return opens `/try?q=…`; keyboard focus alone only
+  pauses the loop.
+- **Two layouts for review.** `/` keeps the headline, intro and Download beside the card.
+  `/?hero=launcher` makes the large card the first viewport: a one-line kicker above, Download and
+  Star below, and the usual headline and copy after it.
+
+`/try` uses the same page frame as the homepage (`components/site-shell.tsx`): its header with the
+appearance button, home.css type, spacing, colors and buttons, and the footer.
 
 ## Local preview
 

@@ -16,11 +16,11 @@ const outcome = await Promise.race([
   page.locator('.try-answer').first().waitFor({ timeout: 60000 }).then(async () => `answer ${await page.locator('.try-answer-result').first().textContent()}`),
   page.locator('.try-progress[data-state="error"]').waitFor({ timeout: 60000 }).then(() => 'load error'),
 ]).catch((error) => `timeout: ${error.message.split('\n')[0]}`);
-const module = await page.evaluate(async () => {
+const calculatorModule = await page.evaluate(async () => {
   const manifest = await (await fetch('/try/calculator.json')).json();
   const response = await fetch(`/try/calculator/${manifest.file}`);
   const bytes = new Uint8Array(await response.arrayBuffer());
   return { status: response.status, encoding: response.headers.get('content-encoding'), first: Array.from(bytes.slice(0, 4)), length: bytes.length, expected: manifest.bytes };
 });
-console.log(JSON.stringify({ outcome, module, problems }, null, 1));
+console.log(JSON.stringify({ outcome, module: calculatorModule, problems }, null, 1));
 await browser.close();

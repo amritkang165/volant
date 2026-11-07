@@ -104,13 +104,15 @@ async function failureRun() {
 
 /** Captures the homepage hero card mid-loop with an answer showing, checks the appearance button
  * still switches it, and that typing hands over to /try with the text and the calculator answering. */
-async function heroRun(scheme, viewport, label) {
+async function heroRun(scheme, viewport, label, query = '') {
   const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2 });
   const page = await context.newPage();
   const problems = [];
   page.on('pageerror', (e) => problems.push(String(e)));
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
-  await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/${query}`, { waitUntil: 'networkidle' });
+  results[`hero ${label} prompt at rest`] = await page.locator('.hero-launcher .hero-placeholder').textContent().catch(() => '(none)');
+  await page.screenshot({ path: `${out}/hero-${label}-rest.png` });
   await page.locator('.hero-launcher .try-answer-result').first().waitFor({ timeout: 15000 });
   results[`hero ${label} answer`] = await page.locator('.hero-launcher .try-answer-result').first().textContent();
   results[`hero ${label} note`] = await page.locator('.hero-launcher .try-footer-note').textContent();
@@ -130,9 +132,27 @@ async function heroRun(scheme, viewport, label) {
   await context.close();
 }
 
+/** Captures /try at rest in the site's design with a calculator answer showing. */
+async function tryPageRun(scheme, viewport, label) {
+  const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await page.goto(`${base}/try?q=${encodeURIComponent('3pm tokyo in new york')}`, { waitUntil: 'networkidle' });
+  await page.locator('.try-answer').first().waitFor({ timeout: 120000 });
+  await page.waitForTimeout(1800);
+  await page.screenshot({ path: `${out}/try-page-${label}.png` });
+  results[`try page ${label}`] = (await page.locator('.try-answer-result').allTextContents())[0];
+  await context.close();
+}
+
 await heroRun('light', { width: 1280, height: 900 }, 'light');
 await heroRun('dark', { width: 1280, height: 900 }, 'dark');
 await heroRun('dark', { width: 390, height: 844 }, 'mobile-dark');
+await heroRun('light', { width: 1280, height: 900 }, 'launcher-light', '?hero=launcher');
+await heroRun('dark', { width: 1280, height: 900 }, 'launcher-dark', '?hero=launcher');
+await heroRun('dark', { width: 390, height: 844 }, 'launcher-mobile-dark', '?hero=launcher');
+await tryPageRun('light', { width: 1280, height: 900 }, 'light');
+await tryPageRun('dark', { width: 1280, height: 900 }, 'dark');
+await tryPageRun('light', { width: 390, height: 844 }, 'mobile-light');
 await progressRun('light');
 await progressRun('dark');
 await failureRun();

@@ -65,6 +65,41 @@
   align-items: center;
   padding-block: 68px 58px;
 }
+/* ?hero=launcher: the launcher card is the first viewport, large and centered, with a one-line
+   kicker above and Download and Star below; the usual hero copy follows. */
+.home-launcher-hero {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding-block: 40px 56px;
+  text-align: center;
+}
+.home-launcher-hero .home-kicker {
+  margin: 0;
+}
+.home-launcher-hero .hero-launcher {
+  width: min(100%, 940px);
+  text-align: left;
+}
+.home-launcher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.home-launcher-hero .home-requirements {
+  margin: 0;
+}
+/* The header hides its Star button on small screens; the one under the launcher card stays. */
+.home-refresh .home-launcher-actions .nav-star,
+.home-refresh .try-page .home-actions .nav-star {
+  display: inline-flex;
+}
+
 /* The hero with the in-browser launcher: copy above, the card across the full hero width. */
 .home-hero-try {
   grid-template-columns: 1fr;

@@ -1,12 +1,12 @@
 {
-  "capturedAt": "2026-11-07T11:46:22.000Z",
+  "capturedAt": "2026-11-07T12:06:35.000Z",
   "zone": "America/New_York",
   "examples": [
     {
       "query": "3pm tokyo in new york",
       "kind": "answer",
       "result": "1:00 AM in New York",
-      "detail": "Saturday, November 7 · Today"
+      "detail": ""
     },
     {
       "query": "15% of 80",
@@ -23,15 +23,15 @@
       "rows": [
         {
           "title": "Tesla to wind down Cybertruck production",
-          "subtitle": "19h ago · by PLenz"
+          "subtitle": "by PLenz"
         },
         {
           "title": "Libghostty 1.0",
-          "subtitle": "8h ago · by mfiguiere"
+          "subtitle": "by mfiguiere"
         },
         {
           "title": "A Jev that can ask Opus for help gives Opus accuracy at 4x lower cost",
-          "subtitle": "12h ago · by theanomaly"
+          "subtitle": "by theanomaly"
         }
       ]
     }
