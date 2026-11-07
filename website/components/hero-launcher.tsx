@@ -18,9 +18,11 @@ type Capture = {
 const capture = recorded as unknown as Capture;
 const prompt = 'Try Volant in your browser now…';
 const startDelay = 180;
-const answerHold = 2000;
-const clearedRest = 650;
-const returnPause = 450;
+const answerHold = 3750;
+const extensionHold = 5000;
+const fadeOut = 300;
+const clearedRest = 1350;
+const returnPause = 700;
 const staticExample = capture.examples.find((example) => example.query === '5 km in miles') ?? capture.examples[0];
 
 /** A fixed date for the label, so server and browser render the same text. */
@@ -33,12 +35,12 @@ function handOff(text: string) {
   window.location.assign(text ? `/try?q=${encodeURIComponent(text.slice(0, 200))}` : '/try');
 }
 
-/** The pause before the keystrokes that turn `from` into `to`: 60–120 ms a character, longer
- * after a space, as a person types. */
+/** The pause before the keystrokes that turn `from` into `to`: 90–150 ms a character, about
+ * 250 ms for the first character after a space, as a person types. */
 function keystrokeDelay(from: string, to: string) {
   let delay = 0;
-  for (let i = from.length; i < to.length; i++) delay += 60 + Math.random() * 60 + (to[i - 1] === ' ' ? 140 : 0);
-  return delay || 90;
+  for (let i = from.length; i < to.length; i++) delay += to[i - 1] === ' ' ? 230 + Math.random() * 40 : 90 + Math.random() * 60;
+  return delay || 120;
 }
 
 /** An extension's icon, or the blank square /try draws when it has none. */
@@ -102,8 +104,9 @@ function FrameField({ frame, caret }: { frame: Frame; caret: boolean }) {
  * launcher: the prompt and an empty results area. After hydration it replays examples recorded
  * keystroke by keystroke from the code /try runs (lib/try-hero-examples.json, refreshed by every
  * website build): each character appears with a human cadence and the results change to what /try
- * showed for exactly that text, including nothing. The final frame holds, clears like Escape, and
- * the next example starts. It computes nothing. Focusing the field stops and clears the replay;
+ * showed for exactly that text, including nothing. The final frame holds (longer for the
+ * extension's list), fades and clears like Escape, and after a rest on the prompt the next example
+ * starts. It computes nothing. Focusing the field stops and clears the replay;
  * clicking the card or typing hands over to /try with what was typed. Under reduced motion there is
  * no replay: the CSS shows one example's final frame with a caption. `large` is the
  * launcher-as-hero variant. */
@@ -111,11 +114,13 @@ export function HeroLauncher({ large = false }: { large?: boolean }) {
   const [frame, setFrame] = useState<Frame | null>(null);
   const [caret, setCaret] = useState(false);
   const [stopped, setStopped] = useState(false);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
     if (stopped || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let example = 0, step = 0, timer = 0;
-    /** Shows the next recorded frame and schedules the one after it; between examples the card is cleared. */
+    /** Shows the next recorded frame and schedules the one after it; after the last one the card
+     * fades, clears, and rests on the prompt before the next example. */
     const advance = () => {
       const { frames } = capture.examples[example];
       if (step < frames.length) {
@@ -124,9 +129,13 @@ export function HeroLauncher({ large = false }: { large?: boolean }) {
         setFrame(current);
         setCaret(!current[2] && step < frames.length - 1);
         step += 1;
-        timer = window.setTimeout(advance, !next ? answerHold : next[2] ? returnPause : keystrokeDelay(current[0], next[0]));
+        timer = window.setTimeout(advance, !next ? (current[2] ? extensionHold : answerHold) : next[2] ? returnPause : keystrokeDelay(current[0], next[0]));
+      } else if (step === frames.length) {
+        setFading(true);
+        step += 1;
+        timer = window.setTimeout(advance, fadeOut);
       } else {
-        setFrame(null); setCaret(false);
+        setFrame(null); setCaret(false); setFading(false);
         example = (example + 1) % capture.examples.length;
         step = 0;
         timer = window.setTimeout(advance, clearedRest);
@@ -143,6 +152,7 @@ export function HeroLauncher({ large = false }: { large?: boolean }) {
     <section
       className={`try-launcher hero-launcher${large ? ' hero-launcher-large' : ''}`}
       aria-label="Volant launcher demo"
+      data-fading={fading && !stopped ? '' : undefined}
       onPointerDown={(event) => { if (!(event.target as Element).closest('a')) handOff(''); }}
     >
       <div className="try-bar">

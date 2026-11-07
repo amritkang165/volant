@@ -134,7 +134,7 @@ function record(query, enter) {
   return { query, frames };
 }
 
-const examples = [record('3pm tokyo in new york'), record('15% of 80'), record('5 km in miles'), record('hn', 'hackernews')];
+const examples = [record('hn', 'hackernews'), record('3pm tokyo in new york'), record('15% of 80'), record('5 km in miles')];
 const extensions = Object.fromEntries([...used].map((folder) => {
   const manifest = manifests[folder];
   return [folder, {

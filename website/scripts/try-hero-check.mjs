@@ -1,8 +1,10 @@
 // Checks the homepage hero's replay in headless Chromium against a local build: first paint shows
 // only the prompt, the replayed frames match lib/try-hero-examples.json keystroke by keystroke,
 // the recorded final answers match what /try shows for the same text, focus/click/typing hand over
-// to /try, reduced motion shows one recorded example, and the homepage makes no WebAssembly or rates
-// requests. Saves light, dark and mobile screenshots at first paint, mid-typing and inside the extension as PNG.
+// to /try, reduced motion shows one recorded example, the homepage makes no WebAssembly or rates
+// requests, and the replay keeps its timing: 90–150 ms keystrokes, about 250 ms after a space, 0.7 s
+// before Return, 3.75 s holds (5 s for the extension) plus a 0.3 s fade, and 1.35 s on the prompt.
+// Saves light, dark and mobile screenshots at first paint, mid-typing and inside the extension as PNG.
 // Usage (from website/, with the site served): node scripts/try-hero-check.mjs http://127.0.0.1:8811 <out-dir>
 import fs from 'node:fs';
 import { mkdir } from 'node:fs/promises';
@@ -66,34 +68,59 @@ async function watched(context, path) {
 async function replayRun(scheme, viewport, label, path) {
   const context = await browser.newContext({ colorScheme: scheme, viewport, deviceScaleFactor: 2 });
   const { page, requests, problems } = await watched(context, path);
-  await page.waitForFunction(() => document.querySelector('.hero-live .hero-ghost-text')?.textContent === '15% of 8', null, { timeout: 30000 });
-  await page.locator('.hero-launcher').screenshot({ path: `${out}/hero-${label}-typing.png` });
   await page.waitForFunction(() => window.__heroLog.some((e) => e.scope), null, { timeout: 30000 });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
   await page.locator('.hero-launcher').screenshot({ path: `${out}/hero-${label}-extension.png` });
-  await page.waitForTimeout(2300);
+  await page.waitForFunction(() => document.querySelector('.hero-live .hero-ghost-text')?.textContent === '15% of 8', null, { timeout: 60000 });
+  await page.locator('.hero-launcher').screenshot({ path: `${out}/hero-${label}-typing.png` });
+  const last = capture.examples[capture.examples.length - 1];
+  await page.waitForFunction((final) => {
+    const log = window.__heroLog;
+    const at = log.findIndex((e) => e.text === final);
+    return at >= 0 && log.slice(at + 1).some((e) => e.text === null);
+  }, last.query, { timeout: 60000 });
   const log = await page.evaluate(() => window.__heroLog);
   const load = await page.evaluate(() => window.__heroLoad);
   expect(log[0].text === null && log[0].rows.length === 0, `${label}: first paint was not prompt-only: ${JSON.stringify(log[0])}`);
   const typed = log.filter((e) => e.text !== null || e.scope);
   const firstChar = typed[0]?.t ?? Infinity;
   results[`${label} first character`] = `${Math.round(firstChar - load)} ms after load (${Math.round(firstChar)} ms after navigation start)`;
-  const expected = capture.examples.flatMap((example) => example.frames.map(([text, rows, scope]) => ({
+  expect(firstChar - load < 400, `${label}: first character ${Math.round(firstChar - load)} ms after load`);
+  const expected = capture.examples.flatMap((example, e) => example.frames.map(([text, rows, scope], f) => ({
     text: scope ? '' : text, scope: scope ? capture.extensions[scope].name : null, rows: rows.map(rowText),
+    example: e, last: f === example.frames.length - 1, nextText: example.frames[f + 1]?.[0], nextScope: !!example.frames[f + 1]?.[2],
   })));
   let matched = 0;
-  for (const entry of typed) {
+  const timings = { keystroke: [], afterSpace: [], beforeReturn: [], hold: [], extensionHold: [], rest: [] };
+  const start = log.indexOf(typed[0]);
+  for (let i = start; i < log.length && matched < expected.length; i++) {
+    const entry = log[i];
+    const following = log[i + 1];
+    if (entry.text === null && !entry.scope) {
+      if (following) timings.rest.push(following.t - entry.t);
+      continue;
+    }
     const frame = expected[matched];
-    if (!frame) break;
     const same = entry.text === frame.text && entry.scope === frame.scope && JSON.stringify(entry.rows) === JSON.stringify(frame.rows) && entry.selected === (frame.rows.length ? 0 : -1);
     expect(same, `${label}: frame ${matched} shown ${JSON.stringify(entry)} expected ${JSON.stringify(frame)}`);
     if (!same) break;
     matched += 1;
+    if (!following) continue;
+    const gap = following.t - entry.t;
+    if (frame.last) (frame.scope ? timings.extensionHold : timings.hold).push(gap);
+    else if (frame.nextScope) timings.beforeReturn.push(gap);
+    else if (frame.nextText.length - frame.text.length === 1) (frame.text.endsWith(' ') ? timings.afterSpace : timings.keystroke).push(gap);
   }
   expect(matched === expected.length, `${label}: replayed ${matched} of ${expected.length} frames`);
-  const gaps = [];
-  for (let i = 1; i < typed.length && typed[i].text !== null && typed[i - 1].text !== null && !typed[i].scope; i++) gaps.push(typed[i].t - typed[i - 1].t);
-  results[`${label} frames`] = `${matched}/${expected.length} matched; gaps between frames (about 2.6 s = hold and clear) ${gaps.map(Math.round).join(', ')} ms`;
+  const within = (name, low, high) => {
+    const list = timings[name];
+    expect(list.length > 0 && list.every((g) => g >= low && g <= high), `${label}: ${name} gaps ${list.map(Math.round).join(', ')} outside ${low}–${high} ms`);
+    return `${name} ${Math.round(Math.min(...list))}–${Math.round(Math.max(...list))}`;
+  };
+  results[`${label} frames`] = `${matched}/${expected.length} matched; ms: ${[
+    within('keystroke', 80, 185), within('afterSpace', 220, 305), within('beforeReturn', 650, 800),
+    within('hold', 3900, 4250), within('extensionHold', 5150, 5500), within('rest', 1300, 1450),
+  ].join(', ')} (holds include the 300 ms fade)`;
   const clears = log.filter((e, i) => i > 0 && e.text === null);
   expect(clears.every((e) => e.rows.length === 0), `${label}: a cleared frame still showed rows`);
   const bad = requests.filter((u) => /\.wasm|\/try\/rates|calculator|samples\.json|manifest\.json/.test(u));

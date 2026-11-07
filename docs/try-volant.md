@@ -117,10 +117,12 @@ Requests follow no redirects and have size caps, and the bodies are checked befo
 `components/hero-launcher.tsx` is the `/try` card in plain HTML, with the same styles (`app/try/try.css`,
 on the site's tokens, so both follow the appearance button). It first paints like an empty launcher:
 the prompt "Try Volant in your browser now…" and an empty results area. About 0.2 s after hydration
-it starts typing one of four examples (`3pm tokyo in new york`, `15% of 80`, `5 km in miles`, then
-`hn` and Return), 60–120 ms a character with a longer pause after a space. Each keystroke shows the
-results `/try` gave for exactly that text: an answer appears, changes or disappears, and a prefix
-with no answer shows nothing. The last frame holds for 2 s, clears, and the next example starts.
+it starts typing four examples in turn (`hn` and Return, then `3pm tokyo in new york`, `15% of 80`
+and `5 km in miles`), 90–150 ms a character and about 250 ms after a space, pausing 0.7 s on the
+`hn` match before Return. Each keystroke shows the results `/try` gave for exactly that text: an
+answer appears, changes or disappears, and a prefix with no answer shows nothing. The last frame
+holds for 3.75 s (5 s for the Hacker News list), fades out over 0.3 s, and the prompt rests 1.35 s
+before the next example.
 
 - **Recording.** `scripts/try-hero-capture.mjs` records the frames into
   `lib/try-hero-examples.json` on every website build (prebuild). For each prefix it runs the

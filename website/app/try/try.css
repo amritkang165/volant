@@ -311,6 +311,15 @@
   font-size: 13px;
   color: var(--try-muted);
 }
+/* A finished example fades before the card clears for the next one. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-live {
+    transition: opacity 300ms ease;
+  }
+  .hero-launcher[data-fading] .hero-live {
+    opacity: 0;
+  }
+}
 /* Under reduced motion nothing is typed: one recorded example's final frame shows instead. */
 @media (prefers-reduced-motion: reduce) {
   .hero-live {
