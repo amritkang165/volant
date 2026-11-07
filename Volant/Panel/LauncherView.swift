@@ -601,6 +601,7 @@ private struct RowView: View {
         case .systemAction(let action): return action.title
         case .systemToggle(let toggle, _): return toggle.title
         case .pickedColor(let color, let format): return color.value(format)
+        case .pickAnotherColor: return String(localized: "Pick Another Color", comment: "Launcher row title after a color was picked: open the loupe again")
         case .privacySettings(let pane): return pane.title
         case .caffeinate(let command): return command.title
         case .agentSession(let session): return session.project
@@ -641,6 +642,7 @@ private struct RowView: View {
         case .systemAction(let action): return action.detail
         case .systemToggle(let toggle, let on): return toggle.detail(on: on)
         case .pickedColor(_, let format): return format.label
+        case .pickAnotherColor: return String(localized: "Open the loupe again", comment: "Launcher row subtitle for Pick Another Color")
         case .privacySettings(let pane): return pane.detail
         case .caffeinate(let command): return command.detail
         case .systemSettings: return String(localized: "Open this pane in System Settings", comment: "Launcher row subtitle")
@@ -697,6 +699,7 @@ private struct RowView: View {
             if let logo = server.kind.logo, let image = NSImage(named: "Runtimes/" + logo.asset) { RuntimeTile(image: image, hex: logo.hex) }
             else { CommandTile(symbol: CoreCommand.servers.symbol, tint: CoreCommand.servers.tint) }
         case .core(let command): CommandTile(symbol: command.symbol, tint: command.tint)
+        case .pickAnotherColor: CommandTile(symbol: CoreCommand.colorPicker.symbol, tint: CoreCommand.colorPicker.tint)
         case .systemAction(let action): CommandTile(symbol: action.symbol, tint: action.tint)
         case .systemToggle(let toggle, _): CommandTile(symbol: toggle.symbol, tint: .indigo)
         case .pickedColor(let color, _): ColorSwatchTile(color: color)

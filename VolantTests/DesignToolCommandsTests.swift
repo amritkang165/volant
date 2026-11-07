@@ -63,6 +63,24 @@ final class DesignToolCommandsTests: XCTestCase {
         XCTAssertEqual(dismissals, 2)
     }
 
+    func testPickAnotherColorFollowsTheFormatsAndOpensTheLoupeAgain() {
+        let model = model(), sampler = FakeColorSampler()
+        model.colorSampler = sampler
+        model.query = "color picker"
+        model.activateSelection()
+        sampler.finish(PickedColor(red: 1, green: 99.0 / 255, blue: 99.0 / 255))
+        XCTAssertEqual(model.rows.map(\.id).filter { $0.hasPrefix("picked-color:") || $0 == "core:colorPicker" },
+                       ["picked-color:hex", "picked-color:rgb", "picked-color:hsl", "picked-color:oklch", "picked-color:another"],
+                       "Pick Another Color follows the formats and replaces the Pick Color command")
+        XCTAssertEqual(model.selectedRow?.id, "picked-color:hex", "HEX stays selected")
+        model.activate(rowID: "picked-color:another")
+        XCTAssertEqual(sampler.requests, 2, "the loupe opens again")
+        sampler.finish(PickedColor(red: 0, green: 0, blue: 1))
+        XCTAssertEqual(model.selectedRow?.id, "picked-color:hex")
+        model.activateSelection()
+        XCTAssertEqual(copied, ["#0000ff"], "the new color replaces the old one")
+    }
+
     func testEscapeInTheLoupeReturnsWithoutAColorOrACopy() {
         let model = model(), sampler = FakeColorSampler()
         model.colorSampler = sampler
@@ -86,8 +104,8 @@ final class DesignToolCommandsTests: XCTestCase {
         model.query = "color"
         XCTAssertFalse(model.rows.contains { $0.id.hasPrefix("picked-color:") })
         model.query = "Colour Picker"
-        XCTAssertEqual(model.rows.filter { $0.id.hasPrefix("picked-color:") }.count, 4)
-        XCTAssertTrue(model.rows.contains { $0.id == "core:colorPicker" }, "picking another stays available")
+        XCTAssertEqual(model.rows.filter { $0.id.hasPrefix("picked-color:") }.count, 5, "four formats and Pick Another Color")
+        XCTAssertTrue(model.rows.contains { $0.id == "picked-color:another" }, "picking another stays available")
     }
 
     // MARK: Open Camera
