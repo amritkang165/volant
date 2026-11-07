@@ -64,6 +64,15 @@ export const schedules: Record<string, FeedName[]> = {
 export const isFeedName = (name: string): name is FeedName => Object.hasOwn(feeds, name);
 const key = (name: FeedName) => `rates:${name}`;
 
+/**
+ * Logs why a feed was not kept and returns null. Only the feed name and the provider's status or
+ * the failed check are logged, never response bodies or anything from visitors.
+ */
+function rejected(name: FeedName, reason: string): null {
+  console.warn(`rates ${name}: not stored (${reason})`);
+  return null;
+}
+
 /** Fetches one fixed feed without following redirects, capped in size and checked for shape. */
 export async function fetchFeed(name: FeedName): Promise<StoredFeed | null> {
   const feed = feeds[name];
@@ -71,13 +80,13 @@ export async function fetchFeed(name: FeedName): Promise<StoredFeed | null> {
     redirect: 'manual',
     headers: { Accept: name === 'ecb' ? 'application/xml' : 'application/json', 'User-Agent': 'usevolant.com try demo' },
   });
-  if (response.status !== 200) return null;
+  if (response.status !== 200) return rejected(name, `HTTP ${response.status}`);
   const declared = Number(response.headers.get('content-length') ?? '0');
-  if (declared > feed.maximumBytes) return null;
+  if (declared > feed.maximumBytes) return rejected(name, `declared ${declared} bytes`);
   const bytes = new Uint8Array(await response.arrayBuffer());
-  if (bytes.length > feed.maximumBytes) return null;
+  if (bytes.length > feed.maximumBytes) return rejected(name, `${bytes.length} bytes`);
   const body = new TextDecoder().decode(bytes);
-  return feed.valid(body) ? { body, fetchedAt: Math.floor(Date.now() / 1000) } : null;
+  return feed.valid(body) ? { body, fetchedAt: Math.floor(Date.now() / 1000) } : rejected(name, 'unexpected shape');
 }
 
 /** Refreshes the feeds a Cron schedule covers, keeping the stored copy when a fetch fails. */
@@ -87,10 +96,13 @@ export async function refreshFeeds(kv: KVNamespace, names: FeedName[]): Promise<
     let fresh: StoredFeed | null = null;
     try {
       fresh = await fetchFeed(name);
-    } catch {
-      fresh = null;
+    } catch (error) {
+      fresh = rejected(name, error instanceof Error ? error.name : 'fetch failed');
     }
-    if (fresh) await kv.put(key(name), JSON.stringify(fresh));
+    if (fresh) {
+      await kv.put(key(name), JSON.stringify(fresh));
+      console.log(`rates ${name}: stored`);
+    }
     outcome[name] = !!fresh;
   }
   return outcome;
