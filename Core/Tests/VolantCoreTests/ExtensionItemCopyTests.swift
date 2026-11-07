@@ -57,7 +57,10 @@ final class ExtensionItemCopyTests: XCTestCase {
         for type in ExtensionItemCopy.Kind.allCases.map(\.rawValue) {
             XCTAssertEqual(try row(#"{"url":"https://assets.example.com/logo","type":"\#(type)"}"#)?.copy?.kind?.rawValue, type)
         }
-        XCTAssertNil(try row(#"{"url":"https://assets.example.com/logo.gif","type":"gif"}"#)?.copy)
+        XCTAssertEqual(ExtensionItemCopy.Kind.allCases.map(\.rawValue), ["svg", "png", "jpeg", "webp", "ico", "gif", "bmp", "avif", "image", "text"])
+        XCTAssertNil(try row(#"{"url":"https://assets.example.com/logo.tif","type":"tiff"}"#)?.copy, "TIFF and HEIC come only through image")
+        XCTAssertNil(try row(#"{"url":"https://assets.example.com/logo.heic","type":"heic"}"#)?.copy)
+        XCTAssertNil(try row(#"{"url":"https://assets.example.com/logo","type":"IMAGE"}"#)?.copy, "Types are lowercase")
         XCTAssertNil(try row(#"{"url":"https://assets.example.com/logo.svg"}"#)?.copy, "A URL copy needs a type")
         XCTAssertNil(try row(#"{"url":"https://other.example.com/logo.svg","type":"svg"}"#)?.copy, "Undeclared host")
         XCTAssertNil(try row(#"{"url":"http://assets.example.com/logo.svg","type":"svg"}"#)?.copy, "Plain http")
@@ -97,6 +100,31 @@ final class ExtensionItemCopyTests: XCTestCase {
         XCTAssertNil(ExtensionItemCopy.downloadedText(Data("<svg/>".utf8), kind: .png), "Image kinds are never copied as text")
     }
 
+    func testSVGMayStartWithAPrologDoctypeAndCommentsButItsRootMustBeSVG() {
+        func svg(_ text: String) -> String? { ExtensionItemCopy.downloadedText(Data(text.utf8), kind: .svg) }
+        let doctype = #"<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">"#
+        let accepted = [
+            doctype + #"<svg xmlns="http://www.w3.org/2000/svg"/>"#,
+            "<!-- Generator: Fictional Draw 1.0 -->\n<svg viewBox=\"0 0 1 1\"></svg>",
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- a -->\n" + doctype + "\n<!-- b -->\n<svg>\n</svg>",
+            "  \n\t<svg\nwidth=\"1\"/>",
+            "<!DOCTYPE svg><svg/>"
+        ]
+        for text in accepted { XCTAssertEqual(svg(text), text, text) }
+        let refused = [
+            "<!DOCTYPE html><svg></svg>",
+            "<!DOCTYPE html>\n<html><body><svg/></body></html>",
+            #"<!DOCTYPE svg [ <!ENTITY a "aaaa"> ]><svg>&a;</svg>"#,
+            "<!-- unterminated <svg/>",
+            "<?xml version=\"1.0\"?><html><svg/></html>",
+            "<svgx/>",
+            "<svg",
+            "<!-- a --><!DOCTYPE svg PUBLIC \"x\" \"y\"",
+            String(repeating: "<!-- x -->", count: 17) + "<svg/>"
+        ]
+        for text in refused { XCTAssertNil(svg(text), text) }
+    }
+
     func testImageSignaturesMatchTheirKind() {
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0])
         let jpeg = Data([0xFF, 0xD8, 0xFF, 0xE0])
@@ -110,6 +138,47 @@ final class ExtensionItemCopyTests: XCTestCase {
         XCTAssertFalse(ExtensionItemCopy.hasImageSignature(png, kind: .webp))
         XCTAssertFalse(ExtensionItemCopy.hasImageSignature(Data("<svg/>".utf8), kind: .ico))
         XCTAssertFalse(ExtensionItemCopy.hasImageSignature(png, kind: .svg))
+    }
+
+    func testTheImageKindAcceptsEveryFormatWhileExplicitKindsStayStrict() {
+        let samples: [(ExtensionImageFormat, Data)] = [
+            (.png, Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0])),
+            (.jpeg, Data([0xFF, 0xD8, 0xFF, 0xE0])),
+            (.gif, Data("GIF89a\u{1}\0\u{1}\0".utf8)),
+            (.webp, Data("RIFF\0\0\0\0WEBPVP8 ".utf8)),
+            (.ico, Data([0, 0, 1, 0, 2, 0])),
+            (.bmp, Data("BM".utf8) + Data(repeating: 0, count: 12)),
+            (.tiff, Data([0x49, 0x49, 0x2A, 0x00, 8, 0, 0, 0])),
+            (.avif, Self.ftyp("avif", compatible: ["mif1", "miaf"])),
+            (.heic, Self.ftyp("heic", compatible: ["mif1", "heic"]))
+        ]
+        let explicit: [ExtensionItemCopy.Kind: ExtensionImageFormat] = [.png: .png, .jpeg: .jpeg, .gif: .gif, .webp: .webp, .ico: .ico, .bmp: .bmp, .avif: .avif]
+        for (format, data) in samples {
+            XCTAssertEqual(ExtensionImageFormat.detect(data), format, format.rawValue)
+            XCTAssertTrue(ExtensionItemCopy.hasImageSignature(data, kind: .image), format.rawValue)
+            for (kind, accepted) in explicit {
+                XCTAssertEqual(ExtensionItemCopy.hasImageSignature(data, kind: kind), accepted == format, "\(kind) with \(format)")
+            }
+            XCTAssertNil(ExtensionItemCopy.imageKindSVG(data), "Image bytes are never copied as SVG text")
+        }
+        XCTAssertEqual(ExtensionImageFormat.detect(Self.ftyp("mif1", compatible: ["avif"])), .avif, "AVIF named by a compatible brand")
+        XCTAssertNil(ExtensionImageFormat.detect(Self.ftyp("isom", compatible: ["mp41"])), "An MP4 video is not an image")
+        XCTAssertNil(ExtensionImageFormat.detect(Data([0, 0, 1, 0, 0, 0])), "An ICO header listing no images")
+        XCTAssertNil(ExtensionImageFormat.detect(Data([0, 0, 2, 0, 1, 0])), "A cursor file")
+        XCTAssertNil(ExtensionImageFormat.detect(Data("%PDF-1.7".utf8)))
+        XCTAssertNil(ExtensionImageFormat.detect(Data()))
+        XCTAssertFalse(ExtensionItemCopy.hasImageSignature(Data("<svg/>".utf8), kind: .image))
+        XCTAssertEqual(ExtensionItemCopy.imageKindSVG(Data("\u{FEFF}<svg xmlns=\"http://www.w3.org/2000/svg\"/>".utf8)), "<svg xmlns=\"http://www.w3.org/2000/svg\"/>",
+                       "An image copy that is SVG markup is copied as text")
+        XCTAssertNil(ExtensionItemCopy.imageKindSVG(Data("<html/>".utf8)))
+        XCTAssertEqual(ExtensionItemCopy.Kind.image.displayName, "image")
+        XCTAssertEqual(ExtensionItemCopy(url: "https://assets.example.com/a", type: "image").confirmation, "Copied image")
+    }
+
+    /// An ISO base media `ftyp` box with a major brand and compatible brands, as AVIF and HEIC files start.
+    static func ftyp(_ major: String, compatible: [String]) -> Data {
+        let size = 16 + 4 * compatible.count
+        return Data([0, 0, 0, UInt8(size)]) + Data("ftyp\(major)".utf8) + Data([0, 0, 0, 0]) + Data(compatible.joined().utf8)
     }
 
     func testErrorsExplainWhyNothingWasCopied() {

@@ -52,6 +52,25 @@ enum ExtensionFetcher {
         }) { data, status, error in completion(error == nil ? data : nil, status) }
     }
 
+    /// How a row image fetch ended: the helper's PNG thumbnail, a failure the helper reported (an HTTP
+    /// error, a download that is not an image, a timeout), or a stop with no answer (a newer query
+    /// cancelled it, or the connection ended), which may be tried again later.
+    enum RowImageReply: Equatable {
+        case thumbnail(Data)
+        case failed(status: Int)
+        case stopped
+    }
+
+    /// Asks the fetch helper for a row image's thumbnail. It runs among the cancellable reads, so a newer
+    /// query in the extension stops it along with that run's fetches.
+    static func fetchRowImage(_ request: ExtensionRequest, hosts: [String], completion: @escaping (RowImageReply) -> Void) {
+        call(timeout: 35, cancellable: true, { proxy, reply in
+            proxy.rowImage(url: request.url.absoluteString, headers: request.headers, allowedHosts: hosts, reply: reply)
+        }) { data, status, error in
+            if let data, error == nil { completion(.thumbnail(data)) } else if error != nil || status != 0 { completion(.failed(status: status)) } else { completion(.stopped) }
+        }
+    }
+
     /// Reads one extension catalog file through the helper's fixed-location method. Anything other than
     /// a complete 200 response is an error; the caller verifies signatures and hashes.
     static func catalogFile(_ path: String, maximumBytes: Int, completion: @escaping (Result<Data, Error>) -> Void) {

@@ -230,6 +230,8 @@ final class LauncherRowState: ObservableObject {
     @Published fileprivate(set) var selectedID: String?
     @Published fileprivate(set) var rowsByID: [String: ResultRow] = [:]
     @Published fileprivate(set) var contactImages: [String: NSImage] = [:]
+    /// Image previews for list extension rows; only rows that carry an image observe it.
+    let extensionImages = ExtensionRowImages()
     private let icons: IconCache
     private let clipImages = NSCache<NSNumber, NSImage>()
 
@@ -621,6 +623,11 @@ final class LauncherModel: ObservableObject {
         self.config = config
         self.onNote = onNote
         self.promotedHarness = config.promotedHarness
+        rowState.extensionImages.load = { [weak self] ext, url, done in
+            guard let self else { done(.stopped); return }
+            self.extensions.loadRowImage(ext, url: url, completion: done)
+        }
+        rowState.extensionImages.authorize = { [weak self] ext, url in self?.extensions.rowImageURL(ext, url) != nil }
         useFSearch()
         clipboardSubscription = clipboard.changes.receive(on: DispatchQueue.main).sink { [weak self] in
             guard let self, self.showingClipboard else { return }
@@ -705,7 +712,7 @@ final class LauncherModel: ObservableObject {
                 switch result {
                 case .success(let items):
                     self.notice = items.isEmpty ? String(localized: "\(ext.name) returned nothing.", comment: "Launcher notice when an extension returns no rows") : nil
-                    self.sections = [ResultSection(title: ext.name, rows: items.map { .extensionItem($0, source: ext) })]
+                    self.showExtensionItems(items, from: ext)
                     self.selection = selectedID.flatMap { id in self.rows.firstIndex { $0.id == id } } ?? 0
                 case .failure(let error):
                     guard !ExtensionManager.ExtensionError.isCancellation(error) else { return }
@@ -780,10 +787,18 @@ final class LauncherModel: ObservableObject {
         scopeRun?.cancel()
         scopeRerun = false
         extensions.cancelItemsRun()
+        rowState.extensionImages.reset()
         scope = nil
         scopeFilter = nil
         if query.isEmpty { refresh() } else { query = "" }
         searchFocusRequest = UUID()
+    }
+
+    /// Shows a list extension's rows as a new list, so image previews still loading for the rows it
+    /// replaces are dropped when they arrive.
+    private func showExtensionItems(_ items: [ExtensionItem], from ext: InstalledExtension) {
+        rowState.extensionImages.reset()
+        sections = [ResultSection(title: ext.name, rows: items.map { .extensionItem($0, source: ext) })]
     }
 
     /// Chooses an entry in the scoped extension's dropdown and runs it at once for the field's text.
@@ -841,6 +856,7 @@ final class LauncherModel: ObservableObject {
         scopeRun?.cancel()
         scopeRerun = false
         extensions.cancelItemsRun()
+        rowState.extensionImages.reset()
         scope = nil
         scopeFilter = nil
         pendingExtension = nil
@@ -2123,7 +2139,7 @@ final class LauncherModel: ObservableObject {
                 if let notice = outcome.notice { self.actionFeedback = notice }
                 guard let items = outcome.items else { self.runExtension(ext, input: self.extensionItemsQuery, keepingSelection: true); return }
                 let selectedID = self.selectedRow?.id
-                self.sections = [ResultSection(title: ext.name, rows: items.map { .extensionItem($0, source: ext) })]
+                self.showExtensionItems(items, from: ext)
                 self.notice = items.isEmpty ? String(localized: "\(ext.name) returned nothing.", comment: "Launcher notice when an extension returns no rows") : nil
                 self.selection = selectedID.flatMap { id in self.rows.firstIndex { $0.id == id } } ?? 0
             case .failure(let error):

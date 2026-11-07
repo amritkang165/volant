@@ -192,6 +192,9 @@ targets:
     platform: macOS
     sources:
       - path: VolantFetchHost
+      # Decodes row image downloads into PNG thumbnails here, so the app never decodes them; the app
+      # uses the same format checks only for a copy the owner chose.
+      - path: Shared/ExtensionImageDecoding.swift
     dependencies:
       - package: VolantCore
     entitlements:

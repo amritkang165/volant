@@ -268,6 +268,7 @@ Merged after 0.3.35, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| Extension rows show image previews and copy any image type: with the new `row-images` permission a row's `image` (a favicon or logo on an approved host) shows in place of its icon, loaded only for rows on screen and decoded into a small PNG by the sandboxed fetch helper; a copy's `"type": "image"` accepts PNG, JPEG, GIF, WebP, ICO, BMP, TIFF, AVIF or HEIC (and SVG as text), and `gif`, `bmp`, `avif` are new explicit types; SVG copies may start with a DOCTYPE or comments | No | #370; ExtensionItemImageTests, ExtensionItemCopyTests, ExtensionRowImageThumbnailTests (generated images of each format; WebP from a fixture; AVIF and HEIC only where the Mac can write them), ExtensionRowImageTests, LauncherExtensionImageTests, ExtensionRowCopyTests, Actions fixture `extension-row-images` renders (loaded, loading, failed) in light and dark; no catalog extension uses it yet; a row image through the signed fetch helper and real favicon services are unverified; Volant 0.3.35 refuses manifests that declare `row-images` | Extensions docs, marked as coming in the next release; say images come only from sites the owner allowed and are decoded outside the app; never "any image from anywhere" |
 
 ## Privacy language
 

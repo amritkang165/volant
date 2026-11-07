@@ -4,8 +4,9 @@ import Foundation
 /// manifest declares the `clipboard-write` permission. Either `text`, at most 64 KB of UTF-8 copied as
 /// plain text, or a `url` on a declared host with a `type`, which Volant downloads through its fetch
 /// helper only when the owner chooses the copy, checks against that type, and copies as text (`svg`,
-/// `text`) or as an image (`png`, `jpeg`, `webp`, `ico`). The module never sees the downloaded bytes,
-/// and nothing is fetched while listing. `title` names the entry in the row's Actions menu.
+/// `text`) or as an image (`png`, `jpeg`, `webp`, `ico`, `gif`, `bmp`, `avif`, or `image` for any of
+/// those and TIFF and HEIC). The module never sees the downloaded bytes, and nothing is fetched while
+/// listing. `title` names the entry in the row's Actions menu.
 public struct ExtensionItemCopy: Codable, Hashable, Sendable {
     public static let permission = "clipboard-write"
     public static let maximumTextBytes = 64 * 1024
@@ -23,19 +24,25 @@ public struct ExtensionItemCopy: Codable, Hashable, Sendable {
     }
 
     /// What a downloaded copy must be. SVG and text are copied as plain text; the others as an image.
+    /// Each explicit image kind accepts only its own format. `image` accepts any format Volant decodes,
+    /// identified by its signature, and SVG markup, which it copies as text like `svg`.
     public enum Kind: String, CaseIterable, Sendable {
-        case svg, png, jpeg, webp, ico, text
+        case svg, png, jpeg, webp, ico, gif, bmp, avif, image, text
 
         public var isImage: Bool { ![.svg, .text].contains(self) }
 
-        /// The Uniform Type Identifier ImageIO reports for a decoded image of this kind.
-        public var imageTypeIdentifier: String? {
+        /// The image formats this kind accepts; empty for SVG and text.
+        public var formats: Set<ExtensionImageFormat> {
             switch self {
-            case .png: "public.png"
-            case .jpeg: "public.jpeg"
-            case .webp: "org.webmproject.webp"
-            case .ico: "com.microsoft.ico"
-            case .svg, .text: nil
+            case .png: [.png]
+            case .jpeg: [.jpeg]
+            case .webp: [.webp]
+            case .ico: [.ico]
+            case .gif: [.gif]
+            case .bmp: [.bmp]
+            case .avif: [.avif]
+            case .image: Set(ExtensionImageFormat.allCases)
+            case .svg, .text: []
             }
         }
 
@@ -47,6 +54,10 @@ public struct ExtensionItemCopy: Codable, Hashable, Sendable {
             case .jpeg: String(localized: "JPEG image", table: "Core", comment: "Kind of file an extension row copies")
             case .webp: String(localized: "WebP image", table: "Core", comment: "Kind of file an extension row copies")
             case .ico: String(localized: "ICO image", table: "Core", comment: "Kind of file an extension row copies")
+            case .gif: String(localized: "GIF image", table: "Core", comment: "Kind of file an extension row copies")
+            case .bmp: String(localized: "BMP image", table: "Core", comment: "Kind of file an extension row copies")
+            case .avif: String(localized: "AVIF image", table: "Core", comment: "Kind of file an extension row copies")
+            case .image: String(localized: "image", table: "Core", comment: "Kind of file an extension row copies, in the middle of a sentence")
             case .text: String(localized: "text", table: "Core", comment: "Kind of file an extension row copies, in the middle of a sentence")
             }
         }
@@ -97,29 +108,62 @@ public struct ExtensionItemCopy: Codable, Hashable, Sendable {
     static let utf8ByteOrderMark: [UInt8] = [0xEF, 0xBB, 0xBF]
 
     /// The text to copy from downloaded `svg` or `text` bytes: valid UTF-8 without NUL characters, and for
-    /// SVG starting, after whitespace, with `<svg` or an XML prolog and containing an `<svg` element. A
-    /// leading byte order mark is removed here, since Foundation keeps it on some macOS versions and drops
-    /// it on others. Nil when the bytes are not that. The markup is never rendered.
+    /// SVG an `<svg` root element (see `startsWithSVGRoot`). A leading byte order mark is removed here,
+    /// since Foundation keeps it on some macOS versions and drops it on others. Nil when the bytes are not
+    /// that. The markup is never parsed or rendered.
     public static func downloadedText(_ data: Data, kind: Kind) -> String? {
         let body = data.starts(with: utf8ByteOrderMark) ? data.dropFirst(utf8ByteOrderMark.count) : data[...]
         guard !kind.isImage, !body.isEmpty, !body.contains(0), let text = String(data: Data(body), encoding: .utf8) else { return nil }
         guard kind == .svg else { return text }
-        let start = text.drop { $0.isWhitespace }
-        guard start.hasPrefix("<svg") || start.hasPrefix("<?xml"), start.contains("<svg") else { return nil }
-        return text
+        return startsWithSVGRoot(text) ? text : nil
     }
 
-    /// Whether downloaded bytes start with the signature of an image `kind`. The app then decodes them
-    /// with ImageIO before copying; this only refuses obvious mismatches early.
-    public static func hasImageSignature(_ data: Data, kind: Kind) -> Bool {
-        let bytes = [UInt8](data.prefix(12))
-        switch kind {
-        case .png: return bytes.starts(with: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
-        case .jpeg: return bytes.starts(with: [0xFF, 0xD8, 0xFF])
-        case .webp: return ExtensionManifest.looksLikeWebP(data)
-        case .ico: return bytes.starts(with: [0x00, 0x00, 0x01, 0x00])
-        case .svg, .text: return false
+    /// The most XML prologs, DOCTYPEs and comments allowed before the root, so a scan stays short.
+    static let maximumSVGPreambleItems = 16
+
+    /// Whether `text`'s root element is `<svg`. Before it may come whitespace and up to
+    /// `maximumSVGPreambleItems` of: an XML prolog (`<?xml … ?>`), comments (`<!-- … -->`) and a
+    /// `<!DOCTYPE svg …>` naming `svg` as its root. A DOCTYPE with an internal subset (`[ … ]`) is refused,
+    /// since it can declare entities for whatever later reads the copy, and so is any other DOCTYPE, such
+    /// as HTML's. This only scans text; the markup is never parsed.
+    static func startsWithSVGRoot(_ text: String) -> Bool {
+        var rest = Substring(text)
+        func skipWhitespace() { rest = rest.drop { $0.isWhitespace } }
+        func skip(past terminator: String) -> Bool {
+            guard let end = rest.range(of: terminator) else { return false }
+            rest = rest[end.upperBound...]; return true
         }
+        skipWhitespace()
+        for _ in 0..<maximumSVGPreambleItems {
+            if rest.hasPrefix("<?xml") {
+                guard skip(past: "?>") else { return false }
+            } else if rest.hasPrefix("<!--") {
+                rest = rest.dropFirst(4)
+                guard skip(past: "-->") else { return false }
+            } else if rest.hasPrefix("<!DOCTYPE") {
+                let declaration = rest.dropFirst(9)
+                guard let end = declaration.firstIndex(of: ">"), !declaration[..<end].contains("["),
+                      declaration[..<end].split(whereSeparator: \.isWhitespace).first == "svg" else { return false }
+                rest = declaration[declaration.index(after: end)...]
+            } else {
+                break
+            }
+            skipWhitespace()
+        }
+        guard rest.hasPrefix("<svg"), let next = rest.dropFirst(4).first else { return false }
+        return next.isWhitespace || next == ">" || next == "/"
+    }
+
+    /// Whether downloaded bytes start with the signature of a format `kind` accepts. The app then decodes
+    /// them with ImageIO, which must report that format, before copying; this refuses mismatches early.
+    public static func hasImageSignature(_ data: Data, kind: Kind) -> Bool {
+        ExtensionImageFormat.detect(data).map(kind.formats.contains) ?? false
+    }
+
+    /// The text to copy for an `image` download that is SVG markup rather than a raster image, under the
+    /// same rules as an `svg` copy; nil for anything else, including bytes with an image signature.
+    public static func imageKindSVG(_ data: Data) -> String? {
+        ExtensionImageFormat.detect(data) == nil ? downloadedText(data, kind: .svg) : nil
     }
 }
 
