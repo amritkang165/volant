@@ -23,6 +23,7 @@ parser.add_argument("--clone", default="volant-input-e2e")
 parser.add_argument("--with-chrome", action="store_true")
 parser.add_argument("--build", help="an existing build.sh output directory")
 parser.add_argument("--keep", action="store_true", help="leave the clone running for follow-up checks; delete it yourself")
+parser.add_argument("--only", choices=["menus"], help="after the grant, run only the Search Menu Items checks")
 args = parser.parse_args()
 
 output = Path(tempfile.mkdtemp(prefix="volant-input-e2e-"))
@@ -65,7 +66,7 @@ try:
     address = subprocess.check_output(["tart", "ip", args.clone], text=True).strip()
     with (output / "e2e.log").open("w") as handle:
         subprocess.run(["ssh", "-i", str(key), "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "IdentitiesOnly=yes",
-                        "-o", "LogLevel=ERROR", f"admin@{address}", f"bash '{guest}/e2e.sh'"],
+                        "-o", "LogLevel=ERROR", f"admin@{address}", f"E2E_ONLY={args.only or ''} bash '{guest}/e2e.sh'"],
                        stdout=handle, stderr=subprocess.STDOUT, timeout=1800, check=False)
 finally:
     if args.keep:

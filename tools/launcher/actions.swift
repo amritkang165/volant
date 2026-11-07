@@ -1593,6 +1593,7 @@ struct Scenario {
 /// - herdr: question cards clicked at fixed offsets from the panel height, machine rows and the footer.
 /// - translate: the Translate screen drawn in the panel, and its draft across focus loss and dismissal.
 /// - rex: Rex pane rows and the footer status drawn in the panel.
+/// - menu-items: Search Menu Items' setting row, menu item rows with shortcut badges, and Return.
 /// - search-scopes: the Contacts, Files and Clipboard scopes' Back chip and rows drawn in the panel.
 /// - clipboard-recovery, spotlight-recovery: error, progress and Retry states drawn in the panel.
 /// Default size only, because they draw standalone windows that ignore the launcher size:
@@ -1630,6 +1631,57 @@ func serversScenario() throws {
     copied = []
     focusActionSearch(); key("\r", 36, .command)
     verify(copied == ["http://localhost:3000"], "Command-Return in the menu copies the URL: \(copied)")
+}
+
+/// Search Menu Items' helper calls, answered with fictional menus so no input helper runs and no
+/// real app is read or pressed.
+final class FixtureMenuClient: MenuItemsClient {
+    var presses: [[String]] = []
+    func menuItems(pid: Int32, bundleID: String, completion: @escaping (MenuItemsReply?) -> Void) {
+        completion(MenuItemsReply(items: [
+            MenuItem(path: ["Quill", "Quit Quill"], shortcut: MenuShortcut(key: "Q", modifiers: 0)),
+            MenuItem(path: ["File", "New Draft"], shortcut: MenuShortcut(key: "N", modifiers: 0)),
+            MenuItem(path: ["File", "Open Recent", "Harbor Notes.quill"]),
+            MenuItem(path: ["File", "Export", "PDF…"], shortcut: MenuShortcut(key: "E", modifiers: MenuShortcut.shift)),
+            MenuItem(path: ["File", "Export", "Plain Text…"]),
+            MenuItem(path: ["Format", "Make Plain Text"], shortcut: MenuShortcut(key: "T", modifiers: MenuShortcut.shift)),
+            MenuItem(path: ["Format", "Font", "Show Fonts"], shortcut: MenuShortcut(key: "T", modifiers: 0)),
+            MenuItem(path: ["Format", "Make Rich Text"], enabled: false),
+            MenuItem(path: ["View", "Enter Full Screen"], shortcut: MenuShortcut(key: "F", modifiers: MenuShortcut.control)),
+        ]))
+    }
+    func pressMenuItem(pid: Int32, path: [String], bundleID: String, completion: @escaping (MenuPressReply?) -> Void) {
+        presses.append(path)
+        completion(MenuPressReply(pressed: true))
+    }
+}
+
+/// Search Menu Items: the row that opens the setting while the switch is off, a fictional app's
+/// menu items with paths, shortcut badges and a dimmed disabled item, filtering, and Return hiding
+/// the launcher and pressing the item by its path through the fake helper.
+func menuItemsScenario() throws {
+    summon()
+    panel.model.query = "menus"; settle()
+    verify(panel.model.rows.map(\.id) == ["command:menu-items-off"], "With the switch off, menus offers the setting: \(panel.model.rows.map(\.id))")
+    try render("menu-items-off")
+    let client = FixtureMenuClient()
+    panel.model.config.searchMenuItems = true
+    panel.model.menuItems.client = client
+    panel.model.menuItems.pressDelay = 0
+    panel.model.menuItems.activate = { _ in }
+    panel.model.menuItems.capture(MenuTarget(pid: 4242, bundleID: "com.example.quill", name: "Quill", path: nil))
+    panel.model.query = ""; settle()
+    panel.model.query = "menus"; settle()
+    verify(waitUntil { panel.model.rows.count == 9 }, "menus lists the fictional menu items: \(panel.model.rows.map(\.id))")
+    verify(panel.model.sections.map(\.title) == ["Quill Menus"] || language != nil, "The section names the app")
+    try render("menu-items")
+    panel.model.query = "menus export"; settle()
+    verify(waitUntil { panel.model.rows.count == 2 }, "Typing filters the menu items: \(panel.model.rows.map(\.id))")
+    try render("menu-items-filtered")
+    key("\r", 36)
+    verify(waitUntil { client.presses == [["File", "Export", "PDF…"]] && !panel.isVisible }, "Return hides the launcher and presses the item by path: \(client.presses)")
+    verify(panel.model.menuItems.items.isEmpty && panel.model.menuItems.target == nil, "Dismissing forgets the menu titles")
+    print("PASS: Search Menu Items offers its setting while off, lists and filters fictional menus, and presses by path")
 }
 
 /// Volant's own Contacts, Files and Clipboard scopes, entered from their command rows with Return
@@ -1728,6 +1780,7 @@ let scenarios: [Scenario] = [
     Scenario(name: "herdr", sizeSensitive: true, run: herdrScenario),
     Scenario(name: "rex", sizeSensitive: true, run: rexScenario),
     Scenario(name: "servers", sizeSensitive: true, run: serversScenario),
+    Scenario(name: "menu-items", sizeSensitive: true, run: menuItemsScenario),
     Scenario(name: "search-scopes", sizeSensitive: true, run: searchScopesScenario),
     Scenario(name: "rex-overview", sizeSensitive: false, run: rexOverviewScenario),
     Scenario(name: "api-settings", sizeSensitive: false, run: apiSettingsScenario),
