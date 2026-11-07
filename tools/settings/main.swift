@@ -371,7 +371,10 @@ if CommandLine.arguments.contains("--render") {
                     guard let document = scroll.documentView else { continue }
                     document.scroll(NSPoint(x: 0, y: document.isFlipped ? document.bounds.height : 0))
                 }
-                RunLoop.main.run(until: Date().addingTimeInterval(0.15))
+                let deadline = Date().addingTimeInterval(2)
+                repeat { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) } while menuItemsAccess.state == .checking && Date() < deadline
+                RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+                precondition(!enabled || menuItemsAccess.state == (trusted ? .allowed : .notAllowed), "Search Menu Items shows \(menuItemsAccess.state)")
                 capture(theme + "-General-" + name)
                 print("Rendered \(theme) General \(name)")
             }

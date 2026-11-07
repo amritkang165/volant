@@ -48,11 +48,13 @@ final class MenuItemsAccess: ObservableObject {
         check(prompt: false)
     }
 
-    /// Asks the helper for its status; a reply after the owner turned the switch off is ignored.
+    /// Asks the helper for its status; a reply after the owner turned the switch off, or superseded by
+    /// a later check, is ignored. A quiet re-check keeps showing the last answer until the new one
+    /// arrives, so Settings doesn't flash Checking each time the section scrolls back into view.
     private func check(prompt: Bool) {
         generation += 1
         let current = generation
-        state = .checking
+        if prompt || state == .idle || state == .unavailable { state = .checking }
         client.status(prompt: prompt) { [weak self] status in
             guard let self, self.generation == current else { return }
             guard let status else { self.state = .unavailable; return }

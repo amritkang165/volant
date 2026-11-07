@@ -54,10 +54,21 @@ process = subprocess.Popen(["tart", "run", args.clone, "--no-graphics", "--no-au
                            stdout=log, stderr=subprocess.STDOUT)
 guest = "/Volumes/My Shared Files/artifacts"
 address = "(unknown)"
+
+
+def reachable():
+    """Whether the guest agent answers; a probe that hangs while the guest boots counts as not yet."""
+    try:
+        return subprocess.run(["tart", "exec", args.clone, "/usr/bin/true"], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, timeout=15).returncode == 0
+    except subprocess.TimeoutExpired:
+        return False
+
+
+
 try:
     deadline = time.time() + 300
-    while subprocess.run(["tart", "exec", args.clone, "/usr/bin/true"], stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, timeout=15).returncode != 0:
+    while not reachable():
         if process.poll() is not None or time.time() > deadline:
             raise RuntimeError(f"Guest did not become reachable; see {output / 'tart.log'}")
         time.sleep(5)
