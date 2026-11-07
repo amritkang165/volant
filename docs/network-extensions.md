@@ -129,7 +129,67 @@ Kingdom's mixed system reads as metric).
     sRGB bitmap, so no metadata, color profile or animation survives, and replies with that PNG. A GIF
     shows its first frame and an ICO its largest entry. The app decodes only that reply, and only when it
     is a single-frame PNG of at most 64 KB and 64 by 64 pixels.
-  - *SVG.* Volant never renders untrusted SVG: an image URL that returns SVG shows the placeholder.
+  - *SVG (after 0.3.36).* An image URL that returns SVG markup (detected as for a copy: no raster
+    signature, UTF-8 without NUL, an `<svg` root after the allowed preamble) is drawn after checking, in
+    the extension helper, never in the app or the fetch helper. Before that change it showed the
+    placeholder, as it still does on 0.3.36. The steps:
+    1. `VolantFetchHost.rowImage` downloads it under the rules above, does not draw it, and checks it
+       with `ExtensionSVGPreview` (VolantCore). Accepted markup goes back to Volant unchanged, marked as
+       SVG; refused markup goes back as no data, still marked.
+    2. Volant does not parse or draw the markup. It forwards the bytes to `VolantExtensionHost`
+       (sandboxed, no `network.client`, no file access outside its container) through one call,
+       `rasterizeSVG(data:maximumPixels:reply:)`, on a fresh connection.
+    3. The extension helper checks the markup again, then draws it with AppKit's own SVG image
+       representation (`NSImage(data:)`, which must open it with the class AppKit registers for
+       `public.svg-image`, CoreSVG; not WebKit) into the same fresh 8-bit sRGB bitmap the raster path
+       uses, at most 64 pixels on its longer side, and replies with that PNG. The renderer's own bitmap
+       never leaves the helper. ImageIO has no SVG decoder on macOS 27 (`CGImageSourceCreateWithData`
+       reports no type), so AppKit's representation is the only native non-browser renderer.
+    4. A watchdog ends the helper if drawing passes 1 second (`ExtensionSVGPreview.renderTimeout`), as
+       for a runaway module, and launchd starts a fresh one for the next request. Volant gives up 1.5
+       seconds after sending the markup (10 seconds to start the helper) and shows the placeholder.
+       A helper stopped this way also stops any extension run it was doing at that moment, which then
+       reports that it stopped.
+    5. The app accepts only that PNG, under the usual thumbnail checks, and caches it like any row image.
+       Refusals, timeouts and failures are cached as failures for the session, so a file that stops the
+       helper is not sent again. `ExtensionActivity` records the GET by host and the drawing as
+       `svgRender` (completed, denied, timedOut or failed), never any markup.
+
+    `ExtensionSVGPreview` is a token scan, not an XML parser: it never resolves entities, reads a DTD or
+    follows a reference, and it refuses rather than rewrites. It refuses:
+    - a DOCTYPE or any other `<!` declaration (so no entities, billion laughs or XXE), and processing
+      instructions other than a leading `<?xml … ?>`;
+    - `<script>`, `<foreignObject>`, `<image>`, `<feImage>`, `iframe`, `object`, `embed`, `audio`,
+      `video`, `canvas`, `img`, `link`, `meta`, `base`, `xi:include` and the other embedding elements,
+      and animation elements (`set`, `animate…`), which can change attributes after the check;
+    - `on…` event attributes, `src`, `xml:base`, and any `href` or `xlink:href` (any prefix) not starting
+      with `#`;
+    - CSS in a `<style>` element or any attribute with `@import`, `@font-face`, a backslash escape, an
+      unterminated comment, a `url(` other than `url(#…)`, or `image(`, `image-set(`, `cross-fade(` or
+      `src(`; character references are decoded before these checks, so `&#117;rl(` is caught;
+    - filters and masks (`<filter>`, any `fe…` primitive, `<mask>`, the `filter` and `mask` attributes,
+      and CSS naming either). CoreSVG draws them at the document's own resolution before scaling down:
+      measured on macOS 27, one blurred rectangle on a 16,384-unit canvas, or on a 64-unit canvas under
+      `scale(256)`, used about 7 GB; a mask on a 16,384 canvas used about 3 GB. Clip paths, gradients,
+      patterns and group opacity under the same scale stayed near 15 MB, so they are allowed. Logos that
+      use a blur, such as svgl's Google logo, keep the placeholder;
+    - a `<use>` pointing at something that itself contains a `<use>` (exponential drawing), including a
+      `<use>` that draws itself or an ancestor;
+    - more than 256 KB, 5,000 elements or 64 levels of nesting, and any `width`, `height` (in px, pt,
+      pc, mm, cm, in, em or ex) or `viewBox` value above 16,384;
+    - malformed markup: unbalanced or unterminated tags, unquoted attributes, `<` in an attribute value,
+      undefined entities, a bare `&`, and text or another element after the root.
+
+    Checked against real logos: svgl's GitHub, Vercel, Figma (clip path) and Instagram (gradients linked
+    by `xlink:href="#…"`) and Simple Icons 16's GitHub, Nike and Airbus pass unchanged. What the check
+    cannot bound is drawing time: one evenodd path of 2,000 long crossing segments (21 KB) took 2.6
+    seconds, which is what the 1-second watchdog is for. With the check bypassed, CoreSVG opened no
+    connection to a loopback listener and drew no local file for `<image>`, `<use>`, CSS `@import` and
+    `url()`, `@font-face`, `feImage`, external DTDs and entities, XInclude, script and `foreignObject`
+    references, in an unsandboxed process; an unresolved `<image>` draws as a red box, and `data:` images
+    do draw, which is one reason `<image>` is refused outright. Simple Icons marks have no fill and draw
+    black, which is hard to see in Dark appearance; extension authors should prefer a colored or
+    appearance-appropriate variant. Volant does not tint previews.
   - *Memory only.* Thumbnails, and failures, are cached in memory by extension and URL for the session,
     at most 200 entries and 4 MB of pixels, least recently used first out; nothing is written to disk,
     and Volant forgets them when it quits. Each fetch is recorded as a GET in `ExtensionActivity`, naming
@@ -138,8 +198,9 @@ Kingdom's mixed system reads as metric).
     own fetches reveal the owner's address, timing and query to those hosts. Row images add three
     things those fetches don't: requests that follow what the owner scrolls to (which rows were on
     screen, like a read receipt per row), up to 30 more requests per list without any owner choice
-    beyond opening it, and an image decoder fed from the network automatically, even if only in the
-    sandboxed helper. That is a small but real step beyond reading data, so the owner opts in.
+    beyond opening it, and an image decoder (and, for SVG, a renderer) fed from the network
+    automatically, even if only in sandboxed helpers. That is a small but real step beyond reading data,
+    so the owner opts in. SVG previews add no permission: they fall under `row-images`.
   - *Older Volant.* Versions before row images ignore `image`, and the row keeps its symbol or the
     extension's icon. But 0.3.35 refuses a manifest whose `permissions` names one it does not know, so
     an extension that declares `row-images` does not load there at all; publish it only for a Volant
@@ -263,6 +324,21 @@ from their row, without a scope.
   The Actions fixture's `extension-row-images` scenario renders the prompt and rows with loaded, loading
   and failed images in light and dark. A row image through the signed fetch helper and real services
   are not verified.
+- SVG previews: `swift test --package-path Core --filter ExtensionSVGPreviewTests` runs the check over
+  real svgl and Simple Icons logos and a hostile corpus (DOCTYPE, billion laughs, XXE, script, event
+  attributes, `foreignObject`, external `href`/`xlink:href`, `<image>`, `@import`, `url(http…)`, escapes,
+  filters, masks, nested `<use>`, oversized, deep and huge-canvas files). `VolantTests/ExtensionSVGRasterizerTests`:
+  logos become small PNGs of the right size and color, refused markup is never drawn, a pathological
+  file that passes the check outlasts the timeout, and, where a loopback listener is allowed (CI, not
+  the sandboxed local test host), the renderer fetches nothing with the check bypassed.
+  `ExtensionRowImageSVGTests` (fake helpers): the markup reaches the extension helper unchanged, only
+  its PNG is shown, refusals, timeouts and failures keep the placeholder and are cached, a change while
+  drawing drops the result, and activity. `tools/check-extensions.sh` drives the production
+  `ExtensionHost.rasterizeSVG`, confirms its watchdog exits on the pathological file, and repeats the
+  loopback and local-file check unsandboxed. The Actions fixture's `extension-row-images-svg` scenario
+  renders svgl and Simple Icons logos and refused files in light and dark. Not verified: the signed
+  `VolantExtensionHost` XPC call (`tools/check-extensions-xpc.sh` needs the exported app), real
+  servers, and macOS versions before 27 beyond CI's build and tests.
 - `VolantTests/ExtensionRowCopyTests` (a fake fetch helper and clipboard): text, SVG, text and each image
   type; wrong types, oversized and failed downloads, unapproved hosts, a host removed mid-download,
   and disabled, blocked, revoked or unpermitted extensions; the fingerprint. `LauncherExtensionCopyTests`:

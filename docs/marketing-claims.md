@@ -274,6 +274,7 @@ Merged after 0.3.36, not in the current download:
 
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
+| SVG row previews: a row `image` that is SVG is checked (no DOCTYPE, script, event attributes, external references, embedded images, filters or masks; size, element, nesting and canvas limits) by the fetch helper and again by the extension helper, which has no network access and draws it with AppKit's SVG representation into the same 64-pixel PNG within one second; the app never draws it; no new permission | No | This PR; ExtensionSVGPreviewTests (real svgl and Simple Icons logos, hostile corpus), ExtensionSVGRasterizerTests, ExtensionRowImageSVGTests (fake helpers), `tools/check-extensions.sh` (production `rasterizeSVG`, watchdog exit on a slow file, no connection or file read for external references with the check bypassed, unsandboxed), Actions fixture `extension-row-images-svg` renders in light and dark; the signed XPC call, real servers and pre-27 macOS rendering beyond CI are unverified; logos that use filters or masks keep the placeholder; monochrome marks with no fill draw black and are hard to see in Dark | Extensions docs, marked as coming in the next release; say SVG is checked and drawn outside the app with no network access; never "any SVG" or "safe" without the checks |
 
 ## Privacy language
 

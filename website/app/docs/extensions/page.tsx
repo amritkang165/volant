@@ -421,8 +421,18 @@ export default function Extensions() {
         <li>
           <strong>Decoded outside Volant.</strong> Volant&rsquo;s sandboxed
           network helper downloads the image and hands Volant a small PNG it
-          drew itself. Volant never displays SVG from an extension; an SVG
-          image shows the extension&rsquo;s icon instead.
+          drew itself. In this release an SVG image shows the
+          extension&rsquo;s icon instead.
+        </li>
+        <li>
+          <strong>SVG, checked first.</strong> Coming in the next release:
+          SVG logos show too. Volant checks each file and refuses anything
+          that could reach another file or the network, run a script, embed
+          a page or another image, or grow out of bounds, then its extension
+          helper, which has no network access, draws it into the same small
+          PNG within one second. The app itself never draws the SVG, and a
+          refused or slow file shows the extension&rsquo;s icon. It needs no
+          extra permission.
         </li>
         <li>
           <strong>Forgotten when Volant quits.</strong> Images stay in memory,
