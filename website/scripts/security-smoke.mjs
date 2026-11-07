@@ -26,6 +26,7 @@ try {
           directive: event.effectiveDirective, blocked: event.blockedURI,
         }));
       });
+      await page.route('**/try/calculator/**', route => route.abort());
       let lastNonce;
       for (const route of ['/', '/try', '/docs', '/docs/agents', '/docs/calculator', '/fictional-missing-page']) {
         console.log(viewport.width, colorScheme, route);
