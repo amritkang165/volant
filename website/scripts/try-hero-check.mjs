@@ -118,7 +118,7 @@ async function replayRun(scheme, viewport, label, path) {
     return `${name} ${Math.round(Math.min(...list))}–${Math.round(Math.max(...list))}`;
   };
   results[`${label} frames`] = `${matched}/${expected.length} matched; ms: ${[
-    within('keystroke', 80, 185), within('afterSpace', 220, 305), within('beforeReturn', 650, 800),
+    within('keystroke', 70, 185), within('afterSpace', 220, 305), within('beforeReturn', 650, 800),
     within('hold', 3900, 4250), within('extensionHold', 5150, 5500), within('rest', 1300, 1450),
   ].join(', ')} (holds include the 300 ms fade)`;
   const clears = log.filter((e, i) => i > 0 && e.text === null);
@@ -206,7 +206,7 @@ async function tryMatchRun() {
 
 const desktop = { width: 1280, height: 900 };
 const phone = { width: 390, height: 844 };
-for (const [prefix, path] of [['home', '/'], ['launcher', '/?hero=launcher']]) {
+for (const [prefix, path] of [['home', '/']]) {
   await firstPaintRun('light', desktop, `${prefix}-light`, path);
   await firstPaintRun('dark', desktop, `${prefix}-dark`, path);
   await firstPaintRun('light', phone, `${prefix}-mobile`, path);

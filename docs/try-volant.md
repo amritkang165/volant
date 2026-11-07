@@ -141,12 +141,10 @@ before the next example.
   field's description says the examples are recorded.
 - **Reduced motion.** Nothing is typed: the card shows the prompt and the final frame of
   `5 km in miles`, captioned as a recorded example.
-- **Checks.** `scripts/try-hero-check.mjs <base> <out>` checks both layouts: prompt-only first
+- **Checks.** `scripts/try-hero-check.mjs <base> <out>` checks the homepage: prompt-only first
   paint, every replayed frame against the recording, final answers against `/try`, hand-off,
   reduced motion, and no WebAssembly or rates requests on the homepage.
-- **Two layouts for review.** `/` keeps the headline, intro and Download beside the card.
-  `/?hero=launcher` makes the large card the first viewport: a one-line kicker above, Download and
-  Star below, and the usual headline and copy after it.
+- **Layout.** The headline, intro and Download sit above the card, which spans the hero's width.
 
 "Try it" is the first link in the site header, and the hero's secondary link ("Try it now") goes to
 `/try`. A homepage section and a line on `/try` say that extensions are WebAssembly: the same file

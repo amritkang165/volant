@@ -108,9 +108,8 @@ function FrameField({ frame, caret }: { frame: Frame; caret: boolean }) {
  * extension's list), fades and clears like Escape, and after a rest on the prompt the next example
  * starts. It computes nothing. Focusing the field stops and clears the replay;
  * clicking the card or typing hands over to /try with what was typed. Under reduced motion there is
- * no replay: the CSS shows one example's final frame with a caption. `large` is the
- * launcher-as-hero variant. */
-export function HeroLauncher({ large = false }: { large?: boolean }) {
+ * no replay: the CSS shows one example's final frame with a caption. */
+export function HeroLauncher() {
   const [frame, setFrame] = useState<Frame | null>(null);
   const [caret, setCaret] = useState(false);
   const [stopped, setStopped] = useState(false);
@@ -150,7 +149,7 @@ export function HeroLauncher({ large = false }: { large?: boolean }) {
 
   return (
     <section
-      className={`try-launcher hero-launcher${large ? ' hero-launcher-large' : ''}`}
+      className="try-launcher hero-launcher"
       aria-label="Volant launcher demo"
       data-fading={fading && !stopped ? '' : undefined}
       onPointerDown={(event) => { if (!(event.target as Element).closest('a')) handOff(''); }}

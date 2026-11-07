@@ -1,10 +1,8 @@
 'use client';
 // oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { HeroLauncher } from '@/components/hero-launcher';
-import { StarButton } from '@/components/star-button';
 import { AppearanceButton } from '@/components/site-shell';
 import {
   ArrowRight,
@@ -86,11 +84,9 @@ const benefits = [
   },
 ];
 
-/** The homepage. `?hero=launcher` previews the variant where the launcher card is the first
- * viewport, with the current headline and copy below it. */
+/** The homepage: the headline, intro and Download above the in-browser launcher card. */
 export default function Home() {
   const [appearance, setAppearance] = useState('system');
-  const launcherHero = useSearchParams()?.get('hero') === 'launcher';
   return (
     <div className="home-refresh" data-theme={appearance}>
       <a className="skip" href="#main">
@@ -100,24 +96,7 @@ export default function Home() {
         <AppearanceButton value={appearance} onChange={setAppearance} />
       </SiteHeader>
       <main id="main">
-        {launcherHero ? (
-          <section className="home-launcher-hero wrap" aria-labelledby="launcher-hero-title">
-            <p className="home-kicker" id="launcher-hero-title">
-              TYPE TO TRY VOLANT, RIGHT HERE.
-            </p>
-            <HeroLauncher large />
-            <div className="home-launcher-actions">
-              <a className="button" href={downloadURL} download>
-                Download for Mac <ArrowRight size={18} />
-              </a>
-              <StarButton href={repositoryURL} />
-            </div>
-            <p className="home-requirements">
-              Free & open source · macOS 15+ · Apple silicon
-            </p>
-          </section>
-        ) : null}
-        <section className={`home-hero wrap${launcherHero ? '' : ' home-hero-try'}`}>
+        <section className="home-hero wrap home-hero-try">
           <div className="home-hero-copy">
             <p className="home-kicker">
               A LITTLE LESS FRICTION. A LOT MORE FLOW.
@@ -144,7 +123,7 @@ export default function Home() {
               Free & open source · macOS 15+ · Apple silicon
             </p>
           </div>
-          {launcherHero ? null : <HeroLauncher />}
+          <HeroLauncher />
         </section>
         <div className="home-proof wrap">
           <span>

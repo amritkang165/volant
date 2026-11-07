@@ -183,14 +183,10 @@ for (const { scheme, viewport, label } of [
   { scheme: 'dark', viewport: { width: 390, height: 844 }, label: 'mobile-dark' },
 ]) {
   await firstPaintRun(scheme, viewport, label);
-  await firstPaintRun(scheme, viewport, `launcher-${label}`, '?hero=launcher');
 }
 await heroRun('light', { width: 1280, height: 900 }, 'light');
 await heroRun('dark', { width: 1280, height: 900 }, 'dark');
 await heroRun('dark', { width: 390, height: 844 }, 'mobile-dark');
-await heroRun('light', { width: 1280, height: 900 }, 'launcher-light', '?hero=launcher');
-await heroRun('dark', { width: 1280, height: 900 }, 'launcher-dark', '?hero=launcher');
-await heroRun('dark', { width: 390, height: 844 }, 'launcher-mobile-dark', '?hero=launcher');
 await tryPageRun('light', { width: 1280, height: 900 }, 'light');
 await tryPageRun('dark', { width: 1280, height: 900 }, 'dark');
 await tryPageRun('light', { width: 390, height: 844 }, 'mobile-light');

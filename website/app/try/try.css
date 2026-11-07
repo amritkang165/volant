@@ -333,33 +333,6 @@
   color: inherit;
   text-decoration: underline;
 }
-/* The launcher-as-hero variant: a bigger field and answer. */
-.hero-launcher-large .try-bar {
-  padding: 22px 26px;
-}
-.hero-launcher-large .try-bar input,
-.hero-launcher-large .hero-ghost {
-  font-size: 30px;
-}
-.hero-launcher-large .hero-ghost {
-  left: 26px;
-  right: 26px;
-}
-.hero-launcher-large .try-answer-result {
-  font-size: 28px;
-}
-.hero-launcher-large .hero-results,
-.hero-launcher-large .hero-results:empty {
-  height: calc(4 * 68px + 20px);
-  padding: 10px;
-}
-.hero-launcher-large .try-row {
-  height: 68px;
-}
-.hero-launcher-large .try-footer {
-  padding: 12px 24px;
-}
-
 /* The /try page, in the homepage's type and spacing. */
 .try-page {
   max-width: 940px;
@@ -420,9 +393,5 @@
   .try-bar input,
   .hero-ghost {
     font-size: 18px;
-  }
-  .hero-launcher-large .try-bar input,
-  .hero-launcher-large .hero-ghost {
-    font-size: 21px;
   }
 }

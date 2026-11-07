@@ -1,7 +1,7 @@
 // Measures the homepage hero in headless Chromium with a 4x CPU throttle and DevTools' "Fast 4G"
 // profile (9 Mbps down, 1.5 Mbps up, 60 ms latency): first contentful paint, largest contentful
 // paint, and when the hero card first shows replayed example content (a typed character).
-// Usage: node scripts/try-hero-timing.mjs <base URL> [runs]   (also measures /?hero=launcher)
+// Usage: node scripts/try-hero-timing.mjs <base URL> [runs]
 import { chromium } from 'playwright';
 
 const [base, runsArg] = process.argv.slice(2);
@@ -51,7 +51,7 @@ async function measure(path) {
 /** The median of a list of numbers. */
 const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 
-for (const path of ['/', '/?hero=launcher']) {
+for (const path of ['/']) {
   const samples = [];
   for (let i = 0; i < runs; i++) samples.push(await measure(path));
   const summary = Object.fromEntries(['fcp', 'lcp', 'example'].map((key) => [key, Math.round(median(samples.map((s) => s[key])))]));
