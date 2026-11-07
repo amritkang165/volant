@@ -1,27 +1,60 @@
-// The "Try Volant" calculator worker: VolantCore's CalculationAnswer.answers built for WASI. It
-// downloads the gzipped module once, decompresses it with the browser's DecompressionStream,
-// compiles it once, and answers each request with a fresh instance. The page ends a request that
-// runs too long by terminating this worker.
+// The "Try Volant" calculator worker: VolantCore's CalculationAnswer.answers built for WASI. The
+// page asks it to load as soon as it is idle; it streams the gzipped module (named by its content
+// hash, so the browser can cache it for good), reports download progress, decompresses it with
+// DecompressionStream, compiles it once, and answers each request with a fresh instance. The page
+// ends a request that runs too long by terminating this worker.
 import { answer } from './calculator.js';
 
-let compiled = null;
+let loading = null;
 
-/** Downloads, decompresses and compiles the calculator module, once. */
-async function load() {
-  if (!compiled) {
-    const started = performance.now();
-    const response = await fetch('/try/calculator/VolantAnswers.wasm.gz');
-    if (!response.ok || !response.body) throw new Error('Calculator unavailable');
-    const bytes = await new Response(response.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
-    const fetchedMs = performance.now() - started;
-    compiled = await WebAssembly.compile(bytes);
-    self.postMessage({ loaded: true, fetchedMs, compiledMs: performance.now() - started - fetchedMs, bytes: bytes.byteLength });
-  }
-  return compiled;
+/** Posts progress at most once per percent, so the page isn't flooded with messages. */
+function reporter(total) {
+  let last = -1;
+  return (received) => {
+    const percent = total ? Math.floor((received / total) * 100) : -1;
+    if (percent !== last) {
+      last = percent;
+      self.postMessage({ progress: { received, total } });
+    }
+  };
 }
 
-/** Answers one request (`{id, request}`) with the module's JSON reply text or an error. */
+/** Downloads, decompresses and compiles the calculator module once, reporting each phase. */
+function load() {
+  loading ??= (async () => {
+    const started = performance.now();
+    const manifest = await (await fetch('/try/calculator.json', { cache: 'no-cache' })).json();
+    if (!/^VolantAnswers-[0-9a-f]{16}\.wasm\.gz$/.test(manifest.file)) throw new Error('Calculator unavailable');
+    const response = await fetch(`/try/calculator/${manifest.file}`);
+    if (!response.ok || !response.body) throw new Error('Calculator unavailable');
+    const declared = Number(response.headers.get('content-length'));
+    const total = declared > 0 ? declared : Number(manifest.bytes) > 0 ? Number(manifest.bytes) : 0;
+    const report = reporter(total);
+    let received = 0;
+    const counted = response.body.pipeThrough(new TransformStream({
+      transform(chunk, controller) {
+        received += chunk.byteLength;
+        report(received);
+        controller.enqueue(chunk);
+      },
+      flush() { self.postMessage({ preparing: true }); },
+    }));
+    const bytes = await new Response(counted.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    const downloadedMs = performance.now() - started;
+    const compiled = await WebAssembly.compile(bytes);
+    // Resource Timing reports a transfer size of 0 when the browser's cache answered.
+    const timing = performance.getEntriesByName(new URL(`/try/calculator/${manifest.file}`, self.location.href).href).at(-1);
+    const cached = timing ? timing.transferSize === 0 && timing.decodedBodySize > 0 : false;
+    self.postMessage({ loaded: true, cached, downloadedMs, compiledMs: performance.now() - started - downloadedMs, bytes: received });
+    return compiled;
+  })();
+  loading.catch(() => { loading = null; self.postMessage({ loadError: true }); });
+  return loading;
+}
+
+/** Starts loading on `{preload: true}`; answers `{id, request}` with the module's JSON reply text or an error. */
 self.onmessage = async (event) => {
+  if (event.data.preload) { load().catch(() => {}); return; }
   const { id, request } = event.data;
   try {
     const calculator = await load();

@@ -136,6 +136,65 @@
   border-radius: 5px;
   flex: none;
 }
+/* The calculator's background download: a slim bar under the field, quiet until it's done. */
+.try-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--try-line);
+  font-size: 0.78rem;
+  color: var(--try-muted);
+}
+.try-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.try-progress-label {
+  flex: none;
+  white-space: nowrap;
+}
+.try-progress-track {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--try-chip);
+  overflow: hidden;
+}
+.try-progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 2px;
+  background: #0a84ff;
+  transition: width 0.2s linear;
+}
+.try-progress-fill.indeterminate {
+  width: 30%;
+  animation: try-progress-slide 1.2s ease-in-out infinite;
+}
+@keyframes try-progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(340%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .try-progress-fill {
+    transition: none;
+  }
+  .try-progress-fill.indeterminate {
+    animation: none;
+    width: 100%;
+    opacity: 0.45;
+  }
+}
+.try-progress[data-state='error'] {
+  color: var(--try-error);
+}
 .try-answer-result {
   font-size: 1.35rem;
   font-weight: 600;

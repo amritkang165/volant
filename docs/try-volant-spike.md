@@ -96,8 +96,23 @@ numbers, dates and unit words. Cloudflare static assets are limited to 25 MiB pe
 serves the gzip file (git-ignored, produced by `build.sh`) and the worker decompresses it with
 `DecompressionStream`. Locally (headless Chromium against `wrangler dev` on localhost, five runs) the
 first answer arrived 0.57–0.76 s after typing, of which download, decompression and compile took
-0.11–0.13 s; each later query takes about 8–50 ms with a fresh instance. Over a real connection the 19.4 MB download dominates (several
-seconds on a typical connection), so the page loads it only on the first keystroke and says so.
+0.11–0.13 s; each later query takes about 8–50 ms with a fresh instance. Over a real connection the 19.4 MB download dominates (about
+6.5 s at a throttled 3 MB/s).
+
+**Loading.** The page starts the calculator in the background when it is idle
+(`requestIdleCallback`, two seconds at most), never on a keystroke, and extensions work meanwhile.
+If loading takes over 0.4 s, a slim bar under the field shows "Loading Volant's calculator… 42%"
+from the streamed bytes (Content-Length, or the size in `public/try/calculator.json` when the server
+sends none, as `wrangler dev` doesn't; indeterminate if neither is known), then "Preparing…" while it
+decompresses and compiles (indeterminate; static under reduced motion), then "Calculator ready"
+briefly. A calculator query typed meanwhile shows "Calculator loading… 42% Answers appear when it's
+ready." and is answered automatically. A failed load shows "Couldn't load the calculator." with
+Retry and no answers. The module's file name carries its content hash and `/try/calculator/*` is
+served `public, max-age=31536000, immutable` (added to `scripts/security-headers.mjs`), so a repeat
+visit uses the browser's cache: in a persistent Chromium profile the second visit loaded it from cache
+in 121 ms without showing the bar (`website/scripts/try-cache-check.mjs`; the worker reads Resource
+Timing's transfer size and the footer says "from cache"). Playwright's throwaway profiles keep only
+an in-memory cache, which doesn't hold a 19 MB file, so they always download it.
 
 **How it runs.** Not as a Volant extension: it imports more of WASI than the extension profile allows
 (filesystem calls, `random_get`, `args_*`) and is far over the 2 MiB extension limit. It runs in its

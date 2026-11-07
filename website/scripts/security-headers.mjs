@@ -10,4 +10,8 @@ writeFileSync(new URL('../public/_headers', import.meta.url), [
   '/_next/static/*',
   '  Cache-Control: public, max-age=31536000, immutable',
   '',
+  // The /try calculator module's name carries its content hash, so a second visit reuses it.
+  '/try/calculator/*',
+  '  Cache-Control: public, max-age=31536000, immutable',
+  '',
 ].join('\n'));

@@ -38,7 +38,26 @@ type Outcome = { items: Row[]; missed: boolean; notice: string | null; storage?:
 type CalcAnswer = { input: string; inputDetail?: string; result: string; resultDetail?: string; copyText: string };
 type FeedName = 'ecb' | 'world' | 'crypto';
 type FeedBody = { body: string; fetchedAt: number };
-type CalcState = 'idle' | 'loading' | 'ready' | 'error';
+type CalcState = 'idle' | 'loading' | 'preparing' | 'ready' | 'error';
+type CalcProgress = { received: number; total: number };
+type CalcMessage = Call & {
+  id?: number;
+  progress?: CalcProgress;
+  preparing?: boolean;
+  loaded?: boolean;
+  loadError?: boolean;
+  cached?: boolean;
+  downloadedMs?: number;
+  compiledMs?: number;
+};
+
+/** The calculator's load status in words: "Loading Volant's calculator… 42%", "Preparing…". */
+function loadLabel(state: CalcState, progress: CalcProgress | null, short = false) {
+  const percent = progress && progress.total ? Math.min(100, Math.floor((progress.received / progress.total) * 100)) : null;
+  if (state === 'preparing') return short ? 'Calculator preparing…' : 'Preparing Volant’s calculator…';
+  const prefix = short ? 'Calculator loading…' : 'Loading Volant’s calculator…';
+  return percent === null ? prefix : `${prefix} ${percent}%`;
+}
 
 /** The visitor's IANA zone and locale, so answers read as the app's would on their Mac. */
 function visitorContext() {
@@ -167,6 +186,11 @@ export function TryLauncher() {
   const [calcQuery, setCalcQuery] = useState('');
   const [calcState, setCalcState] = useState<CalcState>('idle');
   const [calcLoad, setCalcLoad] = useState<string | null>(null);
+  const [calcProgress, setCalcProgress] = useState<CalcProgress | null>(null);
+  const [readyFlash, setReadyFlash] = useState(false);
+  const [barVisible, setBarVisible] = useState(false);
+  const barShown = useRef(false);
+  const barTimer = useRef<number | undefined>(undefined);
   const [credits, setCredits] = useState<FeedName[]>([]);
   const [ratesNote, setRatesNote] = useState<string | null>(null);
   const [fetchingRates, setFetchingRates] = useState(false);
@@ -175,16 +199,26 @@ export function TryLauncher() {
   const calcGeneration = useRef(0);
   const feedBodies = useRef(new Map<FeedName, FeedBody>());
 
-  /** Starts the calculator worker; waiting calls on an old one fail. */
+  /** Starts the calculator worker and asks it to load in the background; waiting calls on an old
+   * one fail. Progress, preparing, ready and failure arrive as messages. */
   const startCalculator = useCallback(() => {
     calcWorker.current?.terminate();
     for (const resolve of calcPending.current.values()) resolve({ error: 'Calculator stopped' });
     calcPending.current.clear();
     const created = new Worker('/try/calculator-worker.js', { type: 'module' });
-    created.onmessage = (event: MessageEvent<Call & { id?: number; loaded?: boolean; fetchedMs?: number; compiledMs?: number; bytes?: number }>) => {
-      if (event.data.loaded) {
+    created.onmessage = (event: MessageEvent<CalcMessage>) => {
+      const data = event.data;
+      if (data.progress) { setCalcState('loading'); setCalcProgress(data.progress); return; }
+      if (data.preparing) { setCalcState('preparing'); return; }
+      if (data.loadError) { setCalcState('error'); return; }
+      if (data.loaded) {
+        window.clearTimeout(barTimer.current);
         setCalcState('ready');
-        setCalcLoad(`Calculator loaded in ${Math.round((event.data.fetchedMs ?? 0) + (event.data.compiledMs ?? 0))} ms`);
+        setCalcLoad(`Calculator loaded${data.cached ? ' from cache' : ''} in ${Math.round((data.downloadedMs ?? 0) + (data.compiledMs ?? 0))} ms`);
+        if (barShown.current) {
+          setReadyFlash(true);
+          window.setTimeout(() => { setReadyFlash(false); setBarVisible(false); barShown.current = false; }, 1600);
+        }
         return;
       }
       const resolve = calcPending.current.get(event.data.id ?? -1);
@@ -192,18 +226,24 @@ export function TryLauncher() {
       resolve?.(event.data);
     };
     calcWorker.current = created;
+    setCalcState('loading');
+    setCalcProgress(null);
+    // The bar appears only if loading takes a while, so a cached module never flashes it.
+    window.clearTimeout(barTimer.current);
+    barTimer.current = window.setTimeout(() => { barShown.current = true; setBarVisible(true); }, 400);
+    created.postMessage({ preload: true });
   }, []);
 
-  /** Sends one request to the calculator; the first waits for the download, later ones get 3 s. */
+  /** Sends one request to the calculator; one sent while it loads waits up to five minutes for
+   * the download, later ones get 3 s. */
   const callCalculator = useCallback((request: Record<string, unknown>, loading: boolean) => new Promise<Call>((resolve) => {
     if (!calcWorker.current) startCalculator();
     const id = ++nextCall.current;
     const timer = setTimeout(() => {
       calcPending.current.delete(id);
       startCalculator();
-      setCalcState('idle');
       resolve({ error: 'The calculator took too long and was stopped' });
-    }, loading ? 120_000 : 3000);
+    }, loading ? 300_000 : 3000);
     calcPending.current.set(id, (result) => { clearTimeout(timer); resolve(result); });
     calcWorker.current?.postMessage({ id, request: JSON.stringify(request) });
   }), [startCalculator]);
@@ -227,12 +267,12 @@ export function TryLauncher() {
    * fetches only those, then asks for the answers with the feeds attached. */
   const calculate = useCallback(async (typed: string) => {
     const mine = ++calcGeneration.current;
+    if (calcState === 'error') return;
     const loading = calcState !== 'ready';
-    if (loading) setCalcState('loading');
     const context = { ...visitorContext(), now: Math.floor(Date.now() / 1000) };
     const needs = await callCalculator({ ...context, mode: 'feeds', query: typed }, loading);
     if (mine !== calcGeneration.current) return;
-    if (needs.error) { setCalcState('error'); setCalcAnswers([]); return; }
+    if (needs.error) { setCalcAnswers([]); return; }
     const wanted = JSON.parse(needs.output ?? '{}') as { rates?: boolean; world?: boolean; crypto?: boolean };
     const names: FeedName[] = [...(wanted.rates ? ['ecb' as const] : []), ...(wanted.world ? ['world' as const] : []), ...(wanted.crypto ? ['crypto' as const] : [])];
     const fresh = names.some((name) => !feedBodies.current.has(name));
@@ -281,16 +321,22 @@ export function TryLauncher() {
   useEffect(() => {
     startWorker();
     input.current?.focus();
+    // The calculator downloads in the background once the page is idle; typing never waits for it.
+    const idle = typeof window.requestIdleCallback === 'function'
+      ? window.requestIdleCallback(() => startCalculator(), { timeout: 2000 })
+      : window.setTimeout(() => startCalculator(), 300);
     Promise.all(shipped.map(async ({ folder, keywords }) => {
       const manifest = (await (await fetch(`/try/extensions/${folder}/manifest.json`)).json()) as Manifest;
       return { folder, keywords, manifest };
     })).then(setExtensions, () => setMessage('Couldn’t load the demo extensions.'));
     fetch('/try/samples.json').then((r) => r.json() as Promise<Samples>).then(setSamples, () => setSamples(null));
     return () => {
+      if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle);
+      window.clearTimeout(idle);
       worker.current?.terminate();
       calcWorker.current?.terminate();
     };
-  }, [startWorker]);
+  }, [startWorker, startCalculator]);
 
   useEffect(() => {
     const typed = query.trim();
@@ -463,6 +509,32 @@ export function TryLauncher() {
           </select>
         ) : null}
       </div>
+      {calcState === 'error' || (barVisible && (calcState === 'loading' || calcState === 'preparing' || readyFlash)) ? (
+        <div className="try-progress" data-state={calcState}>
+          {calcState === 'error' ? (
+            <span className="try-progress-label">
+              Couldn’t load the calculator.
+              <button type="button" className="try-suggestion" onClick={() => startCalculator()}>Retry</button>
+            </span>
+          ) : (
+            <>
+              <span className="try-progress-label" aria-live="polite">{calcState === 'ready' ? 'Calculator ready' : loadLabel(calcState, calcProgress)}</span>
+              <progress
+                className="try-visually-hidden"
+                aria-label="Loading Volant’s calculator"
+                max={100}
+                value={calcState === 'loading' && calcProgress?.total ? Math.floor((calcProgress.received / calcProgress.total) * 100) : calcState === 'ready' ? 100 : undefined}
+              />
+              <span className="try-progress-track" aria-hidden>
+                <span
+                  className={`try-progress-fill${calcState === 'preparing' || !calcProgress?.total ? ' indeterminate' : ''}`}
+                  style={calcState === 'loading' && calcProgress?.total ? { width: `${Math.min(100, (calcProgress.received / calcProgress.total) * 100)}%` } : calcState === 'ready' ? { width: '100%' } : undefined}
+                />
+              </span>
+            </>
+          )}
+        </div>
+      ) : null}
       <ul className="try-results" aria-label="Results">
         {answersShown.map((answer, i) => (
           <li key={`calc-${i}-${answer.result}`}>
@@ -512,8 +584,9 @@ export function TryLauncher() {
           </li>
         ))}
       </ul>
-      {!scope && query.trim() && calcState === 'loading' ? <p className="try-empty">Loading Volant’s calculator (about 19 MB, once)…</p> : null}
-      {!scope && query.trim() && calcState === 'error' ? <p className="try-error">The calculator couldn’t load in this browser.</p> : null}
+      {!scope && query.trim() && (calcState === 'loading' || calcState === 'preparing' || calcState === 'idle') ? (
+        <p className="try-empty" aria-live="polite">{loadLabel(calcState, calcProgress, true)} Answers appear when it’s ready.</p>
+      ) : null}
       {!scope && query.trim() && fetchingRates ? <p className="try-empty">Fetching exchange rates…</p> : null}
       {!scope && extensions.length > 0 && commands.length === 0 && answersShown.length === 0 && calcState === 'ready' && calcQuery === query.trim() && !fetchingRates ? (
         <p className="try-empty">Nothing matches “{query.trim()}”. Files, contacts, clipboard and AI run only in the app.</p>
