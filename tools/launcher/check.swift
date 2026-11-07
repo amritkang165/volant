@@ -1073,7 +1073,9 @@ verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!
 sendCoreKey("\r", code: 36)
 verify(fixtureSampler.requests == 1, "Return starts one sample")
 verify(waitUntil { corePanel.isVisible && corePanel.model.selectedRow?.id == "picked-color:hex" }, "The launcher returns with HEX selected")
-verify(corePanel.model.rows.filter { $0.id.hasPrefix("picked-color:") }.count == 4, "HEX, RGB, HSL and OKLCH rows")
+verify(corePanel.model.rows.filter { $0.id.hasPrefix("picked-color:") }.count == 5, "HEX, RGB, HSL and OKLCH rows, then Pick Another Color")
+verify(corePanel.model.rows.last?.id == "picked-color:another" && !corePanel.model.rows.contains { $0.id == "core:colorPicker" },
+       "Pick Another Color follows the formats in place of the Pick Color command")
 try renderCore("color-card")
 corePanel.model.moveSelection(1)
 verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!), "Restore native editor before copying")
@@ -1083,7 +1085,7 @@ corePanel.toggle()
 fixtureSampler.next = nil
 corePanel.model.query = "pick color"
 verify(waitUntil { corePanel.model.rows.contains { $0.id == "picked-color:hex" } }, "The last picked color shows under its phrase")
-corePanel.model.selection = corePanel.model.rows.firstIndex { $0.id == "core:colorPicker" }!
+corePanel.model.selection = corePanel.model.rows.firstIndex { $0.id == "picked-color:another" }!
 verify(corePanel.makeFirstResponder(coreSearchField(in: corePanel.contentView!)!))
 sendCoreKey("\r", code: 36)
 verify(waitUntil { corePanel.isVisible && corePanel.model.query == "pick color" }, "Escape in the loupe returns to Pick Color")

@@ -220,7 +220,8 @@ export default function SystemControl() {
         Return. The launcher steps aside and macOS shows its magnifying loupe;
         click any pixel on screen. The launcher comes back with the color as
         HEX, RGB, HSL and OKLCH, HEX selected, and Return copies the one you
-        choose. Escape in the loupe cancels without copying anything. No
+        choose. <strong>Pick Another Color</strong>, just below, opens the
+        loupe again. Escape in the loupe cancels without copying anything. No
         permission is needed: macOS hands Volant only the color you clicked,
         never a picture of your screen.
       </p>

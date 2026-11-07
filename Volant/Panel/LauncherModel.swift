@@ -35,6 +35,8 @@ enum ResultRow: Identifiable, Hashable {
     case systemToggle(SystemToggle, on: Bool?)
     /// The last color picked from the screen, in one format.
     case pickedColor(PickedColor, PickedColor.Format)
+    /// Opens the loupe again, listed after the picked color's formats.
+    case pickAnotherColor
     /// Opens the Privacy & Security pane a refused command needs.
     case privacySettings(PrivacyPane)
     case appleShortcut(AppleShortcut)
@@ -82,6 +84,7 @@ enum ResultRow: Identifiable, Hashable {
         case .systemAction(let action): return "system-action:" + action.rawValue
         case .systemToggle(let toggle, _): return "system-toggle:" + toggle.rawValue
         case .pickedColor(_, let format): return "picked-color:" + format.rawValue
+        case .pickAnotherColor: return "picked-color:another"
         case .privacySettings(let pane): return "privacy:" + pane.rawValue
         case .caffeinate(let command): return "caffeinate:" + command.id
         case .agentSession(let session): return "agent:" + session.id
@@ -123,6 +126,7 @@ enum ResultRow: Identifiable, Hashable {
         case .menuItem(let entry): return entry.item.shortcut?.display ?? String(localized: "Menu Item", comment: "Result row kind label for a menu item without a keyboard shortcut")
         case .core, .caffeinate, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
         case .pickedColor: return String(localized: "Color", comment: "Result row kind label: a color picked from the screen")
+        case .pickAnotherColor: return String(localized: "Command", comment: "Result row kind label")
         case .privacySettings: return String(localized: "System Settings", comment: "Result row kind label")
         case .agentSession(let session): return session.status
         case .herdrMachine(_, let enabled, _): return enabled ? String(localized: "Enabled", comment: "Result row kind label: a Herdr machine that is on") : String(localized: "Disabled", comment: "Result row kind label: a Herdr machine that is off")
@@ -153,7 +157,7 @@ enum ResultRow: Identifiable, Hashable {
 
     var isCoreCommand: Bool {
         switch self {
-        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .privacySettings, .menuItemsOff: return true
+        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .pickAnotherColor, .privacySettings, .menuItemsOff: return true
         default: return false
         }
     }
@@ -170,6 +174,7 @@ enum ResultRow: Identifiable, Hashable {
         case .systemAction(let action): return action.title.replacingOccurrences(of: "…", with: "")
         case .systemToggle(let toggle, let on): return toggle.actionTitle(on: on)
         case .pickedColor(_, let format): return String(localized: "Copy as \(format.label, format: .verbatim)", comment: "Footer and Actions label for Return on a picked color; the value is a format such as HEX or RGB")
+        case .pickAnotherColor: return String(localized: "Pick Color", comment: "Footer and Actions label for Return on Pick Another Color")
         case .privacySettings: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .caffeinate(let command): return command.stop ? String(localized: "Stop", comment: "Footer label for Return: stop Caffeinate") : String(localized: "Start", comment: "Footer label for Return: start Caffeinate")
         case .agentSession: return String(localized: "Focus in Herdr", comment: "Footer and Actions label for Return")
@@ -1415,8 +1420,10 @@ final class LauncherModel: ObservableObject {
             immediate.append(ResultSection(title: String(localized: "Alias", comment: "Launcher section title for the app an alias opens"), rows: [.app(app)]))
         }
         if !answers.isEmpty { immediate.append(ResultSection(title: ResultSection.calculatorTitle, rows: answers)) }
-        if let pickedColor, LauncherRouting.colorPickerPhrases.contains(q.lowercased()) {
-            immediate.append(ResultSection(title: ResultSection.pickedColorTitle, rows: PickedColor.Format.allCases.map { .pickedColor(pickedColor, $0) }))
+        let showsPickedColor = pickedColor != nil && LauncherRouting.colorPickerPhrases.contains(q.lowercased())
+        if let pickedColor, showsPickedColor {
+            immediate.append(ResultSection(title: ResultSection.pickedColorTitle,
+                                           rows: PickedColor.Format.allCases.map { .pickedColor(pickedColor, $0) } + [.pickAnotherColor]))
         }
         let snips = config.snippets.filter { $0.keyword.lowercased() == q.lowercased() }.map { ResultRow.snippet($0) }
         if !snips.isEmpty { immediate.append(ResultSection(title: String(localized: "Snippets", comment: "Launcher section title"), rows: snips)) }
@@ -1437,7 +1444,9 @@ final class LauncherModel: ObservableObject {
         if !actions.isEmpty { immediate.append(ResultSection(title: String(localized: "System", comment: "Launcher section title for system actions such as Lock Screen"), rows: actions)) }
         let panes = SystemSettingsDestination.search(q).map { ResultRow.systemSettings($0) }
         if !panes.isEmpty { immediate.append(ResultSection(title: String(localized: "System Settings", comment: "Launcher section title for System Settings panes"), rows: panes)) }
-        if !matchingCommands.isEmpty { immediate.append(ResultSection(title: "Volant", rows: matchingCommands)) }
+        // After a pick, Pick Another Color below the formats stands in for the Pick Color command.
+        let commandRows = showsPickedColor ? matchingCommands.filter { $0 != .core(.colorPicker) } : matchingCommands
+        if !commandRows.isEmpty { immediate.append(ResultSection(title: "Volant", rows: commandRows)) }
         let shortcuts = appleShortcuts.matches(q).prefix(6).map(ResultRow.appleShortcut)
         if !shortcuts.isEmpty { immediate.append(ResultSection(title: ResultSection.appleShortcutsTitle, rows: shortcuts)) }
         return immediate
@@ -1813,7 +1822,7 @@ final class LauncherModel: ObservableObject {
     func activateSelection() {
         guard let row = selectedRow else { return }
         switch row {
-        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation, .pickedColor, .privacySettings, .menuItem, .menuItemsOff: break
+        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation, .pickedColor, .pickAnotherColor, .privacySettings, .menuItem, .menuItemsOff: break
         default: usage.record(key: row.id, query: query)
         }
         switch row {
@@ -1824,6 +1833,7 @@ final class LauncherModel: ObservableObject {
         case .systemAction(let action): onNote(.systemAction(action)); return
         case .systemToggle(let toggle, _): toggleSystemSetting(toggle); return
         case .pickedColor(let color, let format): copy(color.value(format))
+        case .pickAnotherColor: pickColor(); return
         case .privacySettings(let pane): openURL(pane.url)
         case .core(let command):
             if let source = SearchScope(command: command) { enterSearchScope(source); return }
