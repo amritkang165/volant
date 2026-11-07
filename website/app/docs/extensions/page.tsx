@@ -391,18 +391,18 @@ export default function Extensions() {
         <code>{copyRow}</code>
       </pre>
       <p>
-        Coming in the next release: <code>&quot;type&quot;: &quot;image&quot;</code>{' '}
+        <code>&quot;type&quot;: &quot;image&quot;</code>{' '}
         copies whatever image a site returns (PNG, JPEG, GIF, WebP, ICO, BMP,
         TIFF, AVIF or HEIC), useful when a favicon service answers with ICO
         one time and PNG the next, and SVG markup is copied as text. GIF, BMP
-        and AVIF also become explicit types. Volant 0.3.35 ignores copies of
+        and AVIF are explicit types too. Volant 0.3.35 ignores copies of
         these new types, so an extension that supports it should keep the
         explicit types it already knows.
       </p>
 
       <h2>Images in rows</h2>
       <p>
-        Coming in the next release. A list extension can show a picture in
+        A list extension can show a picture in
         each row, such as a site&rsquo;s favicon or a company&rsquo;s logo, in
         place of its icon. When you enable it, Volant says{' '}
         <strong>Show images from its sites in its rows</strong>.
