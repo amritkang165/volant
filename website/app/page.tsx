@@ -2,7 +2,8 @@
 // oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import Image from 'next/image';
 import { useState } from 'react';
-import { LauncherDemo } from '@/components/launcher-demo';
+import { HeroLauncher } from '@/components/hero-launcher';
+import { AppearanceButton } from '@/components/site-shell';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -13,9 +14,6 @@ import {
   Code2,
   SlidersHorizontal,
   Check,
-  Monitor,
-  Sun,
-  Moon,
 } from 'lucide-react';
 import {
   Accordion,
@@ -86,44 +84,7 @@ const benefits = [
   },
 ];
 
-const appearances = [
-  { value: 'system', label: 'System', icon: Monitor },
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-] as const;
-
-/**
- * One icon button for the page's appearance. Each click moves to the next of System, Light and
- * Dark; the icon shows the current choice and the label names it and the one that comes next.
- */
-function AppearanceButton({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const index = Math.max(
-    0,
-    appearances.findIndex((option) => option.value === value),
-  );
-  const current = appearances[index];
-  const next = appearances[(index + 1) % appearances.length];
-  const Icon = current.icon;
-  const label = `Appearance: ${current.label}. Switch to ${next.label}.`;
-  return (
-    <button
-      type="button"
-      className="home-appearance"
-      onClick={() => onChange(next.value)}
-      aria-label={label}
-      title={label}
-    >
-      <Icon size={16} aria-hidden="true" />
-    </button>
-  );
-}
-
+/** The homepage: the headline, intro and Download above the in-browser launcher card. */
 export default function Home() {
   const [appearance, setAppearance] = useState('system');
   return (
@@ -135,7 +96,7 @@ export default function Home() {
         <AppearanceButton value={appearance} onChange={setAppearance} />
       </SiteHeader>
       <main id="main">
-        <section className="home-hero wrap">
+        <section className="home-hero wrap home-hero-try">
           <div className="home-hero-copy">
             <p className="home-kicker">
               A LITTLE LESS FRICTION. A LOT MORE FLOW.
@@ -154,15 +115,15 @@ export default function Home() {
               <a className="button" href={downloadURL} download>
                 Download for Mac <ArrowRight size={18} />
               </a>
-              <a className="home-secondary" href="#features">
-                See what it can do <ArrowUpRight size={16} />
+              <a className="home-secondary" href="/try">
+                Try it now <ArrowUpRight size={16} />
               </a>
             </div>
             <p className="home-requirements">
               Free & open source · macOS 15+ · Apple silicon
             </p>
           </div>
-          <LauncherDemo />
+          <HeroLauncher />
         </section>
         <div className="home-proof wrap">
           <span>
@@ -263,6 +224,28 @@ export default function Home() {
             </span>
             <ArrowUpRight size={16} />
           </a>
+        </section>
+        <section className="home-wasm wrap" aria-labelledby="wasm-title">
+          <p className="home-kicker">EXTENSIONS ARE WEBASSEMBLY</p>
+          <h2 id="wasm-title">One module. Your Mac and your browser.</h2>
+          <p>
+            A Volant extension is a small WebAssembly module. The file you
+            install in Volant runs in its sandboxed helper on your Mac, and
+            the very same file runs on the Try it page in a modern browser.
+            The module never reaches the network itself: Volant fetches only
+            the addresses you approve and hands it the answer.
+          </p>
+          <div className="home-wasm-links">
+            <a href="/try">
+              Run one in your browser <ArrowUpRight size={15} />
+            </a>
+            <a href="/docs/extensions">
+              How extensions work <ArrowUpRight size={15} />
+            </a>
+            <a href="https://github.com/mysticcoders/volant-extensions">
+              Browse the catalog <ArrowUpRight size={15} />
+            </a>
+          </div>
         </section>
         <section className="home-bottom wrap">
           <div className="home-privacy">
