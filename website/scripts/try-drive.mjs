@@ -41,6 +41,71 @@ async function calc(page, text) {
   return page.locator('.try-answer').evaluateAll((rows) => rows.map((r) => r.textContent.replace(/\s+/g, ' ').trim()));
 }
 
+/** Loads /try over a throttled connection (about 3 MB/s) so the calculator's progress bar is
+ * visible: captures it mid-download, types a calculator query and an extension word while it
+ * loads, checks the answer arrives by itself, then reloads to confirm the cached module skips it. */
+async function progressRun(scheme) {
+  const context = await browser.newContext({ colorScheme: scheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  const problems = [];
+  page.on('pageerror', (e) => problems.push(String(e)));
+  page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Network.enable');
+  await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 20, downloadThroughput: 3 * 1024 * 1024, uploadThroughput: 1024 * 1024 });
+  await page.goto(`${base}/try`, { waitUntil: 'domcontentloaded' });
+  const started = Date.now();
+  await page.waitForFunction(() => /\b([2-9]\d)%/.test(document.querySelector('.try-progress-label')?.textContent ?? ''), null, { timeout: 60000 });
+  results[`${scheme} bar label mid-load`] = await page.locator('.try-progress-label').textContent();
+  await page.screenshot({ path: `${out}/try-${scheme}-loading.png` });
+  await page.locator('.try-bar input').fill('3pm tokyo in new york');
+  await page.waitForTimeout(300);
+  results[`${scheme} inline while loading`] = await page.locator('.try-empty').allTextContents();
+  await page.locator('.try-bar input').fill('h');
+  await page.waitForTimeout(300);
+  results[`${scheme} extensions while loading`] = (await page.locator('.try-title').allTextContents()).length;
+  await page.locator('.try-bar input').fill('3pm tokyo in new york');
+  await page.screenshot({ path: `${out}/try-${scheme}-loading-query.png` });
+  await page.locator('.try-answer').first().waitFor({ timeout: 120000 });
+  results[`${scheme} answer after load`] = (await page.locator('.try-answer-result').allTextContents())[0];
+  results[`${scheme} throttled load ms`] = Date.now() - started;
+  results[`${scheme} ready label`] = await page.locator('.try-progress-label').textContent().catch(() => '(bar already hidden)');
+  await page.screenshot({ path: `${out}/try-${scheme}-ready.png` });
+  await page.waitForTimeout(2000);
+  results[`${scheme} bar after ready`] = await page.locator('.try-progress').count();
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  const seen = await page.waitForFunction(() => /\d+%/.test(document.querySelector('.try-progress-label')?.textContent ?? ''), null, { timeout: 4000 }).then(() => true, () => false);
+  results[`${scheme} second visit showed percent`] = seen;
+  results[`${scheme} progress problems`] = problems;
+  await context.close();
+}
+
+/** Blocks the calculator module so loading fails, checks the error and Retry, then lets Retry load it. */
+async function failureRun() {
+  const context = await browser.newContext({ colorScheme: 'light', viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
+  let blocked = true;
+  await context.route('**/try/calculator/**', (route) => (blocked ? route.abort() : route.continue()));
+  const page = await context.newPage();
+  await page.goto(`${base}/try`, { waitUntil: 'domcontentloaded' });
+  const failed = await page.locator('.try-progress[data-state="error"]').waitFor({ timeout: 15000 }).then(() => true, () => false);
+  results['failure shown'] = failed ? await page.locator('.try-progress').textContent() : '(not observed: route may not reach worker fetches)';
+  if (failed) {
+    await page.locator('.try-bar input').fill('2+2');
+    await page.waitForTimeout(300);
+    results['failure answers'] = await page.locator('.try-answer').count();
+    await page.screenshot({ path: `${out}/try-light-load-failed.png` });
+    blocked = false;
+    await page.getByRole('button', { name: 'Retry' }).click();
+    await page.locator('.try-answer').first().waitFor({ timeout: 60000 }).catch(() => {});
+    results['after retry'] = (await page.locator('.try-answer-result').allTextContents())[0] ?? '(no answer)';
+  }
+  await context.close();
+}
+
+await progressRun('light');
+await progressRun('dark');
+await failureRun();
+
 for (const scheme of ['light', 'dark']) {
   const { page, context, problems, loadMs, bytes } = await open(scheme, { width: 1280, height: 900 });
   results[`${scheme} load ms`] = loadMs;
