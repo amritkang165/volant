@@ -58,5 +58,8 @@ class ScopeTests(unittest.TestCase):
                      "tools/raycast-wasm/bound-memory.mjs", "tools/extensions/wasi-fixtures/streams.wasm"]:
             self.assertEqual(scope.classify([path]), {"native": True, "ui": False}, path)
 
+    def test_svg_row_previews_need_the_actions_fixture(self):
+        self.assertEqual(scope.classify(["Shared/ExtensionSVGRasterizer.swift"]), {"native": True, "ui": True})
+
 
 unittest.main()

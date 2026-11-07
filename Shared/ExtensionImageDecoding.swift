@@ -53,13 +53,30 @@ enum ExtensionImageDecoding {
             kCGImageSourceShouldCacheImmediately: false
         ]
         guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(opened.source, opened.index, options as CFDictionary) else { return nil }
-        let scale = min(1, Double(maximumPixels) / Double(max(thumbnail.width, thumbnail.height)))
-        let width = max(1, Int((Double(thumbnail.width) * scale).rounded())), height = max(1, Int((Double(thumbnail.height) * scale).rounded()))
-        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+        let (width, height) = fitted(width: Double(thumbnail.width), height: Double(thumbnail.height), maximumPixels: maximumPixels)
+        return redrawnPNG(width: width, height: height) { context in
+            context.draw(thumbnail, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
+    }
+
+    /// The pixel size of a `width` by `height` image scaled down, never up, to fit `maximumPixels` on its
+    /// longer side, at least 1 by 1.
+    static func fitted(width: Double, height: Double, maximumPixels: Int) -> (width: Int, height: Int) {
+        let scale = min(1, Double(maximumPixels) / max(width, height))
+        return (max(1, Int((width * scale).rounded())), max(1, Int((height * scale).rounded())))
+    }
+
+    /// A PNG of what `draw` paints into a fresh, cleared `width` by `height` 8-bit sRGB bitmap with
+    /// premultiplied alpha, so nothing from the source survives except its pixels. Nil when the bitmap
+    /// cannot be made or the PNG would be larger than `ExtensionItemImage.maximumThumbnailBytes`.
+    static func redrawnPNG(width: Int, height: Int, draw: (CGContext) -> Void) -> Data? {
+        guard (1...ExtensionItemImage.thumbnailPixels).contains(width), (1...ExtensionItemImage.thumbnailPixels).contains(height),
+              let space = CGColorSpace(name: CGColorSpace.sRGB),
               let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        context.clear(CGRect(x: 0, y: 0, width: width, height: height))
         context.interpolationQuality = .high
-        context.draw(thumbnail, in: CGRect(x: 0, y: 0, width: width, height: height))
+        draw(context)
         guard let redrawn = context.makeImage() else { return nil }
         let output = NSMutableData()
         guard let destination = CGImageDestinationCreateWithData(output, "public.png" as CFString, 1, nil) else { return nil }

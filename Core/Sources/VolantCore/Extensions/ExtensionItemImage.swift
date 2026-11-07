@@ -8,7 +8,8 @@ import Foundation
 /// Volant fetches it only while the row is on screen, through its fetch helper, from a host the owner
 /// allowed, at most `maximumDownloadBytes`. The helper decodes the download and returns a PNG thumbnail
 /// of at most `thumbnailPixels` on a side that it drew itself; the app decodes only that PNG. SVG is
-/// never rendered: an image URL that returns SVG shows the placeholder. Thumbnails stay in memory for
+/// checked (`ExtensionSVGPreview`) and drawn into the same kind of PNG by the extension helper, which has
+/// no network access, never by the app; refused SVG shows the placeholder. Thumbnails stay in memory for
 /// the session and are never written to disk.
 public struct ExtensionItemImage: Codable, Hashable, Sendable {
     public static let permission = "row-images"

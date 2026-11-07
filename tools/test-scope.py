@@ -19,6 +19,8 @@ UI_PATTERNS = (
     # Caffeinate, snippet and quicklink forms, and app shortcut bindings.
     "Volant/SystemControl/*", "Volant/Camera/*", "Volant/Snippets/*", "Volant/Quicklinks/*", "Volant/Settings/AppBindingStore.swift",
     "VolantTests/LiveMarkdownTests.swift", "VolantTests/NotesStoreTests.swift",
+    # The Actions fixture draws SVG row previews with the extension helper's code.
+    "Shared/ExtensionSVGRasterizer.swift",
 )
 NATIVE_PATTERNS = ("Volant/*", "VolantTests/*", "VolantAgentHost/*", "VolantExtensionHost/*", "VolantAIHost/*", "VolantInputHost/*", "VolantFetchHost/*", "VolantRatesHost/*", "Integrations/*",
                    "Shared/*", "Core/*", "extensions/*", "docs/releases/*", "Scripts/*", "tools/*", "project.yml", ".swiftlint.yml", ".github/workflows/*")

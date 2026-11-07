@@ -69,6 +69,8 @@ final class ExtensionManager {
     var fetchCopy: (ExtensionRequest, [String], @escaping (Data?, Int) -> Void) -> Void = ExtensionFetcher.fetchData
     /// Asks the fetch helper for a row image's thumbnail; tests replace it.
     var fetchRowImage: (ExtensionRequest, [String], @escaping (ExtensionFetcher.RowImageReply) -> Void) -> Void = ExtensionFetcher.fetchRowImage
+    /// Hands checked SVG markup to the extension helper to draw a row image preview; tests replace it.
+    var rasterizeSVG: (Data, @escaping (ExtensionSVGRendering.Reply) -> Void) -> Void = ExtensionSVGRendering.rasterize
     /// Finds the owner's rounded location for extensions allowed to receive it; tests replace it.
     var locate: (@escaping (ExtensionLocation?) -> Void) -> Void = { completion in
         MainActor.assumeIsolated { ExtensionLocationProvider.shared.locate(completion) }
@@ -673,7 +675,8 @@ final class ExtensionManager {
     /// Loads one row image for a row on screen. Nothing reaches the module. The URL must pass
     /// `rowImageURL` before the fetch and again after it; the fetch helper downloads it (no redirects, at
     /// most 256 KB, with the host's declared token) and returns a PNG thumbnail it drew, which must pass
-    /// `ExtensionRowImages.thumbnail` before it is shown. Each load is recorded as a GET naming only the host.
+    /// `ExtensionRowImages.thumbnail` before it is shown. SVG the fetch helper checked goes, unread, to
+    /// the extension helper to draw (`drawSVG`). Each load is recorded as a GET naming only the host.
     func loadRowImage(_ ext: InstalledExtension, url link: String, completion: @escaping (RowImageOutcome) -> Void) {
         let sequence = beginRun(ext)
         let host = ExtensionActivity.host(of: link)
@@ -685,10 +688,38 @@ final class ExtensionManager {
             switch reply {
             case .stopped:
                 record(ext, sequence, .fetch, .cancelled, detail: host, since: start); completion(.stopped); return
+            case .svg(let markup):
+                record(ext, sequence, .fetch, .completed, detail: host, since: start)
+                drawSVG(markup, ext, link, sequence, completion: completion); return
+            case .svgRefused:
+                record(ext, sequence, .fetch, .completed, detail: host, since: start)
+                record(ext, sequence, .svgRender, .denied)
+                completion(rowImageURL(ext, link) == nil ? .refused : .failed); return
             case .failed: image = nil
             case .thumbnail(let data): image = ExtensionRowImages.thumbnail(data)
             }
             record(ext, sequence, .fetch, image == nil ? .failed : .completed, detail: host, since: start)
+            guard rowImageURL(ext, link) != nil else { completion(.refused); return }
+            completion(image.map(RowImageOutcome.image) ?? .failed)
+        }
+    }
+
+    /// Has the extension helper draw a row image's SVG preview, after checking the extension and host are
+    /// still allowed, and accepts only its PNG under the usual thumbnail checks. The outcome (drawn,
+    /// refused, timed out or failed) is recorded without any of the markup.
+    private func drawSVG(_ markup: Data, _ ext: InstalledExtension, _ link: String, _ sequence: Int, completion: @escaping (RowImageOutcome) -> Void) {
+        guard rowImageURL(ext, link) != nil else { completion(.refused); return }
+        let start = Date()
+        rasterizeSVG(markup) { [self] reply in
+            let image: NSImage?
+            let outcome: ExtensionActivity.Outcome
+            switch reply {
+            case .png(let png): image = ExtensionRowImages.thumbnail(png); outcome = image == nil ? .failed : .completed
+            case .refused: image = nil; outcome = .denied
+            case .timedOut: image = nil; outcome = .timedOut
+            case .failed: image = nil; outcome = .failed
+            }
+            record(ext, sequence, .svgRender, outcome, since: start)
             guard rowImageURL(ext, link) != nil else { completion(.refused); return }
             completion(image.map(RowImageOutcome.image) ?? .failed)
         }

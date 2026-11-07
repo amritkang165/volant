@@ -739,9 +739,9 @@ func fixtureLogo(width: Int, height: Int, red: CGFloat, green: CGFloat, blue: CG
 
 /// A list extension with `row-images`: the first-run prompt says it shows images from its sites, rows
 /// whose images loaded show them in place of the extension's icon, a row still loading and rows whose
-/// image failed (an HTTP error, or SVG, which is never rendered) keep the placeholder, and rows without
+/// image failed (an HTTP error, or a page that is not an image) keep the placeholder, and rows without
 /// an image are unchanged. Logos go through the real thumbnail code the fetch helper runs; nothing is
-/// downloaded.
+/// downloaded. SVG previews have their own scenario.
 func extensionRowImagesScenario() throws {
     let (imageDirectory, _) = try copyExtension("row-images") { manifest in
         manifest.id = "fixture.favicons"; manifest.name = "Fixture Favicons"; manifest.output = "items"
@@ -764,13 +764,13 @@ func extensionRowImagesScenario() throws {
     imageManager.fetchRowImage = { request, _, completion in
         switch request.url.path {
         case "/loading.png": waiting.append(completion)
-        case "/vector.svg": completion(.failed(status: 200))
+        case "/page.html": completion(.failed(status: 200))
         case let path: completion(downloads[path].flatMap { ExtensionImageDecoding.thumbnailPNG($0) }.map { .thumbnail($0) } ?? .failed(status: 404))
         }
     }
     let rows = [("Fictional Coffee", "coffee.ico", "ICO favicon"), ("Fictional Maps", "maps.png", "Wide PNG logo, fitted"),
                 ("Fictional Books", "books.gif", "GIF favicon"), ("Fictional Weather", "loading.png", "Still loading: extension icon"),
-                ("Fictional Archive", "missing.png", "Server answered 404: extension icon"), ("Fictional Vectors", "vector.svg", "SVG is never rendered: extension icon")]
+                ("Fictional Archive", "missing.png", "Server answered 404: extension icon"), ("Fictional Pages", "page.html", "Not an image: extension icon")]
     let items = rows.map { #"{"title":"\#($0.0)","subtitle":"\#($0.2)","url":"https://site.example.com/\#($0.1)","image":{"url":"https://icons.example.com/\#($0.1)"}}"# }
         + [#"{"title":"Fictional Plain","subtitle":"No image","url":"https://site.example.com/plain"}"#]
     imageManager.invokeOverride = { _, _, completion in completion(.success(#"{"items":[\#(items.joined(separator: ","))]}"#)) }
@@ -785,6 +785,59 @@ func extensionRowImagesScenario() throws {
     panel.orderOut(nil)
     try imageManager.setCommunityAllowed(false, expected: true)
     print("PASS: a row-images extension asks first, shows loaded images, and keeps the placeholder while loading or after a failure")
+}
+
+/// SVG row previews: logos as svgl and Simple Icons publish them go through the fetch helper's check
+/// (`ExtensionSVGPreview.sanitized`) and the extension helper's real drawing code
+/// (`ExtensionSVGRasterizer.rasterize`), and hostile files (a script, a remote image, a huge canvas) keep
+/// the extension's icon. Nothing is downloaded and no helper process runs.
+func extensionRowSVGImagesScenario() throws {
+    let (imageDirectory, _) = try copyExtension("row-svg") { manifest in
+        manifest.id = "fixture.logos"; manifest.name = "Fixture Logos"; manifest.output = "items"
+        manifest.hosts = ["logos.example.com"]; manifest.permissions = ["row-images"]
+    }
+    let manager = ExtensionManager(configURL: panel.model.actionConfigURL, roots: [imageDirectory], dataDirectory: root.appendingPathComponent("SVGData-" + UUID().uuidString))
+    manager.reload()
+    try manager.setCommunityAllowed(true, expected: manager.communityAllowed)
+    try manager.setEnabled(manager.extensions.first!, true)
+    let svgl = "xmlns=\"http://www.w3.org/2000/svg\""
+    let downloads: [String: String] = [
+        "/figma.svg": ##"<svg width="54" height="80" viewBox="0 0 54 80" fill="none" "## + svgl + ##"><g clip-path="url(#c)"><path d="M13.3333 80.0002C20.6933 80.0002 26.6667 74.0268 26.6667 66.6668V53.3335H13.3333C5.97333 53.3335 0 59.3068 0 66.6668C0 74.0268 5.97333 80.0002 13.3333 80.0002Z" fill="#0ACF83"/><path d="M0 39.9998C0 32.6398 5.97333 26.6665 13.3333 26.6665H26.6667V53.3332H13.3333C5.97333 53.3332 0 47.3598 0 39.9998Z" fill="#A259FF"/><path d="M0 13.3333C0 5.97333 5.97333 0 13.3333 0H26.6667V26.6667H13.3333C5.97333 26.6667 0 20.6933 0 13.3333Z" fill="#F24E1E"/><path d="M26.6667 0H40.0001C47.3601 0 53.3334 5.97333 53.3334 13.3333C53.3334 20.6933 47.3601 26.6667 40.0001 26.6667H26.6667V0Z" fill="#FF7262"/><path d="M53.3334 39.9998C53.3334 47.3598 47.3601 53.3332 40.0001 53.3332C32.6401 53.3332 26.6667 47.3598 26.6667 39.9998C26.6667 32.6398 32.6401 26.6665 40.0001 26.6665C47.3601 26.6665 53.3334 32.6398 53.3334 39.9998Z" fill="#1ABCFE"/></g><defs><clipPath id="c"><rect width="53.3333" height="80" fill="white"/></clipPath></defs></svg>"##,
+        "/vercel.svg": ##"<svg viewBox="0 0 256 222" width="256" height="222" "## + svgl + ##" preserveAspectRatio="xMidYMid"><path fill="#000" d="m128 0 128 221.705H0z"/></svg>"##,
+        "/github.svg": ##"<svg role="img" viewBox="0 0 24 24" "## + svgl + ##"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>"##,
+        "/script.svg": #"<svg viewBox="0 0 24 24" "# + svgl + #"><script>fetch('https://evil.example/')</script><rect width="24" height="24" fill="red"/></svg>"#,
+        "/remote.svg": #"<svg viewBox="0 0 24 24" "# + svgl + #"><image href="https://evil.example/a.png" width="24" height="24"/></svg>"#,
+        "/huge.svg": #"<svg viewBox="0 0 100000 100000" "# + svgl + #"><rect width="100000" height="100000" fill="red"/></svg>"#
+    ]
+    var drawn = 0
+    manager.fetchRowImage = { request, _, completion in
+        guard let markup = downloads[request.url.path].map({ Data($0.utf8) }) else { completion(.failed(status: 404)); return }
+        switch ExtensionSVGPreview.sanitized(markup) {
+        case .success(let checked): completion(.svg(checked))
+        case .failure: completion(.svgRefused)
+        }
+    }
+    manager.rasterizeSVG = { markup, completion in
+        drawn += 1
+        if case .png(let png) = ExtensionSVGRasterizer.rasterize(markup) { completion(.png(png)) } else { completion(.refused) }
+    }
+    let rows = [("Figma logo", "figma.svg", "svgl, colors and a clip path"), ("Vercel logo", "vercel.svg", "svgl, wide, fitted"),
+                ("GitHub mark", "github.svg", "Simple Icons, no fill: draws black"), ("Fictional Script", "script.svg", "SVG with a script: refused, extension icon"),
+                ("Fictional Remote", "remote.svg", "SVG with a remote image: refused, extension icon"), ("Fictional Canvas", "huge.svg", "100,000-unit canvas: refused, extension icon")]
+    let items = rows.map { #"{"title":"\#($0.0)","subtitle":"\#($0.2)","url":"https://site.example.com/\#($0.1)","image":{"url":"https://logos.example.com/\#($0.1)"}}"# }
+        + [#"{"title":"Fictional Plain","subtitle":"No image","url":"https://site.example.com/plain"}"#]
+    manager.invokeOverride = { _, _, completion in completion(.success(#"{"items":[\#(items.joined(separator: ","))]}"#)) }
+    panel.model.extensions = manager
+    panel.toggle(); panel.model.query = "Fixture Logos"; settle()
+    key("\r", 36)
+    verify(waitUntil { panel.model.rows.count == 7 }, "The logo extension shows its rows")
+    let images = panel.model.rowState.extensionImages
+    verify(waitUntil { images.shown.count == 3 }, "The three checked logos are drawn: \(images.shown.count)")
+    verify(drawn == 3, "Only checked SVG reaches the drawing code: \(drawn)")
+    try render("extension-row-images-svg")
+    panel.orderOut(nil)
+    try manager.setCommunityAllowed(false, expected: true)
+    print("PASS: SVG row previews draw checked logos and keep the extension icon for refused files")
 }
 
 /// Dictation Settings with a fictional vocabulary, and the sheet that adds a word. Output stays on
@@ -1722,6 +1775,7 @@ let scenarios: [Scenario] = [
     Scenario(name: "extension-rows", sizeSensitive: true, run: extensionRowsScenario),
     Scenario(name: "extension-row-copy", sizeSensitive: false, run: extensionRowCopyScenario),
     Scenario(name: "extension-row-images", sizeSensitive: false, run: extensionRowImagesScenario),
+    Scenario(name: "extension-row-images-svg", sizeSensitive: false, run: extensionRowSVGImagesScenario),
     Scenario(name: "extension-settings", sizeSensitive: false, run: extensionSettingsScenario),
     Scenario(name: "dictation-vocabulary", sizeSensitive: false, run: dictationVocabularyScenario),
     Scenario(name: "catalog", sizeSensitive: true, run: catalogScenario),
