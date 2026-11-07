@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import shippedExtensions from '@/lib/try-extensions.json';
 
 type Filter = { id: string; title: string };
 type Preference = { id: string; type: string; default?: unknown };
@@ -73,18 +74,9 @@ const feedCredits: Record<FeedName, { text: string; href: string }> = {
   crypto: { text: 'Data provided by CoinGecko', href: 'https://www.coingecko.com' },
 };
 
-/** The extensions the demo ships, by folder, with the words that find their command row. */
-const shipped: { folder: string; keywords: string[] }[] = [
-  { folder: 'hackernews', keywords: ['hn', 'hacker news', 'news'] },
-  { folder: 'lobsters', keywords: ['lobsters', 'lobste.rs', 'news'] },
-  { folder: 'wikipedia', keywords: ['wiki', 'wikipedia'] },
-  { folder: 'case', keywords: ['case', 'camel', 'snake', 'kebab'] },
-  { folder: 'encode', keywords: ['encode', 'base64', 'url'] },
-  { folder: 'fancytext', keywords: ['fancy', 'unicode', 'bold'] },
-  { folder: 'characters', keywords: ['characters', 'chars', 'symbol', 'unicode'] },
-  { folder: 'wordcount', keywords: ['count', 'words', 'wordcount'] },
-  { folder: 'hello', keywords: ['hello', 'hi'] },
-];
+/** The extensions the demo ships, by folder, with the words that find their command row. The
+ * homepage hero's capture (scripts/try-hero-capture.mjs) reads the same list. */
+const shipped: { folder: string; keywords: string[] }[] = shippedExtensions;
 
 const wikiSamples = ['WebAssembly', 'Swift (programming language)', 'macOS', 'Raycast'];
 const maximumRounds = 3;

@@ -262,6 +262,9 @@
   pointer-events: none;
   white-space: nowrap;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .hero-placeholder {
   color: var(--try-muted);
@@ -277,57 +280,44 @@
   vertical-align: text-bottom;
   background: var(--try-accent);
 }
-/* Suggestion rows: the saved examples, server-rendered so the card is never empty. Every row has
-   a fixed height, so nothing moves when the typing loop starts or a row is highlighted. */
-.hero-suggestions {
-  max-height: none;
-  overflow: visible;
+.hero-ghost .try-chip {
+  flex: none;
 }
-.hero-suggestion {
-  height: 58px;
-  text-decoration: none;
-  transition: background-color 160ms ease;
-}
-.hero-suggestion:hover,
-.hero-suggestion:focus-visible {
-  background: var(--try-chip);
-  outline: none;
-}
-.hero-suggestion[aria-current='true'] {
-  background: var(--try-select);
-}
-.hero-query {
-  flex: 0 0 34%;
+.hero-ghost-text {
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+}
+/* The replayed results: room for four rows is kept whether a frame shows none or four, so nothing
+   below the card moves as the results change. */
+.hero-launcher .hero-results,
+.hero-launcher .hero-results:empty {
+  height: calc(4 * 60px + 12px);
+  max-height: none;
+  min-height: 0;
+  padding: 6px;
+  overflow: hidden;
+}
+.hero-launcher .try-row {
+  box-sizing: border-box;
+  height: 60px;
+}
+.hero-static {
+  display: none;
+}
+.hero-static-caption {
+  margin: 0;
+  padding: 0 18px 12px;
+  font-size: 13px;
   color: var(--try-muted);
-  font-size: 15px;
 }
-.hero-answer {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 17px;
-}
-.hero-answer img {
-  border-radius: 4px;
-}
-.hero-open {
-  opacity: 0;
-  transition: opacity 160ms ease;
-}
-.hero-suggestion:hover .hero-open,
-.hero-suggestion:focus-visible .hero-open,
-.hero-suggestion[aria-current='true'] .hero-open {
-  opacity: 1;
-}
+/* Under reduced motion nothing is typed: one recorded example's final frame shows instead. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-suggestion,
-  .hero-open {
-    transition: none;
+  .hero-live {
+    display: none;
+  }
+  .hero-static {
+    display: block;
   }
 }
 .hero-try-link {
@@ -349,14 +339,13 @@
 .hero-launcher-large .try-answer-result {
   font-size: 28px;
 }
-.hero-launcher-large .try-results {
+.hero-launcher-large .hero-results,
+.hero-launcher-large .hero-results:empty {
+  height: calc(4 * 68px + 20px);
   padding: 10px;
 }
-.hero-launcher-large .hero-suggestion {
-  height: 64px;
-}
-.hero-launcher-large .hero-answer {
-  font-size: 20px;
+.hero-launcher-large .try-row {
+  height: 68px;
 }
 .hero-launcher-large .try-footer {
   padding: 12px 24px;
@@ -426,16 +415,5 @@
   .hero-launcher-large .try-bar input,
   .hero-launcher-large .hero-ghost {
     font-size: 21px;
-  }
-  .hero-open {
-    display: none;
-  }
-  .hero-query {
-    flex-basis: 44%;
-    font-size: 13px;
-  }
-  .hero-answer,
-  .hero-launcher-large .hero-answer {
-    font-size: 15px;
   }
 }

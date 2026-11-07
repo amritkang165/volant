@@ -2,8 +2,8 @@
 
 `usevolant.com/try` is an interactive, clearly labeled browser demo of the launcher. It runs real
 Volant code: the catalog's own extension modules, and VolantCore's calculator compiled to
-WebAssembly. Nothing a visitor types leaves the page. The homepage hero is the same card, showing
-captured examples, and hands over to `/try` when a visitor clicks or types. It grew out of the spike
+WebAssembly. Nothing a visitor types leaves the page. The homepage hero is the same card, replaying
+examples recorded keystroke by keystroke, and hands over to `/try` when a visitor clicks or types. It grew out of the spike
 in PR #369.
 
 ## What runs
@@ -115,20 +115,33 @@ Requests follow no redirects and have size caps, and the bodies are checked befo
 ## The hero
 
 `components/hero-launcher.tsx` is the `/try` card in plain HTML, with the same styles (`app/try/try.css`,
-on the site's tokens, so both follow the appearance button). At rest it shows the prompt "Try Volant
-in your browser now…". After a pause it types one of three examples (`3pm tokyo in new york`,
-`15% of 80`, `hn`), shows the answer `/try` gave when it was captured, and returns to the prompt.
-Under reduced motion it stays on the prompt.
+on the site's tokens, so both follow the appearance button). It first paints like an empty launcher:
+the prompt "Try Volant in your browser now…" and an empty results area. About 0.2 s after hydration
+it starts typing one of four examples (`3pm tokyo in new york`, `15% of 80`, `5 km in miles`, then
+`hn` and Return), 60–120 ms a character with a longer pause after a space. Each keystroke shows the
+results `/try` gave for exactly that text: an answer appears, changes or disappears, and a prefix
+with no answer shows nothing. The last frame holds for 2 s, clears, and the next example starts.
 
-- **Examples.** `scripts/try-hero-capture.mjs` captures them into `lib/try-hero-examples.json` on
-  every website build (prebuild). It uses the published module (a local build, or the R2 copy), and
-  keeps the existing file if neither is reachable.
-- **No stale dates.** Text that depends on the capture day ("Saturday, November 7 · Today",
+- **Recording.** `scripts/try-hero-capture.mjs` records the frames into
+  `lib/try-hero-examples.json` on every website build (prebuild). For each prefix it runs the
+  published calculator module (a local build, or the R2 copy) and `/try`'s extension match
+  (`lib/try-extensions.json`, shared with `components/try-launcher.tsx`). After Return it runs the
+  Hacker News module on `/try`'s sample data, with `/try`'s first filter and default preferences.
+  Rows are stored once and frames refer to them, about 2.5 KB in all. A prefix whose rows differ
+  from both neighbors while those match (`5 km in mil`, a one-keystroke flicker) is typed together
+  with the next character. If no module is reachable it keeps the existing file.
+- **No stale dates.** Text that depends on the capture day ("Sunday, November 8", "Tomorrow",
   "19h ago") is left out; the footer says when the examples were captured.
 - **Nothing computed.** The hero computes nothing, and the homepage's policy has no
-  `'wasm-unsafe-eval'`.
-- **Hand-off.** Clicking it, typing or pressing Return opens `/try?q=…`; keyboard focus alone only
-  pauses the loop.
+  `'wasm-unsafe-eval'`. It loads the extension icons that frames show (Hacker News, Characters).
+- **Hand-off.** Clicking the card, typing or pressing Return opens `/try?q=…` with the first
+  keystroke kept; keyboard focus alone stops and clears the replay. The replay is `aria-hidden`; the
+  field's description says the examples are recorded.
+- **Reduced motion.** Nothing is typed: the card shows the prompt and the final frame of
+  `5 km in miles`, captioned as a recorded example.
+- **Checks.** `scripts/try-hero-check.mjs <base> <out>` checks both layouts: prompt-only first
+  paint, every replayed frame against the recording, final answers against `/try`, hand-off,
+  reduced motion, and no WebAssembly or rates requests on the homepage.
 - **Two layouts for review.** `/` keeps the headline, intro and Download beside the card.
   `/?hero=launcher` makes the large card the first viewport: a one-line kicker above, Download and
   Star below, and the usual headline and copy after it.

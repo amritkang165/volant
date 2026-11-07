@@ -1,6 +1,6 @@
 // Measures the homepage hero in headless Chromium with a 4x CPU throttle and DevTools' "Fast 4G"
 // profile (9 Mbps down, 1.5 Mbps up, 60 ms latency): first contentful paint, largest contentful
-// paint, and when the hero card first shows example content (a saved answer or suggestion row).
+// paint, and when the hero card first shows replayed example content (a typed character).
 // Usage: node scripts/try-hero-timing.mjs <base URL> [runs]   (also measures /?hero=launcher)
 import { chromium } from 'playwright';
 
@@ -27,9 +27,9 @@ async function measure(path) {
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) if (!entry.hadRecentInput) window.__heroTimes.cls += entry.value;
     }).observe({ type: 'layout-shift', buffered: true });
-    /** Records the first frame in which the hero card shows an example answer or suggestion row. */
+    /** Records the first frame in which the hero card shows a typed character of a recorded example. */
     const check = () => {
-      const node = document.querySelector('.hero-launcher .try-answer-result, .hero-launcher .hero-suggestion');
+      const node = document.querySelector('.hero-launcher .hero-ghost-text');
       if (node && node.getBoundingClientRect().height > 0 && !window.__heroTimes.example) {
         window.__heroTimes.example = performance.now();
         return;
