@@ -482,7 +482,37 @@
 .home-refresh[data-theme='dark'] {
   color-scheme: dark;
 }
-.home-appearance select,
+.home-appearance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+.home-appearance:hover {
+  color: var(--foreground);
+  background: var(--card);
+  border-color: var(--border);
+}
+.home-appearance:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-appearance {
+    transition: none;
+  }
+}
 .home-demo-control {
   font: inherit;
   font-size: 12px;
@@ -491,10 +521,6 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px;
-}
-.home-appearance select:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
 }
 .home-demo-caption {
   display: flex;

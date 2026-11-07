@@ -13,6 +13,9 @@ import {
   Code2,
   SlidersHorizontal,
   Check,
+  Monitor,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import {
   Accordion,
@@ -83,6 +86,44 @@ const benefits = [
   },
 ];
 
+const appearances = [
+  { value: 'system', label: 'System', icon: Monitor },
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+] as const;
+
+/**
+ * One icon button for the page's appearance. Each click moves to the next of System, Light and
+ * Dark; the icon shows the current choice and the label names it and the one that comes next.
+ */
+function AppearanceButton({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const index = Math.max(
+    0,
+    appearances.findIndex((option) => option.value === value),
+  );
+  const current = appearances[index];
+  const next = appearances[(index + 1) % appearances.length];
+  const Icon = current.icon;
+  const label = `Appearance: ${current.label}. Switch to ${next.label}.`;
+  return (
+    <button
+      type="button"
+      className="home-appearance"
+      onClick={() => onChange(next.value)}
+      aria-label={label}
+      title={label}
+    >
+      <Icon size={16} aria-hidden="true" />
+    </button>
+  );
+}
+
 export default function Home() {
   const [appearance, setAppearance] = useState('system');
   return (
@@ -91,17 +132,7 @@ export default function Home() {
         Skip to content
       </a>
       <SiteHeader>
-        <label className="home-appearance">
-          <span className="sr-only">Site appearance</span>
-          <select
-            value={appearance}
-            onChange={(event) => setAppearance(event.target.value)}
-          >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
+        <AppearanceButton value={appearance} onChange={setAppearance} />
       </SiteHeader>
       <main id="main">
         <section className="home-hero wrap">
