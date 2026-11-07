@@ -14,22 +14,20 @@ enum ExtensionCopyContent: Equatable {
     static let maximumImagePixels = 32_000_000
 
     /// Content for downloaded bytes of `kind`, or nil when they are not that kind: SVG and text must pass
-    /// `ExtensionItemCopy.downloadedText`; an image must carry the kind's signature, be reported by ImageIO
-    /// as that type, stay within the size limits, and decode.
+    /// `ExtensionItemCopy.downloadedText`; an image must carry the signature of a format the kind accepts,
+    /// be reported by ImageIO as that format, stay within the size limits, and decode. An `image` copy
+    /// that is SVG markup instead is copied as text, like `svg`. A GIF copies its first frame and an ICO
+    /// its largest entry.
     init?(_ data: Data, kind: ExtensionItemCopy.Kind) {
         guard kind.isImage else {
             guard let text = ExtensionItemCopy.downloadedText(data, kind: kind) else { return nil }
             self = .text(text); return
         }
-        let options = [kCGImageSourceShouldCache: false] as CFDictionary
+        if kind == .image, let svg = ExtensionItemCopy.imageKindSVG(data) { self = .text(svg); return }
         guard ExtensionItemCopy.hasImageSignature(data, kind: kind),
-              let source = CGImageSourceCreateWithData(data as CFData, options),
-              CGImageSourceGetType(source) as String? == kind.imageTypeIdentifier, CGImageSourceGetCount(source) > 0,
-              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, options) as? [CFString: Any],
-              let width = properties[kCGImagePropertyPixelWidth] as? Int, let height = properties[kCGImagePropertyPixelHeight] as? Int,
-              (1...Self.maximumImageDimension).contains(width), (1...Self.maximumImageDimension).contains(height),
-              width * height <= Self.maximumImagePixels,
-              let image = CGImageSourceCreateImageAtIndex(source, 0, options) else { return nil }
+              let opened = ExtensionImageDecoding.open(data, accepting: kind.formats, maximumDimension: Self.maximumImageDimension,
+                                                       maximumPixels: Self.maximumImagePixels),
+              let image = CGImageSourceCreateImageAtIndex(opened.source, opened.index, [kCGImageSourceShouldCache: false] as CFDictionary) else { return nil }
         let bitmap = NSBitmapImageRep(cgImage: image)
         guard let png = bitmap.representation(using: .png, properties: [:]), let tiff = bitmap.tiffRepresentation else { return nil }
         self = .image(png: png, tiff: tiff)

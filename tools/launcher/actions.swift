@@ -720,6 +720,73 @@ func extensionRowCopyScenario() throws {
     print("PASS: a clipboard-write extension asks first, lists its copy after the links, and copies only when chosen")
 }
 
+/// A fictional logo for a row image: a filled shape of `color` on a transparent `width` by `height`
+/// canvas, encoded as `type`, the way a site might serve its favicon.
+func fixtureLogo(width: Int, height: Int, red: CGFloat, green: CGFloat, blue: CGFloat, circle: Bool, type: String = "public.png") -> Data {
+    let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+    context.setFillColor(red: red, green: green, blue: blue, alpha: 1)
+    let rect = CGRect(x: 0, y: 0, width: width, height: height)
+    if circle { context.fillEllipse(in: rect) } else { context.addPath(CGPath(roundedRect: rect, cornerWidth: CGFloat(height) / 5, cornerHeight: CGFloat(height) / 5, transform: nil)); context.fillPath() }
+    context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+    context.fill(rect.insetBy(dx: CGFloat(width) * 0.38, dy: CGFloat(height) * 0.2))
+    let data = NSMutableData()
+    let destination = CGImageDestinationCreateWithData(data, type as CFString, 1, nil)!
+    CGImageDestinationAddImage(destination, context.makeImage()!, nil)
+    CGImageDestinationFinalize(destination)
+    return data as Data
+}
+
+/// A list extension with `row-images`: the first-run prompt says it shows images from its sites, rows
+/// whose images loaded show them in place of the extension's icon, a row still loading and rows whose
+/// image failed (an HTTP error, or SVG, which is never rendered) keep the placeholder, and rows without
+/// an image are unchanged. Logos go through the real thumbnail code the fetch helper runs; nothing is
+/// downloaded.
+func extensionRowImagesScenario() throws {
+    let (imageDirectory, _) = try copyExtension("row-images") { manifest in
+        manifest.id = "fixture.favicons"; manifest.name = "Fixture Favicons"; manifest.output = "items"
+        manifest.hosts = ["icons.example.com"]; manifest.permissions = ["row-images"]
+    }
+    let imageManager = ExtensionManager(configURL: panel.model.actionConfigURL, roots: [imageDirectory], dataDirectory: root.appendingPathComponent("ImageData-" + UUID().uuidString))
+    imageManager.reload()
+    try imageManager.setCommunityAllowed(true, expected: imageManager.communityAllowed)
+    let prompt = NSHostingView(rootView: ExtensionPermissionView(
+        request: ExtensionPermissionRequest(extensionItem: imageManager.extensions.first!, input: "", hosts: ["icons.example.com"]), enable: { _ in }, cancel: {}))
+    prompt.frame = NSRect(x: 0, y: 0, width: 390, height: 330); prompt.layoutSubtreeIfNeeded(); settle()
+    try render("extension-row-images-prompt", view: prompt)
+    try imageManager.setEnabled(imageManager.extensions.first!, true)
+    let downloads: [String: Data] = [
+        "/coffee.ico": fixtureLogo(width: 48, height: 48, red: 0.55, green: 0.32, blue: 0.18, circle: true, type: "com.microsoft.ico"),
+        "/maps.png": fixtureLogo(width: 128, height: 64, red: 0.16, green: 0.6, blue: 0.32, circle: false),
+        "/books.gif": fixtureLogo(width: 32, height: 32, red: 0.2, green: 0.38, blue: 0.85, circle: false, type: "com.compuserve.gif")
+    ]
+    var waiting: [(ExtensionFetcher.RowImageReply) -> Void] = []
+    imageManager.fetchRowImage = { request, _, completion in
+        switch request.url.path {
+        case "/loading.png": waiting.append(completion)
+        case "/vector.svg": completion(.failed(status: 200))
+        case let path: completion(downloads[path].flatMap { ExtensionImageDecoding.thumbnailPNG($0) }.map { .thumbnail($0) } ?? .failed(status: 404))
+        }
+    }
+    let rows = [("Fictional Coffee", "coffee.ico", "ICO favicon"), ("Fictional Maps", "maps.png", "Wide PNG logo, fitted"),
+                ("Fictional Books", "books.gif", "GIF favicon"), ("Fictional Weather", "loading.png", "Still loading: extension icon"),
+                ("Fictional Archive", "missing.png", "Server answered 404: extension icon"), ("Fictional Vectors", "vector.svg", "SVG is never rendered: extension icon")]
+    let items = rows.map { #"{"title":"\#($0.0)","subtitle":"\#($0.2)","url":"https://site.example.com/\#($0.1)","image":{"url":"https://icons.example.com/\#($0.1)"}}"# }
+        + [#"{"title":"Fictional Plain","subtitle":"No image","url":"https://site.example.com/plain"}"#]
+    imageManager.invokeOverride = { _, _, completion in completion(.success(#"{"items":[\#(items.joined(separator: ","))]}"#)) }
+    panel.model.extensions = imageManager
+    panel.toggle(); panel.model.query = "Fixture Favicons"; settle()
+    key("\r", 36)
+    verify(waitUntil { panel.model.rows.count == 7 }, "The image extension shows its rows")
+    let images = panel.model.rowState.extensionImages
+    verify(waitUntil { images.shown.count == 3 }, "The three valid images load: \(images.shown.count)")
+    verify(waiting.count == 1, "The loading row waits for its image")
+    try render("extension-row-images")
+    panel.orderOut(nil)
+    try imageManager.setCommunityAllowed(false, expected: true)
+    print("PASS: a row-images extension asks first, shows loaded images, and keeps the placeholder while loading or after a failure")
+}
+
 /// Dictation Settings with a fictional vocabulary, and the sheet that adds a word. Output stays on
 /// Copy, so the input helper is never started.
 func dictationVocabularyScenario() throws {
@@ -1654,6 +1721,7 @@ let scenarios: [Scenario] = [
     Scenario(name: "community-settings", sizeSensitive: false, run: communitySettingsScenario),
     Scenario(name: "extension-rows", sizeSensitive: true, run: extensionRowsScenario),
     Scenario(name: "extension-row-copy", sizeSensitive: false, run: extensionRowCopyScenario),
+    Scenario(name: "extension-row-images", sizeSensitive: false, run: extensionRowImagesScenario),
     Scenario(name: "extension-settings", sizeSensitive: false, run: extensionSettingsScenario),
     Scenario(name: "dictation-vocabulary", sizeSensitive: false, run: dictationVocabularyScenario),
     Scenario(name: "catalog", sizeSensitive: true, run: catalogScenario),

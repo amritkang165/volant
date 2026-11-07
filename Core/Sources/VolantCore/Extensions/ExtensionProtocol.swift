@@ -29,8 +29,10 @@ public struct ExtensionManifest: Codable, Hashable {
     public var appLinks: [String]?
     /// Owner data the extension asks for, beyond its hosts: `"location"` for list extensions (see
     /// `ExtensionLocation`), `"clipboard"` for any extension that receives JSON requests (see
-    /// `ExtensionClipboard`) and `"clipboard-write"` for list extensions whose rows copy text or images
-    /// when the owner chooses them (see `ExtensionItemCopy`). Part of the approval fingerprint when present.
+    /// `ExtensionClipboard`), `"clipboard-write"` for list extensions whose rows copy text or images
+    /// when the owner chooses them (see `ExtensionItemCopy`), and `"row-images"` for list extensions whose
+    /// rows show pictures from their hosts (see `ExtensionItemImage`). Part of the approval fingerprint
+    /// when present.
     public var permissions: [String]?
     /// How a text extension reads its input: `"text"` (the default), the typed text as it is, or `"json"`,
     /// the same JSON request a list extension gets, so it can use preferences, storage and the clipboard
@@ -56,7 +58,8 @@ public struct ExtensionManifest: Codable, Hashable {
     public var wantsLocation: Bool { declaredPermissions.contains(ExtensionLocation.permission) }
     public var wantsClipboard: Bool { declaredPermissions.contains(ExtensionClipboard.permission) }
     public var wantsClipboardWrite: Bool { declaredPermissions.contains(ExtensionItemCopy.permission) }
-    public static let knownPermissions: Set<String> = [ExtensionLocation.permission, ExtensionClipboard.permission, ExtensionItemCopy.permission]
+    public static let knownPermissions: Set<String> = [ExtensionLocation.permission, ExtensionClipboard.permission, ExtensionItemCopy.permission,
+                                                       ExtensionItemImage.permission]
     public var declaredHosts: [String] { hosts ?? [] }
     public var listsItems: Bool { output == "items" }
     public var takesJSON: Bool { input == "json" }
@@ -85,7 +88,7 @@ public struct ExtensionManifest: Codable, Hashable {
               declaredAppLinks.allSatisfy(Self.isAllowedAppLink), declaredAppLinks.isEmpty || listsItems,
               Set(declaredPermissions).isSubset(of: Self.knownPermissions), Set(declaredPermissions).count == declaredPermissions.count,
               declaredPermissions.isEmpty || receivesRequests, !wantsLocation || listsItems,
-              !wantsClipboardWrite || listsItems, [nil, "list", "search"].contains(mode), mode == nil || listsItems,
+              !wantsClipboardWrite || listsItems, !wantsRowImages || listsItems, [nil, "list", "search"].contains(mode), mode == nil || listsItems,
               placeholder.map({ (1...Self.maximumPlaceholderLength).contains($0.count) && listsItems }) ?? true,
               filters == nil || (listsItems && (2...ExtensionFilter.maximumCount).contains(declaredFilters.count)),
               declaredFilters.allSatisfy(\.isValid), Set(declaredFilters.map(\.id)).count == declaredFilters.count,

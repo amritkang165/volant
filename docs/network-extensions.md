@@ -56,8 +56,8 @@ Kingdom's mixed system reads as metric).
 - **Row symbols.** A row's `"symbol"` names one of Volant's row icons: `sun`, `moon`, `cloud-sun`,
   `cloud-moon`, `cloud`, `fog`, `drizzle`, `rain`, `heavy-rain`, `sleet`, `snow`, `thunderstorm`,
   `wind`, `hot` and `cold` (`ExtensionItemSymbol`). Volant draws the matching SF Symbol in color in
-  place of the extension's icon. Extensions never supply row images; an unknown name is dropped and
-  the row shows the extension's icon. Older Volant versions ignore the field.
+  place of the extension's icon. An unknown name is dropped and the row shows the extension's icon.
+  Older Volant versions ignore the field. A row image (below) takes the symbol's place once it loads.
 - **Row badges.** A row's `"badges"`, up to three `{"symbol","text"}` pairs, show at its end in place of
   the extension's name, such as a story's points, comments and site. `symbol` is one of `points`,
   `comments`, `site`, `author` and `time` (`ExtensionItemBadge.Symbol`), drawn by Volant; an unknown
@@ -69,7 +69,7 @@ Kingdom's mixed system reads as metric).
 - **Copying.** A list extension that declares `"permissions": ["clipboard-write"]` can give a row a
   `"copy"`: `{"text": "<svg …>…</svg>", "title": "Copy SVG"}`, up to 64 KB of UTF-8 copied as plain
   text, or `{"url": "https://cdn.example.com/logo.png", "type": "png", "title": "Copy Image"}` with
-  `type` one of `svg`, `png`, `jpeg`, `webp`, `ico` or `text`. `title` is one line of at most 40
+  `type` one of `svg`, `png`, `jpeg`, `webp`, `ico`, `gif`, `bmp`, `avif`, `image` or `text`. `title` is one line of at most 40
   characters, "Copy" when absent. Without the permission, or with a text over 64 KB, an unknown type, or
   a URL that is not https on the default port to a declared host, the copy is dropped while sanitizing
   and the row stays. The prompt and Settings say "Copy text and images to your clipboard when you
@@ -82,15 +82,68 @@ Kingdom's mixed system reads as metric).
     extension is still enabled, unchanged, not revoked and not blocked by the community switch, and that
     the host is declared and allowed, then fetches it once through `VolantFetchHost` with the same rules
     as a plan (https, no redirects, at most 512 KB, the host's declared token). It checks the bytes
-    match `type` before copying: `svg` and `text` must be UTF-8 without NUL characters, and SVG must
-    start with `<svg` or an XML prolog and contain an `<svg` element; it is never parsed or rendered.
-    Images must carry the type's signature, be reported by ImageIO as that type, be at most 8192 pixels
-    on a side and 32 megapixels, and decode; they are copied as PNG and TIFF. Approval and the host are
-    checked again after the download. An unapproved host, a failed or non-2xx fetch, a wrong type or an
-    oversized file shows why in the footer and copies nothing.
+    match `type` before copying: `svg` and `text` must be UTF-8 without NUL characters, and SVG's root
+    element must be `<svg`. Before the root it may have whitespace and up to 16 of an XML prolog,
+    `<!-- … -->` comments and a `<!DOCTYPE svg …>` that names `svg` as its root, as svgl's files do. A
+    DOCTYPE with an internal subset (`<!DOCTYPE svg [ … ]>`) is refused, since it can declare entities for
+    whatever later reads the copy, and so is any other DOCTYPE, such as `<!DOCTYPE html><svg>`. This is a
+    text scan; the markup is never parsed or rendered.
+    Images must carry the signature of a format the type accepts, be reported by ImageIO as that format,
+    be at most 8192 pixels on a side and 32 megapixels, and decode; they are copied as PNG and TIFF. A GIF
+    copies its first frame and an ICO its largest entry. Approval and the host are checked again after
+    the download. An unapproved host, a failed or non-2xx fetch, a wrong type or an oversized file shows
+    why in the footer and copies nothing.
+  - **Any image.** An extension often cannot know a service's format: DuckDuckGo's icon service answers
+    the same URL pattern with ICO or PNG. `"type": "image"` accepts any raster image Volant decodes (PNG,
+    JPEG, GIF, WebP, ICO with PNG or BMP entries, BMP, TIFF, AVIF and HEIC), identified by its signature
+    and confirmed by ImageIO, so no other ImageIO decoder (PDF, PSD, camera raw) is reachable. Bytes that
+    are SVG markup instead are copied as text under the SVG rules above. The explicit types stay strict:
+    `png` accepts only PNG, `gif` only GIF, and so on (`ExtensionImageFormat`).
+  - **Older Volant.** 0.3.35 drops a copy whose `type` it does not know (`image`, `gif`, `bmp`, `avif`)
+    while sanitizing and keeps the row, so an extension that must work on 0.3.35 keeps the explicit
+    0.3.35 types (`svg`, `png`, `jpeg`, `webp`, `ico`, `text`). Checked against the v0.3.35 sources.
   - The module never sees the downloaded bytes. Each copy is recorded as a clipboard write in
     `ExtensionActivity`, with the host for a URL copy and its GET, never the content.
   - Older Volant versions ignore `copy`, so give such rows a `url` or a title that is useful to copy.
+- **Row images.** A list extension that declares `"permissions": ["row-images"]` can give a row an
+  `"image": {"url": "https://icons.example.com/ip3/example.com.ico"}`, such as a site's favicon or a
+  company's logo. Volant shows it at the row's leading edge in place of the row's symbol or the
+  extension's icon: 24 points, aspect-fit, rounded corners. The row's symbol, or the extension's icon,
+  shows while it loads and stays when it fails. The URL must be https on the default port to a declared
+  host, with no credentials or fragment; otherwise, or without the permission, the image is dropped while
+  sanitizing and the row stays. `image` must be an object. The prompt and Settings say "Show images from
+  its sites in its rows"; the permission is part of the approval fingerprint, so adding it needs enabling
+  again and a catalog update that adds it turns the extension off (`ExtensionItemImage`).
+  - *When it loads.* Only rows that appear on screen ask for their image, never while listing. Each list
+    starts at most 30 fetches and at most 4 run at once across lists; rows past the thirtieth keep the
+    placeholder. A new list, a new query, leaving the extension or closing the launcher drops results
+    still loading.
+  - *Checks.* Before each fetch and again after it, Volant checks that the extension declares
+    `row-images` and is enabled, unchanged, not revoked and not blocked by the community switch, and that
+    the host is declared and allowed. A cached image is shown in a new list only after the same checks.
+  - *Decoding outside the app.* `VolantFetchHost.rowImage` fetches the URL under the plan rules (no
+    redirects, no cookies, the host's declared token) and at most 256 KB. Inside that sandboxed helper,
+    ImageIO opens it only when its signature is PNG, JPEG, GIF, WebP, ICO, BMP, TIFF, AVIF or HEIC and
+    ImageIO agrees, the source is at most 4096 pixels on a side and 16 megapixels, and it draws a
+    thumbnail of at most 64 pixels (`CGImageSourceCreateThumbnailAtIndex`, no caching) into a fresh 8-bit
+    sRGB bitmap, so no metadata, color profile or animation survives, and replies with that PNG. A GIF
+    shows its first frame and an ICO its largest entry. The app decodes only that reply, and only when it
+    is a single-frame PNG of at most 64 KB and 64 by 64 pixels.
+  - *SVG.* Volant never renders untrusted SVG: an image URL that returns SVG shows the placeholder.
+  - *Memory only.* Thumbnails, and failures, are cached in memory by extension and URL for the session,
+    at most 200 entries and 4 MB of pixels, least recently used first out; nothing is written to disk,
+    and Volant forgets them when it quits. Each fetch is recorded as a GET in `ExtensionActivity`, naming
+    only the host.
+  - *Why a permission.* The URLs are the extension's choice on hosts the owner already allowed, and its
+    own fetches reveal the owner's address, timing and query to those hosts. Row images add three
+    things those fetches don't: requests that follow what the owner scrolls to (which rows were on
+    screen, like a read receipt per row), up to 30 more requests per list without any owner choice
+    beyond opening it, and an image decoder fed from the network automatically, even if only in the
+    sandboxed helper. That is a small but real step beyond reading data, so the owner opts in.
+  - *Older Volant.* Versions before row images ignore `image`, and the row keeps its symbol or the
+    extension's icon. But 0.3.35 refuses a manifest whose `permissions` names one it does not know, so
+    an extension that declares `row-images` does not load there at all; publish it only for a Volant
+    release that supports it.
 
 `VolantFetchHost` is the only process with network access for this. It is a sandboxed XPC service
 with just `network.client`, built like `VolantRatesHost`: it re-checks each URL against the hosts it
@@ -197,7 +250,19 @@ from their row, without a scope.
 - `swift test --package-path Core --filter ExtensionNetworkTests`: host names, URL permission, plans,
   item trimming and shared host approvals.
 - `swift test --package-path Core --filter ExtensionItemCopyTests`: the `clipboard-write` permission,
-  dropping copies while sanitizing, size, type, title and host limits, and the SVG and image checks.
+  dropping copies while sanitizing, size, type, title and host limits, and the SVG and image checks,
+  including the `image` type, each format's signature and SVG preambles. `ExtensionItemImageTests`: the
+  `row-images` permission, dropping images while sanitizing, host rules and limits.
+- `VolantTests/ExtensionRowImageThumbnailTests`: thumbnails from generated PNG, JPEG, GIF (first
+  frame), BMP, TIFF and ICO with PNG and BMP entries (largest entry), a WebP fixture (ImageIO cannot
+  write WebP), and AVIF and HEIC when the Mac can write them; SVG, HTML, PDF, garbage, truncated and
+  oversized sources refused; the app's PNG-only acceptance. `ExtensionRowImageTests` (a fake fetch
+  helper): loads, failures, refusals before and after the fetch, activity, the fingerprint, and the
+  loader's concurrency, per-list cap, stale-list dropping and cache bounds. `LauncherExtensionImageTests`:
+  rows keep images, nothing loads until a row asks, leaving drops loads, and the row view's placeholder.
+  The Actions fixture's `extension-row-images` scenario renders the prompt and rows with loaded, loading
+  and failed images in light and dark. A row image through the signed fetch helper and real services
+  are not verified.
 - `VolantTests/ExtensionRowCopyTests` (a fake fetch helper and clipboard): text, SVG, text and each image
   type; wrong types, oversized and failed downloads, unapproved hosts, a host removed mid-download,
   and disabled, blocked, revoked or unpermitted extensions; the fingerprint. `LauncherExtensionCopyTests`:

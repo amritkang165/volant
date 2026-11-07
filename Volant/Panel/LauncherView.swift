@@ -727,11 +727,55 @@ private struct RowView: View {
             else { Image(systemName: "puzzlepiece.extension").font(.system(size: 20)).foregroundStyle(.secondary) }
         case .extensionResult: Image(systemName: "checkmark.circle").font(.system(size: 20)).foregroundStyle(.secondary)
         case .extensionItem(let item, let source):
-            if let symbol = item.symbol.flatMap(ExtensionItemSymbol.init(rawValue:)) {
-                ExtensionRowSymbol(symbol: symbol)
-            } else if let icon = ExtensionIcon.image(for: source) { Image(nsImage: icon).resizable().clipShape(RoundedRectangle(cornerRadius: 5)) }
-            else { Image(systemName: "newspaper").font(.system(size: 20)).foregroundStyle(.secondary) }
+            if let image = item.image {
+                ExtensionRowImage(url: image.url, source: source, images: state.extensionImages) { ExtensionItemIcon(item: item, source: source) }
+            } else {
+                ExtensionItemIcon(item: item, source: source)
+            }
         }
+    }
+}
+
+/// A list extension row's own icon: the symbol it chose, otherwise the extension's icon, otherwise a
+/// generic symbol. Also the placeholder while a row image loads and when it fails.
+struct ExtensionItemIcon: View {
+    let item: ExtensionItem
+    let source: InstalledExtension
+
+    var body: some View {
+        if let symbol = item.symbol.flatMap(ExtensionItemSymbol.init(rawValue:)) {
+            ExtensionRowSymbol(symbol: symbol)
+        } else if let icon = ExtensionIcon.image(for: source) {
+            Image(nsImage: icon).resizable().clipShape(RoundedRectangle(cornerRadius: 5))
+        } else {
+            Image(systemName: "newspaper").font(.system(size: 20)).foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// A list extension row's image preview, such as a favicon, drawn aspect-fit and rounded at the row's
+/// 24-point icon size. It asks for its image when the row appears, and again when a new list keeps the
+/// row on screen, so only rows on screen load. It shows `placeholder` until the image arrives, or for
+/// good when it fails.
+struct ExtensionRowImage<Placeholder: View>: View {
+    let url: String
+    let source: InstalledExtension
+    @ObservedObject var images: ExtensionRowImages
+    @ViewBuilder let placeholder: () -> Placeholder
+
+    var body: some View {
+        Group {
+            if let image = images.image(url, for: source) {
+                Image(nsImage: image).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                    .accessibilityHidden(true)
+            } else {
+                placeholder()
+            }
+        }
+        .frame(width: 24, height: 24)
+        .onAppear { images.request(url, for: source) }
+        .onChange(of: images.list) { images.request(url, for: source) }
     }
 }
 

@@ -114,6 +114,64 @@ final class ExtensionRowCopyTests: XCTestCase {
         XCTAssertEqual(try copy(manager, ext, ExtensionItemCopy(url: "https://\(host)/logo", type: "png")).get(), "Copied image")
     }
 
+    func testTheImageTypeCopiesAnyFormatVolantDecodes() throws {
+        let (manager, ext) = try manager()
+        typealias Fixtures = ExtensionImageFixtures
+        var images: [(String, Data)] = [("PNG", try image(.png)), ("JPEG", try image(.jpeg)), ("GIF", try image(.gif)), ("BMP", try image(.bmp)),
+                                        ("TIFF", try image(.tiff)), ("WebP", webp),
+                                        ("ICO with a PNG entry", Fixtures.ico([Fixtures.icoPNGEntry(size: 16, Fixtures.blue)])),
+                                        ("ICO with a BMP entry", Fixtures.ico([Fixtures.icoBMPEntry(size: 16, Fixtures.blue)]))]
+        if let avif = Fixtures.image(UTType("public.avif")!) { images.append(("AVIF", avif)) }
+        if let heic = Fixtures.image(.heic, width: 64, height: 64) { images.append(("HEIC", heic)) }
+        for (label, data) in images {
+            reply = (data, 200)
+            XCTAssertNoThrow(try copy(manager, ext, ExtensionItemCopy(url: "https://\(host)/favicon", type: "image")).get(), label)
+            guard case .image(let png, _)? = written.last else { XCTFail("\(label) copied no image"); continue }
+            XCTAssertEqual(CGImageSourceCreateWithData(png as CFData, nil).flatMap(CGImageSourceGetType) as String?, UTType.png.identifier, label)
+        }
+        reply = (Data("\u{FEFF}<svg xmlns=\"http://www.w3.org/2000/svg\"/>".utf8), 200)
+        XCTAssertEqual(try copy(manager, ext, ExtensionItemCopy(url: "https://\(host)/favicon", type: "image", title: "Copy Favicon")).get(), "Copied Favicon")
+        XCTAssertEqual(written.last, .text("<svg xmlns=\"http://www.w3.org/2000/svg\"/>"), "SVG under image is copied as text, never rendered")
+        for (label, data) in [("HTML", Data("<html><body>Not found</body></html>".utf8)), ("PDF", Data("%PDF-1.4".utf8)), ("truncated PNG", try image(.png).prefix(20))] {
+            reply = (data, 200)
+            XCTAssertThrowsError(try copy(manager, ext, ExtensionItemCopy(url: "https://\(host)/favicon", type: "image")).get(), label) {
+                XCTAssertEqual($0 as? ExtensionCopyError, .wrongType(.image))
+            }
+        }
+    }
+
+    func testGIFBMPAndAVIFAreExplicitTypesThatStayStrict() throws {
+        let (manager, ext) = try manager()
+        let animated = ExtensionImageFixtures.animatedGIF(first: ExtensionImageFixtures.red, second: ExtensionImageFixtures.blue)
+        reply = (animated, 200)
+        XCTAssertNoThrow(try copy(manager, ext, url("gif")).get())
+        guard case .image(let png, _)? = written.last else { return XCTFail("The GIF copied no image") }
+        XCTAssertTrue(ExtensionImageFixtures.close(try XCTUnwrap(ExtensionImageFixtures.inspect(png)).center, ExtensionImageFixtures.red), "A GIF copies its first frame")
+        reply = (try image(.bmp), 200)
+        XCTAssertNoThrow(try copy(manager, ext, url("bmp")).get())
+        if let avif = ExtensionImageFixtures.image(UTType("public.avif")!) {
+            reply = (avif, 200)
+            XCTAssertNoThrow(try copy(manager, ext, url("avif")).get())
+        }
+        for (type, data) in [("gif", try image(.png)), ("bmp", try image(.gif)), ("avif", try image(.png)), ("png", try image(.gif)), ("ico", try image(.bmp))] {
+            reply = (data, 200)
+            XCTAssertThrowsError(try copy(manager, ext, url(type)).get(), type) {
+                XCTAssertEqual($0 as? ExtensionCopyError, .wrongType(ExtensionItemCopy.Kind(rawValue: type)!))
+            }
+        }
+    }
+
+    func testAnICOCopiesItsLargestEntry() throws {
+        let (manager, ext) = try manager()
+        typealias Fixtures = ExtensionImageFixtures
+        reply = (Fixtures.ico([Fixtures.icoPNGEntry(size: 16, Fixtures.red), Fixtures.icoBMPEntry(size: 48, Fixtures.green), Fixtures.icoPNGEntry(size: 32, Fixtures.blue)]), 200)
+        XCTAssertNoThrow(try copy(manager, ext, url("ico")).get())
+        guard case .image(let png, _)? = written.last else { return XCTFail("The ICO copied no image") }
+        let copied = try XCTUnwrap(Fixtures.inspect(png))
+        XCTAssertEqual(copied.width, 48)
+        XCTAssertTrue(Fixtures.close(copied.center, Fixtures.green))
+    }
+
     func testWrongTypesCopyNothing() throws {
         let (manager, ext) = try manager()
         let png = try image(.png), jpeg = try image(.jpeg)

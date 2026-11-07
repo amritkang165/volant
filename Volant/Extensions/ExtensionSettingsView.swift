@@ -487,6 +487,10 @@ struct ExtensionPermissionView: View {
                     Label(InstalledExtension.clipboardWriteDescription, systemImage: "doc.on.clipboard")
                         .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("extension-clipboard-write-grant")
                 }
+                if request.extensionItem.manifest.wantsRowImages {
+                    Label(InstalledExtension.rowImagesDescription, systemImage: "photo")
+                        .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("extension-row-images-grant")
+                }
             }
             if request.location {
                 Label("Share your approximate location (about 11 km) with \(request.extensionItem.name) and the sites it reads. Volant asks macOS for it only when the extension runs, and never saves it.",

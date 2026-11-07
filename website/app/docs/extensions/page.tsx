@@ -31,6 +31,13 @@ const copyRow = `"permissions": ["clipboard-write"]
  "copy": {"url": "https://cdn.example.com/logo.svg", "type": "svg",
           "title": "Copy SVG"}}`;
 
+const imageRow = `"permissions": ["row-images", "clipboard-write"]
+
+{"title": "example.com", "url": "https://example.com",
+ "image": {"url": "https://icons.duckduckgo.com/ip3/example.com.ico"},
+ "copy": {"url": "https://icons.duckduckgo.com/ip3/example.com.ico",
+          "type": "image", "title": "Copy Favicon"}}`;
+
 const preferencesManifest = `"preferences": [
   {"id": "hideDomains", "type": "text", "title": "Hidden sites",
    "placeholder": "example.com", "maxLength": 200},
@@ -382,6 +389,60 @@ export default function Extensions() {
       </p>
       <pre>
         <code>{copyRow}</code>
+      </pre>
+      <p>
+        Coming in the next release: <code>&quot;type&quot;: &quot;image&quot;</code>{' '}
+        copies whatever image a site returns (PNG, JPEG, GIF, WebP, ICO, BMP,
+        TIFF, AVIF or HEIC), useful when a favicon service answers with ICO
+        one time and PNG the next, and SVG markup is copied as text. GIF, BMP
+        and AVIF also become explicit types. Volant 0.3.35 ignores copies of
+        these new types, so an extension that supports it should keep the
+        explicit types it already knows.
+      </p>
+
+      <h2>Images in rows</h2>
+      <p>
+        Coming in the next release. A list extension can show a picture in
+        each row, such as a site&rsquo;s favicon or a company&rsquo;s logo, in
+        place of its icon. When you enable it, Volant says{' '}
+        <strong>Show images from its sites in its rows</strong>.
+      </p>
+      <ul>
+        <li>
+          <strong>Only from sites you allowed.</strong> Images come only from
+          the sites the extension lists and you approved, over https, at most
+          256 KB each, with no redirects.
+        </li>
+        <li>
+          <strong>Only rows you can see.</strong> A row asks for its image when
+          it appears on screen, at most 30 per list and 4 at a time. The
+          extension&rsquo;s icon shows while it loads and stays if it fails.
+        </li>
+        <li>
+          <strong>Decoded outside Volant.</strong> Volant&rsquo;s sandboxed
+          network helper downloads the image and hands Volant a small PNG it
+          drew itself. Volant never displays SVG from an extension; an SVG
+          image shows the extension&rsquo;s icon instead.
+        </li>
+        <li>
+          <strong>Forgotten when Volant quits.</strong> Images stay in memory,
+          are never saved to disk, and each download appears in the
+          extension&rsquo;s activity by site name only.
+        </li>
+        <li>
+          <strong>Why it asks.</strong> Loading images tells those sites which
+          rows you scrolled to, which the extension&rsquo;s own reading
+          doesn&rsquo;t, so you decide.
+        </li>
+      </ul>
+      <p>
+        For extension authors: declare <code>row-images</code> and give a row
+        an <code>image</code> with a <code>url</code> on one of your hosts.
+        Older Volant versions ignore the field, but Volant 0.3.35 won&rsquo;t
+        load an extension that declares this permission.
+      </p>
+      <pre>
+        <code>{imageRow}</code>
       </pre>
 
       <h2>Text commands with JSON input</h2>
