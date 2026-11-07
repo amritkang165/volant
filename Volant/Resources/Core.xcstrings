@@ -35587,6 +35587,985 @@
           }
         }
       }
+    },
+    "Find and choose a menu command in the app you were using": {
+      "comment": "Launcher command description, shown under its name",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Einen Menübefehl in der zuletzt verwendeten App finden und wählen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Busca y elige un comando de menú en la app que estabas usando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trouver et choisir une commande de menu dans l’app que vous utilisiez"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Trova e scegli un comando di menu nell’app che stavi usando"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "使用中だったアプリのメニューコマンドを見つけて選択"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "사용하던 앱에서 메뉴 명령을 찾아 선택"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Zoek en kies een menuopdracht in de app die je gebruikte"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Znajdź i wybierz polecenie menu w aplikacji, której używałeś"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Encontre e escolha um comando de menu no app que você estava usando"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Encontre e escolha um comando de menu na app que estava a usar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Найти и выбрать команду меню в приложении, которым вы пользовались"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Kullandığınız uygulamada bir menü komutu bulun ve seçin"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Знайти й вибрати команду меню в програмі, якою ви користувалися"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在你正在使用的 App 中查找并选择菜单命令"
+          }
+        }
+      }
+    },
+    "Search Menu Items": {
+      "comment": "Launcher command name: search the menu bar of the app that was in front",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menüeinträge suchen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar elementos de menú"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Rechercher dans les menus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cerca voci di menu"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メニュー項目を検索"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메뉴 항목 검색"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menu-onderdelen zoeken"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Szukaj pozycji menu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Buscar itens de menu"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pesquisar itens de menu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Поиск по меню"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Menü Öğelerinde Ara"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Пошук у меню"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "搜索菜单项"
+          }
+        }
+      }
+    },
+    "That menu item changed or is gone, so Volant didn’t press anything.": {
+      "comment": "Search Menu Items message",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dieser Menüeintrag hat sich geändert oder ist weg, daher hat Volant nichts ausgelöst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ese elemento de menú cambió o ya no existe, así que Volant no pulsó nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cet élément de menu a changé ou a disparu, Volant n’a donc rien activé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quella voce di menu è cambiata o non c’è più, quindi Volant non ha attivato nulla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "そのメニュー項目は変更されたか、なくなったため、Volantは何も実行しませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "해당 메뉴 항목이 변경되었거나 없어져 Volant가 아무것도 실행하지 않았습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dat menu-onderdeel is gewijzigd of verdwenen, dus Volant heeft niets gekozen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ta pozycja menu zmieniła się lub zniknęła, więc Volant niczego nie wybrał."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esse item de menu mudou ou não existe mais, então o Volant não acionou nada."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esse item de menu mudou ou já não existe, por isso o Volant não acionou nada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Этот пункт меню изменился или исчез, поэтому Volant ничего не выбрал."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bu menü öğesi değişti veya kaldırıldı, bu yüzden Volant hiçbir şey çalıştırmadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Цей пункт меню змінився або зник, тому Volant нічого не вибрав."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "该菜单项已更改或不存在，因此 Volant 没有执行任何操作。"
+          }
+        }
+      }
+    },
+    "That menu item isn’t available right now.": {
+      "comment": "Search Menu Items message for a disabled item",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dieser Menüeintrag ist gerade nicht verfügbar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ese elemento de menú no está disponible ahora."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cet élément de menu n’est pas disponible pour le moment."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Quella voce di menu non è disponibile ora."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "そのメニュー項目は現在使用できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "해당 메뉴 항목은 지금 사용할 수 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dat menu-onderdeel is nu niet beschikbaar."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ta pozycja menu jest teraz niedostępna."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esse item de menu não está disponível agora."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esse item de menu não está disponível de momento."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Этот пункт меню сейчас недоступен."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bu menü öğesi şu anda kullanılamıyor."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Цей пункт меню зараз недоступний."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "该菜单项当前不可用。"
+          }
+        }
+      }
+    },
+    "The app didn’t respond to that menu item.": {
+      "comment": "Search Menu Items message",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Die App hat auf diesen Menüeintrag nicht reagiert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "La app no respondió a ese elemento de menú."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’app n’a pas répondu à cet élément de menu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’app non ha risposto a quella voce di menu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "アプリはそのメニュー項目に応答しませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "앱이 해당 메뉴 항목에 응답하지 않았습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De app reageerde niet op dat menu-onderdeel."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aplikacja nie zareagowała na tę pozycję menu."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O app não respondeu a esse item de menu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A app não respondeu a esse item de menu."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Приложение не отреагировало на этот пункт меню."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uygulama bu menü öğesine yanıt vermedi."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Програма не відреагувала на цей пункт меню."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "App 没有响应该菜单项。"
+          }
+        }
+      }
+    },
+    "The app in front changed, so Volant didn’t press anything.": {
+      "comment": "Search Menu Items message when another app came to the front",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Die App im Vordergrund hat gewechselt, daher hat Volant nichts ausgelöst."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "La app en primer plano cambió, así que Volant no pulsó nada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’app au premier plan a changé, Volant n’a donc rien activé."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "L’app in primo piano è cambiata, quindi Volant non ha attivato nulla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "前面のアプリが変わったため、Volantは何も実行しませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "앞에 있는 앱이 바뀌어 Volant가 아무것도 실행하지 않았습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De app op de voorgrond is veranderd, dus Volant heeft niets gekozen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aplikacja na pierwszym planie zmieniła się, więc Volant niczego nie wybrał."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O app em primeiro plano mudou, então o Volant não acionou nada."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A app em primeiro plano mudou, por isso o Volant não acionou nada."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Активное приложение сменилось, поэтому Volant ничего не выбрал."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Öndeki uygulama değişti, bu yüzden Volant hiçbir şey çalıştırmadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Активна програма змінилася, тому Volant нічого не вибрав."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "前台 App 已更改，因此 Volant 没有执行任何操作。"
+          }
+        }
+      }
+    },
+    "This app has no menu bar Volant can read.": {
+      "comment": "Search Menu Items message",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Diese App hat keine Menüleiste, die Volant lesen kann."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esta app no tiene una barra de menús que Volant pueda leer."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Cette app n’a pas de barre des menus que Volant peut lire."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Questa app non ha una barra dei menu che Volant possa leggere."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "このアプリにはVolantが読み取れるメニューバーがありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "이 앱에는 Volant가 읽을 수 있는 메뉴 막대가 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Deze app heeft geen menubalk die Volant kan lezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ta aplikacja nie ma paska menu, który Volant może odczytać."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Este app não tem uma barra de menus que o Volant possa ler."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Esta app não tem uma barra de menus que o Volant possa ler."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "У этого приложения нет строки меню, которую Volant может прочитать."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bu uygulamanın Volant’ın okuyabileceği bir menü çubuğu yok."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "У цієї програми немає рядка меню, який Volant може прочитати."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "此 App 没有 Volant 可读取的菜单栏。"
+          }
+        }
+      }
+    },
+    "Volant couldn’t read that menu item.": {
+      "comment": "Search Menu Items message for a malformed request",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant konnte diesen Menüeintrag nicht lesen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant no pudo leer ese elemento de menú."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant n’a pas pu lire cet élément de menu."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant non è riuscito a leggere quella voce di menu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volantはそのメニュー項目を読み取れませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant가 해당 메뉴 항목을 읽을 수 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant kon dat menu-onderdeel niet lezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant nie mógł odczytać tej pozycji menu."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant não conseguiu ler esse item de menu."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant não conseguiu ler esse item de menu."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant не удалось прочитать этот пункт меню."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant bu menü öğesini okuyamadı."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant не вдалося прочитати цей пункт меню."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant 无法读取该菜单项。"
+          }
+        }
+      }
+    },
+    "Volant doesn’t read or press the menus of this app.": {
+      "comment": "Search Menu Items message for Volant itself, the login window or the security agent",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant liest die Menüs dieser App nicht und löst sie nicht aus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant no lee ni pulsa los menús de esta app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant ne lit ni n’active les menus de cette app."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant non legge né attiva i menu di questa app."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volantはこのアプリのメニューを読み取ったり実行したりしません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant는 이 앱의 메뉴를 읽거나 실행하지 않습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant leest en kiest de menu’s van deze app niet."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant nie odczytuje ani nie wybiera menu tej aplikacji."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant não lê nem aciona os menus deste app."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant não lê nem aciona os menus desta app."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant не читает меню этого приложения и не выбирает его пункты."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant bu uygulamanın menülerini okumaz ve çalıştırmaz."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant не читає меню цієї програми й не вибирає його пункти."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant 不会读取或执行此 App 的菜单。"
+          }
+        }
+      }
+    },
+    "Volant needs Accessibility permission to read menus.": {
+      "comment": "Search Menu Items message when Accessibility is off for Volant",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant braucht die Berechtigung für Bedienungshilfen, um Menüs zu lesen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant necesita permiso de Accesibilidad para leer menús."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant a besoin de l’autorisation Accessibilité pour lire les menus."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant ha bisogno del permesso di Accessibilità per leggere i menu."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volantがメニューを読み取るにはアクセシビリティの許可が必要です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant가 메뉴를 읽으려면 손쉬운 사용 권한이 필요합니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant heeft toestemming voor Toegankelijkheid nodig om menu’s te lezen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant potrzebuje uprawnienia Dostępności, aby odczytywać menu."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant precisa da permissão de Acessibilidade para ler menus."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant precisa da permissão de Acessibilidade para ler menus."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant нужно разрешение Универсального доступа, чтобы читать меню."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant’ın menüleri okuyabilmesi için Erişilebilirlik izni gerekir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant потрібен дозвіл Універсального доступу, щоб читати меню."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant 需要辅助功能权限才能读取菜单。"
+          }
+        }
+      }
+    },
+    "Volant never presses items in the Apple menu.": {
+      "comment": "Search Menu Items message; the Apple menu holds Shut Down, Log Out and similar",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant löst nie Einträge im Apple-Menü aus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant nunca pulsa elementos del menú Apple."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant n’active jamais d’éléments du menu Pomme."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant non attiva mai voci del menu Apple."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volantがアップルメニューの項目を実行することはありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant는 Apple 메뉴의 항목을 실행하지 않습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant kiest nooit onderdelen in het Apple-menu."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant nigdy nie wybiera pozycji z menu Apple."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant nunca aciona itens do menu Apple."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "O Volant nunca aciona itens do menu Apple."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant никогда не выбирает пункты меню Apple."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant, Apple menüsündeki öğeleri asla çalıştırmaz."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant ніколи не вибирає пункти меню Apple."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Volant 绝不会执行苹果菜单中的项目。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

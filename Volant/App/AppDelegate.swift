@@ -5,14 +5,20 @@ import VolantCore
 
 /// Owns the long-lived services: menu bar item, hotkeys, app index, clipboard monitor, and the panel.
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    /// The one connection to the input helper, shared by dictation and Settings. It connects only
-    /// when the owner has chosen Type at the cursor.
+    /// The one connection to the input helper, shared by dictation, Search Menu Items and Settings.
+    /// It connects only when the owner has chosen Type at the cursor or turned on Search Menu Items.
     private let inputHost = InputHostConnection()
     private lazy var dictationAccess = DictationTypingAccess(client: inputHost, canReconnect: { [weak self] in
         guard let model = self?.panel.model else { return true }
         return !model.dictation.isListening && !model.dictationTypesAtCursor
     })
-    private lazy var settingsPanel: SettingsWindowController = SettingsWindowController(conversations: panel.model.conversations, dictationAccess: dictationAccess, openAI: { [weak self] configuration in
+    /// Turning Search Menu Items off stops the helper only when dictation isn't typing with it.
+    private lazy var menuItemsAccess = MenuItemsAccess(client: inputHost, canDisconnect: { [weak self] in
+        guard let self else { return true }
+        return self.config.dictationOutput == .copy && !self.panel.model.dictationTypesAtCursor
+    })
+    private lazy var settingsPanel: SettingsWindowController = SettingsWindowController(conversations: panel.model.conversations, dictationAccess: dictationAccess,
+                                                                                        menuItemsAccess: menuItemsAccess, openAI: { [weak self] configuration in
         guard let self else { return }
         self.settingsPanel.window?.orderOut(nil)
         self.panel.model.acp.configure(configuration)
@@ -95,6 +101,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .whatsNew:
             self?.showSettings()
             self?.settingsPanel.state.section = .whatsNew
+        case .menuItemsSettings:
+            self?.showSettings()
+            self?.settingsPanel.state.section = .general
         case .about:
             NSApp.activate(ignoringOtherApps: true)
             NSApp.orderFrontStandardAboutPanel(nil)
@@ -179,6 +188,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let ai = try? AIConfiguration.load() { panel.model.acp.configure(ai) }
         if config.syncSettingsWithICloud { settingsSync.update(enabled: true) }
         panel.model.inputHost = inputHost
+        panel.model.menuItems.client = inputHost
         currencyRates.loadCache()
         currencyRates.onUpdate = { [weak self] in self?.panel.model.refreshForCurrencyRates() }
         panel.model.onCalculationQuery = { [weak self] query in self?.currencyRates.noteQuery(query) }
@@ -444,7 +454,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         config = loaded
-        if config.dictationOutput == .copy, !panel.model.dictationTypesAtCursor { inputHost.disconnect() }
+        if config.dictationOutput == .copy, !config.searchMenuItems, !panel.model.dictationTypesAtCursor { inputHost.disconnect() }
         NSApp.setActivationPolicy(config.showInDock ? .regular : .accessory)
         applyTheme()
         settingsPanel.refresh(config, apps: index.apps)

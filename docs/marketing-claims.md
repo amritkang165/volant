@@ -275,9 +275,15 @@ Merged after 0.3.36, not in the current download:
 | Story | Released | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
 
+Merged after 0.3.36, not in the current download:
+
+| Story | Released | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Search Menu Items: an opt-in command (`menus`, Settings › General, off by default) that lists the menu items of the app that was in front, filters them, and presses the chosen one through the input helper; the Apple menu, Volant, the login window and password prompts are refused; menu titles stay in memory only while the launcher is open | No | MenuItemsControllerTests (fake Accessibility tree: listing, bounds, Apple menu, re-validation, presses), MenuItemsQueryTests, LauncherMenuItemsTests (fake helper: listing, filtering, press flow, refusals, switch off, nothing recorded), `tools/check-input-confinement.py`; native fixture renders of the setting and rows with fictional menus only; a live run against a real app only in a disposable Tart clone, if recorded in docs/search-menu-items.md; the signed installed app's TCC attribution and presses in arbitrary apps are unverified | Launcher and Privacy docs, marked as coming in the next release; "no Accessibility unless you choose Type at the cursor or Search Menu Items"; say it reads only menu titles, shortcuts and enabled state of the app in front; never "controls any app" or "reads your screen" |
+
 ## Privacy language
 
-No Volant account or telemetry. Usage stats in Settings › Your Volant are computed from data on the Mac and never sent; there is no opt-in telemetry either. Notes and encrypted clipboard history remain local. Submitted AI prompts and selected context reach the chosen provider/server. Keys stay in Keychain. Updates, HTTP AI, rates and network extensions use separate helpers; opt-in iCloud uses Apple's system service. Avoid blanket “everything stays on your Mac,” “entirely offline,” or “zero dependencies” claims. Say “no Accessibility unless you choose Type at the cursor”: the main app stays sandboxed and never uses Accessibility, and only the separate input helper does, listed as Volant in System Settings, after the owner picks that output.
+No Volant account or telemetry. Usage stats in Settings › Your Volant are computed from data on the Mac and never sent; there is no opt-in telemetry either. Notes and encrypted clipboard history remain local. Submitted AI prompts and selected context reach the chosen provider/server. Keys stay in Keychain. Updates, HTTP AI, rates and network extensions use separate helpers; opt-in iCloud uses Apple's system service. Avoid blanket “everything stays on your Mac,” “entirely offline,” or “zero dependencies” claims. Say “no Accessibility unless you choose Type at the cursor” for the current download, and “no Accessibility unless you choose Type at the cursor or Search Menu Items” once Search Menu Items ships: the main app stays sandboxed and never uses Accessibility, and only the separate input helper does, listed as Volant in System Settings, after the owner picks that output or turns on Search Menu Items.
 
 ## Imagery
 

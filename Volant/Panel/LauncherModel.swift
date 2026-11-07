@@ -17,6 +17,8 @@ enum LauncherAction {
     case confetti
     case camera
     case systemAction(SystemAction)
+    /// Settings › General, where Search Menu Items is turned on.
+    case menuItemsSettings
     case checkForUpdates, whatsNew, about, quit
 }
 
@@ -37,6 +39,10 @@ enum ResultRow: Identifiable, Hashable {
     case privacySettings(PrivacyPane)
     case appleShortcut(AppleShortcut)
     case server(ListeningServer)
+    /// A menu item of the app that was in front, for Search Menu Items.
+    case menuItem(MenuItemEntry)
+    /// Search Menu Items while its switch is off: opens the setting.
+    case menuItemsOff
     case caffeinate(CaffeinateCommand)
     case systemSettings(SystemSettingsDestination)
     case settings
@@ -70,6 +76,8 @@ enum ResultRow: Identifiable, Hashable {
         switch self {
         case .appleShortcut(let shortcut): return "apple-shortcut:" + shortcut.id
         case .server(let server): return "server:" + server.id
+        case .menuItem(let entry): return "menu-item:" + entry.item.id
+        case .menuItemsOff: return "command:menu-items-off"
         case .core(let command): return "core:" + command.rawValue
         case .systemAction(let action): return "system-action:" + action.rawValue
         case .systemToggle(let toggle, _): return "system-toggle:" + toggle.rawValue
@@ -112,7 +120,8 @@ enum ResultRow: Identifiable, Hashable {
         case .server(let server):
             return server.exposed ? String(localized: "Network", comment: "Server row label: other machines can connect")
                 : String(localized: "Local", comment: "Server row label: only this Mac can connect")
-        case .core, .caffeinate, .systemAction, .systemToggle: return String(localized: "Command", comment: "Result row kind label")
+        case .menuItem(let entry): return entry.item.shortcut?.display ?? String(localized: "Menu Item", comment: "Result row kind label for a menu item without a keyboard shortcut")
+        case .core, .caffeinate, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
         case .pickedColor: return String(localized: "Color", comment: "Result row kind label: a color picked from the screen")
         case .privacySettings: return String(localized: "System Settings", comment: "Result row kind label")
         case .agentSession(let session): return session.status
@@ -144,7 +153,7 @@ enum ResultRow: Identifiable, Hashable {
 
     var isCoreCommand: Bool {
         switch self {
-        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .privacySettings: return true
+        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .privacySettings, .menuItemsOff: return true
         default: return false
         }
     }
@@ -154,6 +163,9 @@ enum ResultRow: Identifiable, Hashable {
         switch self {
         case .appleShortcut: return String(localized: "Run Shortcut", comment: "Footer and Actions label for Return")
         case .server: return String(localized: "Open in Browser", comment: "Footer and Actions label for Return on a server row")
+        case .menuItem(let entry): return entry.item.enabled ? String(localized: "Choose Menu Item", comment: "Footer label for Return on a menu item row")
+            : String(localized: "Not Available Now", comment: "Footer label for Return on a disabled menu item row")
+        case .menuItemsOff: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .core: return String(localized: "Open Command", comment: "Footer and Actions label for Return")
         case .systemAction(let action): return action.title.replacingOccurrences(of: "…", with: "")
         case .systemToggle(let toggle, let on): return toggle.actionTitle(on: on)
@@ -368,6 +380,10 @@ final class LauncherModel: ObservableObject {
     let servers = ServersModel()
     private var serversSubscription: AnyCancellable?
     var showingServers: Bool { ListeningServers.queryTerm(routedQuery) != nil }
+    /// Search Menu Items' items for this launcher session, cleared when the launcher is dismissed.
+    let menuItems = MenuItemsModel()
+    private var menuItemsSubscription: AnyCancellable?
+    var showingMenuItems: Bool { MenuItemsQuery.term(routedQuery) != nil }
     let agents: AgentsModel
     let conversations = ACPConversations()
     /// The conversation AI Chat shows; everything that acts on "the" conversation acts on this one.
@@ -666,6 +682,9 @@ final class LauncherModel: ObservableObject {
         serversSubscription = servers.objectWillChange.sink { [weak self] _ in
             DispatchQueue.main.async { self?.refreshServerResults() }
         }
+        menuItemsSubscription = menuItems.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async { self?.refreshMenuResults(keepingSelection: true) }
+        }
         agentSubscription = agents.objectWillChange.sink { [weak self] _ in
             DispatchQueue.main.async { self?.refreshAgentResults() }
         }
@@ -950,6 +969,71 @@ final class LauncherModel: ObservableObject {
         selection = selectedID.flatMap { id in rows.firstIndex { $0.id == id } } ?? 0
     }
 
+    /// Shows Search Menu Items: a row that opens the setting while it is off; otherwise the captured
+    /// app's menu items for the typed filter, with a notice while they load, when no app was in front
+    /// or when the helper refused, and a row to Privacy & Security when Accessibility is off.
+    private func refreshMenuResults(keepingSelection: Bool) {
+        guard showingMenuItems else { return }
+        let selectedID = keepingSelection ? selectedRow?.id : nil
+        defer { selection = selectedID.flatMap { id in rows.firstIndex { $0.id == id } } ?? 0 }
+        notice = nil
+        guard config.searchMenuItems else {
+            sections = [ResultSection(title: CoreCommand.menuItems.title, rows: [.menuItemsOff])]
+            return
+        }
+        guard let target = menuItems.target else {
+            sections = []
+            notice = MenuItemsModel.noTarget
+            return
+        }
+        if menuItems.refusal == .notTrusted {
+            sections = [ResultSection(title: PrivacyPane.accessibility.sectionTitle, rows: [.privacySettings(.accessibility)])]
+            actionFeedback = MenuRefusal.notTrusted.message
+            return
+        }
+        let ranked = MenuItemSearch.rank(menuItems.items, term: MenuItemsQuery.term(routedQuery) ?? "")
+        sections = ranked.isEmpty ? [] : [ResultSection(title: String(localized: "\(target.name, format: .verbatim) Menus", comment: "Search Menu Items section title; the value is an app name such as TextEdit"),
+                                                        rows: ranked.map { .menuItem(MenuItemEntry(item: $0, appPath: target.path)) })]
+        if menuItems.loading {
+            notice = String(localized: "Reading \(target.name, format: .verbatim)’s menus…", comment: "Search Menu Items notice while reading an app's menus; the value is an app name")
+        } else if let refusal = menuItems.refusal {
+            notice = refusal.message
+        } else if menuItems.unavailable {
+            notice = MenuItemsModel.helperUnavailable
+        } else if ranked.isEmpty {
+            notice = menuItems.items.isEmpty ? String(localized: "No menu items found.", comment: "Search Menu Items notice when the app's menus are empty")
+                : String(localized: "No matching menu items", comment: "Search Menu Items notice when nothing matches the typed filter")
+        }
+        if !ranked.isEmpty, menuItems.truncated {
+            actionFeedback = String(localized: "Showing the first \(menuItems.items.count, specifier: "%lld") menu items.", comment: "Search Menu Items footer when a limit cut the list short")
+        }
+    }
+
+    /// The launcher is about to appear: remembers the app in front for Search Menu Items, only while
+    /// its switch is on, and drops anything read for the previous session.
+    func captureMenuTarget(_ app: NSRunningApplication?) {
+        menuItems.capture(config.searchMenuItems ? MenuTarget.capture(app) : nil)
+    }
+
+    /// The launcher was dismissed: forgets the menu titles and the rows that show them.
+    func menuItemsDismissed() {
+        menuItems.clear()
+        if showingMenuItems { sections = [] }
+    }
+
+    /// Return on a menu item: asks the helper to press it once the launcher is hidden and the app is in
+    /// front again. A refusal brings the launcher back on Search Menu Items with the reason.
+    private func pressMenuItem(_ item: MenuItem) {
+        guard item.enabled else { actionFeedback = MenuRefusal.disabled.message; return }
+        menuItems.press(item) { [weak self] message in
+            guard let self, let message else { return }
+            self.reopen()
+            self.query = CoreCommand.menuItems.query
+            self.actionFeedback = message
+        }
+        dismiss()
+    }
+
     /// Updates for installed extensions in the catalog this Mac last accepted; the app connects it to
     /// `ExtensionUpdateChecker.available`, which never contacts the catalog.
     var extensionUpdates: () -> [ExtensionUpdateChecker.Update] = { [] }
@@ -1151,6 +1235,12 @@ final class LauncherModel: ObservableObject {
             sections = []
             servers.refresh()
             refreshServerResults()
+            return
+        }
+        if showingMenuItems {
+            sections = []
+            if config.searchMenuItems { menuItems.loadIfNeeded() }
+            refreshMenuResults(keepingSelection: false)
             return
         }
         if showingAppleShortcuts {
@@ -1723,12 +1813,14 @@ final class LauncherModel: ObservableObject {
     func activateSelection() {
         guard let row = selectedRow else { return }
         switch row {
-        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation, .pickedColor, .privacySettings: break
+        case .appleShortcut, .server, .connectivity, .audioRoute, .volume, .extensionResult, .extensionItem, .newNote, .calculation, .pickedColor, .privacySettings, .menuItem, .menuItemsOff: break
         default: usage.record(key: row.id, query: query)
         }
         switch row {
         case .appleShortcut(let shortcut): shortcutRunQuery = query; appleShortcuts.run(shortcut); return
         case .server(let server): openURL(server.url)
+        case .menuItem(let entry): pressMenuItem(entry.item); return
+        case .menuItemsOff: dismiss(); onNote(.menuItemsSettings); return
         case .systemAction(let action): onNote(.systemAction(action)); return
         case .systemToggle(let toggle, _): toggleSystemSetting(toggle); return
         case .pickedColor(let color, let format): copy(color.value(format))

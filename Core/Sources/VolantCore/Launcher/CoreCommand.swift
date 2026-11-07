@@ -2,7 +2,7 @@ import Foundation
 
 /// Discoverable entry points. Data rows keep their own identity and aren't branded as apps.
 public enum CoreCommand: String, CaseIterable, Hashable {
-    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, colorPicker, camera, newSnippet, newQuicklink, catalog
+    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, colorPicker, camera, newSnippet, newQuicklink, catalog, menuItems
     /// The command's name in the launcher, translated in the Core table.
     public var titleResource: LocalizedStringResource {
         switch self {
@@ -28,6 +28,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .newSnippet: return LocalizedStringResource("Create Snippet", table: "Core", comment: "Launcher command name")
         case .newQuicklink: return LocalizedStringResource("Create Quicklink", table: "Core", comment: "Launcher command name")
         case .catalog: return LocalizedStringResource("Extension Catalog", table: "Core", comment: "Launcher command name")
+        case .menuItems: return LocalizedStringResource("Search Menu Items", table: "Core", comment: "Launcher command name: search the menu bar of the app that was in front")
         }
     }
     public var query: String {
@@ -38,6 +39,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .files: return "/"
         case .newSnippet: return "new snippet"
         case .newQuicklink: return "new quicklink"
+        case .menuItems: return "menus"
         default: return rawValue
         }
     }
@@ -65,6 +67,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .newSnippet: return "text.badge.plus"
         case .newQuicklink: return "link.badge.plus"
         case .catalog: return "puzzlepiece.extension"
+        case .menuItems: return "filemenu.and.selection"
         }
     }
     /// The command's one-line description, translated in the Core table.
@@ -84,6 +87,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .clipboard: return LocalizedStringResource("Find something you copied", table: "Core", comment: "Launcher command description, shown under its name")
         case .contacts: return LocalizedStringResource("Find people in your Contacts", table: "Core", comment: "Launcher command description, shown under its name")
         case .files: return LocalizedStringResource("Find files on your Mac", table: "Core", comment: "Launcher command description, shown under its name")
+        case .menuItems: return LocalizedStringResource("Find and choose a menu command in the app you were using", table: "Core", comment: "Launcher command description, shown under its name")
         default: return LocalizedStringResource("Built into Volant", table: "Core", comment: "Launcher command description, shown under its name")
         }
     }
@@ -103,6 +107,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .clipboard: return "clipboard history | clip | copied | paste"
         case .contacts: return "people | person | address book"
         case .files: return "file | documents | finder"
+        case .menuItems: return MenuItemsQuery.phrases.joined(separator: " | ") + " | menu commands"
         case .servers: return "ports | localhost | listening | dev server"
         case .colorPicker: return LauncherRouting.colorPickerPhrases.sorted().joined(separator: " | ") + " | eyedropper | colour"
         case .camera: return "webcam | facetime camera | mirror | open camera"
