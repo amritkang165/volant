@@ -217,8 +217,11 @@ export default function PrivacyAndSecurity() {
         Carbon&rsquo;s hotkey registration, which needs no permission at all.
       </p>
       <p>
-        <strong>No Accessibility grant unless you choose Type at the cursor.</strong>{' '}
-        Unless you choose it, Volant never asks for it: results are copied to
+        <strong>
+          No Accessibility grant unless you choose Type at the cursor or Search
+          Menu Items.
+        </strong>{' '}
+        Unless you choose one of them, Volant never asks for it: results are copied to
         the clipboard instead of pasted, so no keystroke is synthesized. Window
         management and system-wide text expansion stay absent.
       </p>
@@ -229,12 +232,32 @@ export default function PrivacyAndSecurity() {
         separate helper inside the app, which asks macOS once for Accessibility
         (System Settings lists it as Volant). The helper can only type text you
         just dictated into the app that was in front when you started; it has
-        no command for reading what is on screen or typing anything else. It
+        no command for typing anything else, and apart from Search Menu Items
+        below, none for reading what is on screen. It
         never reads the text of the field it types into. It refuses to type
         into password fields or while secure input is on, and copies instead.
         The main app stays sandboxed and never uses Accessibility itself.
         Choosing Copy to clipboard again stops the helper; macOS keeps the grant
         until you turn Volant off in Privacy &amp; Security → Accessibility.
+      </p>
+      <p>
+        Coming in the next release: <strong>Search Menu Items</strong> in
+        Settings → General, off until you turn it on. Type{' '}
+        <code>menus</code> in the launcher to search the menu bar of the app
+        you were using, and press Return to choose an item. The same helper
+        does the work, with the same single Volant entry in Privacy &amp;
+        Security → Accessibility; turning the switch on asks for the permission
+        only if Volant doesn&rsquo;t have it yet. The helper reads only menu
+        titles, keyboard shortcuts and whether each item is enabled, never
+        window contents or the text of fields, and only from the app in front.
+        It presses the item you chose only after checking that the same app is
+        still in front and the item still has the same name. It never reads
+        or presses the Apple menu, which holds Shut Down, Restart and Log Out,
+        and refuses Volant itself, the login window and password prompts. Menu
+        titles can include document names, so they stay in memory only while
+        the launcher is open and are never saved, synced or logged. Turning
+        the switch off stops the helper unless Type at the cursor still uses
+        it.
       </p>
 
       <h2>Your data at rest</h2>

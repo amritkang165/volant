@@ -128,6 +128,7 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         let previousQuery = model.query
         let previousSections = model.sections
         let previousSelection = model.selection
+        model.captureMenuTarget(NSWorkspace.shared.frontmostApplication)
         model.isPresented = true
         observeOutsideInteraction()
         // After a click-away, Translate comes back with its text; after Escape, Back or the shortcut it
@@ -278,6 +279,7 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         presentationGeneration += 1
         endDragging()
         model.dictionary.clear()
+        model.menuItemsDismissed()
         model.actionTarget = nil
         model.isPresented = false
         model.agents.disconnect()

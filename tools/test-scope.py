@@ -14,6 +14,8 @@ UI_PATTERNS = (
     "Volant/App/main.swift", "Volant/App/AppDelegate.swift", "Volant/Resources/*", "Volant/Appearance/*",
     "Volant/Settings/AIModelDiscovery.swift", "Volant/Settings/ACPAgentDetection.swift", "Volant/Settings/AICredentials.swift", "Core/Sources/VolantCore/Clipboard/*", "Core/Sources/VolantCore/Emoji/*", "Core/Sources/VolantCore/Launcher/*", "Core/Sources/VolantCore/Agents/*", "Core/Sources/VolantCore/Herdr/*", "Core/Sources/VolantCore/Rex/*", "Shared/HerdrQuestion.swift", "Shared/HerdrClaudeQuestion.swift", "Shared/HerdrResponseController.swift", "Shared/ExtensionImageDecoding.swift", "Volant/SystemControl/SystemSettingsDestination.swift",
     "tools/launcher/*", "Volant/Settings/SettingsSection.swift",
+    # Search Menu Items: the launcher fixture drives its model; Settings shows its switch.
+    "Volant/MenuItems/*", "Core/Sources/VolantCore/MenuItems/*", "Volant/Settings/MenuItemsSettingsSection.swift",
     "tools/check-launcher.sh", "tools/check-launcher-actions.sh", "tools/app-module.sh", "tools/check-dictation-hud.sh", "tools/run-bounded-check.py",
     # Launcher fixtures drive these directly: volume and audio routes, Wi-Fi and Bluetooth, system actions,
     # Caffeinate, snippet and quicklink forms, and app shortcut bindings.

@@ -520,6 +520,7 @@ private extension CoreCommand {
         case .camera: return Color(white: 0.35)
         case .newSnippet, .newQuicklink: return .cyan
         case .catalog: return Color(red: 0.95, green: 0.42, blue: 0.29)
+        case .menuItems: return Color(red: 0.35, green: 0.4, blue: 0.85)
         }
     }
 }
@@ -555,6 +556,7 @@ private struct RowView: View {
         HStack(spacing: 12) {
             icon.frame(width: 24, height: 24)
             Text(title).font(.system(size: 15)).lineLimit(1)
+                .foregroundStyle(dimmed ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.primary))
             if let subtitle {
                 Text(subtitle).font(.system(size: 14)).foregroundStyle(.secondary).lineLimit(1)
             }
@@ -566,6 +568,13 @@ private struct RowView: View {
             }
             if case .extensionItem(let item, _) = row, let badges = item.badges {
                 ExtensionRowBadges(badges: badges)
+            } else if case .menuItem(let entry) = row {
+                if let shortcut = entry.item.shortcut {
+                    Text(shortcut.display).font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                        .padding(.horizontal, 6).frame(minHeight: 20)
+                        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
+                        .accessibilityLabel(String(localized: "Shortcut \(shortcut.display, format: .verbatim)", comment: "Accessibility label for a menu item's keyboard shortcut"))
+                }
             } else {
                 Text(row.kind).font(.system(size: 14)).foregroundStyle(.secondary)
             }
@@ -576,9 +585,17 @@ private struct RowView: View {
         .background(selected ? theme.selection : AnyShapeStyle(Color.clear), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
+    /// A disabled menu item, drawn dimmed; Return on it explains instead of pressing.
+    private var dimmed: Bool {
+        if case .menuItem(let entry) = row { return !entry.item.enabled }
+        return false
+    }
+
     private var title: String {
         switch row {
         case .appleShortcut(let shortcut): return shortcut.name
+        case .menuItem(let entry): return entry.item.title
+        case .menuItemsOff: return String(localized: "Turn On Search Menu Items", comment: "Launcher row title while Search Menu Items is off")
         case .server(let server): return "\(server.port) · " + (server.folderName.map { server.displayName + " · " + $0 } ?? server.displayName)
         case .core(let command): return command.title
         case .systemAction(let action): return action.title
@@ -619,6 +636,8 @@ private struct RowView: View {
         switch row {
         case .core(let command): return command.detail
         case .server(let server): return server.detail(home: ServersModel.home)
+        case .menuItem(let entry): return entry.item.location
+        case .menuItemsOff: return String(localized: "Off in Settings. Lets Volant read and press the menus of the app you were using.", comment: "Launcher row subtitle while Search Menu Items is off")
         case .systemAction(let action): return action.detail
         case .systemToggle(let toggle, let on): return toggle.detail(on: on)
         case .pickedColor(_, let format): return format.label
@@ -670,6 +689,10 @@ private struct RowView: View {
     @ViewBuilder private var icon: some View {
         switch row {
         case .appleShortcut: CommandTile(symbol: "square.stack.3d.up", tint: CoreCommand.shortcuts.tint)
+        case .menuItem(let entry):
+            if let path = entry.appPath { Image(nsImage: state.icon(forFile: path)).resizable().opacity(dimmed ? 0.5 : 1) }
+            else { CommandTile(symbol: CoreCommand.menuItems.symbol, tint: CoreCommand.menuItems.tint) }
+        case .menuItemsOff: CommandTile(symbol: CoreCommand.menuItems.symbol, tint: CoreCommand.menuItems.tint)
         case .server(let server):
             if let logo = server.kind.logo, let image = NSImage(named: "Runtimes/" + logo.asset) { RuntimeTile(image: image, hex: logo.hex) }
             else { CommandTile(symbol: CoreCommand.servers.symbol, tint: CoreCommand.servers.tint) }
