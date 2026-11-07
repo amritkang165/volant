@@ -3,7 +3,8 @@ import Foundation
 /// The raster image formats Volant decodes for extensions: a row's copy and a row's image preview.
 /// Downloaded bytes are identified by their signature here, before ImageIO sees them, and ImageIO must
 /// then report one of the format's type identifiers, so a download can never reach a decoder for a
-/// format outside this list (such as PDF, PSD or camera raw). SVG is not here: Volant never renders it.
+/// format outside this list (such as PDF, PSD or camera raw). SVG is not here: ImageIO never sees it, and
+/// row previews draw it only in the extension helper (`ExtensionSVGPreview`).
 public enum ExtensionImageFormat: String, CaseIterable, Sendable {
     case png, jpeg, gif, webp, ico, bmp, tiff, avif, heic
 

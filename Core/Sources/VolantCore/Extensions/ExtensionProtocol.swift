@@ -184,6 +184,11 @@ public struct ExtensionFilter: Codable, Hashable, Sendable {
     func run(module: Data, capabilities: [String], input: String, timeout: Double, reply: @escaping (String?, String?) -> Void)
     /// ABI 2: restricted WASI command with in-memory stdin/stdout only.
     func runCommand(module: Data, input: String, timeout: Double, reply: @escaping (String?, String?) -> Void)
+    /// Draws a row image preview from SVG markup the fetch helper downloaded and checked: checks it again
+    /// (`ExtensionSVGPreview`), draws it at most `maximumPixels` on a side, and replies with a fresh PNG, or
+    /// nil and a short code. No module runs, and the helper stops itself if drawing passes
+    /// `ExtensionSVGPreview.renderTimeout`.
+    func rasterizeSVG(data: Data, maximumPixels: Int, reply: @escaping (Data?, String?) -> Void)
 }
 
 /// What the service may ask the app to do on the extension's behalf. Every call is re-checked against the manifest by the app.

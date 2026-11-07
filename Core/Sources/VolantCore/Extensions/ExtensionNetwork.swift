@@ -312,11 +312,14 @@ public enum ExtensionHostApprovals {
 /// sends GET, or POST with a JSON body, with only the headers `ExtensionRequest.isAllowed` accepts, which
 /// are those an extension's declared secrets add. `fetchCatalogFile` reads only the fixed extension
 /// catalog paths that `ExtensionCatalog.url(for:)` accepts. `rowImage` GETs a row's image under the same
-/// URL rules, at most `ExtensionItemImage.maximumDownloadBytes`, decodes it inside the helper, and replies
-/// with a PNG thumbnail it drew itself, never the downloaded bytes.
+/// URL rules, at most `ExtensionItemImage.maximumDownloadBytes`, decodes a raster image inside the helper,
+/// and replies with a PNG thumbnail it drew itself, never the downloaded bytes. A download that is SVG
+/// markup is not drawn there: the reply's `isSVG` is true, with the markup when it passes
+/// `ExtensionSVGPreview.check` (for Volant to hand, unread, to the extension helper to draw) and no data
+/// when it does not.
 @objc public protocol VolantFetchHostProtocol {
     func request(url: String, method: String, body: Data?, headers: [String: String], allowedHosts: [String], maximumBytes: Int,
                  reply: @escaping (Data?, Int, String?) -> Void)
     func fetchCatalogFile(path: String, maximumBytes: Int, reply: @escaping (Data?, Int, String?) -> Void)
-    func rowImage(url: String, headers: [String: String], allowedHosts: [String], reply: @escaping (Data?, Int, String?) -> Void)
+    func rowImage(url: String, headers: [String: String], allowedHosts: [String], reply: @escaping (Data?, Bool, Int, String?) -> Void)
 }

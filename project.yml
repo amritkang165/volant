@@ -44,7 +44,9 @@ targets:
       - path: docs/releases
         type: folder
         buildPhase: resources
+      # Extension SVG previews are drawn only in VolantExtensionHost; the app never draws extension SVG.
       - path: Shared
+        excludes: ["ExtensionSVGRasterizer.swift"]
     info:
       path: Volant/Info.plist
       properties:
