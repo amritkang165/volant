@@ -63,6 +63,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var clipboardStore = ClipboardStore(retention: config.clipboardRetention)
     private lazy var clipboardMonitor = ClipboardMonitor(store: clipboardStore)
     private let notesStore = NotesStore()
+    private lazy var notesSync: NotesICloudSync = {
+        let sync = NotesICloudSync(store: notesStore)
+        sync.onStatus = { [weak self] status in self?.settingsPanel.state.notesICloudStatus = status.text }
+        return sync
+    }()
     /// Created on first use. Pane previews follow `config.rexPanePreviews`; turning them on or off
     /// in the window writes the configuration and reloads it, so Settings shows the same choice.
     private lazy var rexOverview = RexOverviewWindowController(model: RexOverviewModel(previewsAllowed: config.rexPanePreviews, save: { [weak self] allowed in
@@ -187,6 +192,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         applyTheme()
         if let ai = try? AIConfiguration.load() { panel.model.acp.configure(ai) }
         if config.syncSettingsWithICloud { settingsSync.update(enabled: true) }
+        notesSync.update(enabled: config.syncSettingsWithICloud)
         panel.model.inputHost = inputHost
         panel.model.menuItems.client = inputHost
         currencyRates.loadCache()
@@ -464,6 +470,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let ai = try? AIConfiguration.load() { panel.model.conversations.apply(ai) }
         clipboardStore.retention = config.clipboardRetention
         settingsSync.update(enabled: config.syncSettingsWithICloud)
+        notesSync.update(enabled: config.syncSettingsWithICloud)
         currencyRates.keyChanged()
     }
 }

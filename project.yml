@@ -58,6 +58,12 @@ targets:
         SUFeedURL: $(VOLANT_UPDATE_FEED_URL)
         SUPublicEDKey: $(VOLANT_UPDATE_PUBLIC_KEY)
         SUEnableInstallerLauncherService: true
+        # Volant for iPhone shares this container; public so notes show in Finder as iCloud Drive > Volant.
+        NSUbiquitousContainers:
+          iCloud.com.mysticcoders.volant:
+            NSUbiquitousContainerIsDocumentScopePublic: true
+            NSUbiquitousContainerName: Volant
+            NSUbiquitousContainerSupportedFolderLevels: Any
         SUEnableDownloaderService: true
         LSUIElement: true
         LSMinimumSystemVersion: "15.0"

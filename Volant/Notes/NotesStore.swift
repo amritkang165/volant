@@ -80,7 +80,8 @@ final class NotesSearchTask {
 /// Plain Markdown files in a folder, one per note. Writes go through one serial queue; reload never
 /// discards an edit that has not reached disk yet. Only the open note and dirty notes keep their full
 /// text in memory; reload reuses notes whose modification date and size are unchanged. Search answers
-/// at once from what is resident and reads other files on a background queue, one at a time.
+/// at once from what is resident and reads other files on a background queue, one at a time. The folder
+/// is the local one in Application Support, or Volant's iCloud Drive folder while notes sync is on.
 final class NotesStore: ObservableObject {
     static let unreadableMessage = String(localized: "This note couldn’t be read as UTF-8 Markdown. Check the file’s access and encoding, then retry.")
     @Published private(set) var notes: [Note] = [] { didSet { generation += 1 } }
@@ -94,7 +95,7 @@ final class NotesStore: ObservableObject {
         let count = notes.filter { $0.readError != nil }.count
         return count == 0 ? nil : String(localized: "\(count) unreadable notes. Files and pins have been kept.", comment: "Notes load status; needs a plural variant for one note")
     }
-    let directory: URL
+    @Published private(set) var directory: URL
     private let io = DispatchQueue(label: "com.mysticcoders.volant.notes", qos: .utility)
     private var pendingSave: [String: DispatchWorkItem] = [:]
     @Published private(set) var dirtyText: [String: String] = [:]
@@ -109,7 +110,7 @@ final class NotesStore: ObservableObject {
     /// `searchReader` reads files for background search only; tests inject a slow or gated reader.
     init(directory: URL? = nil, searchReader: @escaping (URL) -> String? = { try? String(contentsOf: $0, encoding: .utf8) }) {
         self.searchReader = searchReader
-        self.directory = directory ?? Preferences.supportDirectory.appendingPathComponent("Notes", isDirectory: true)
+        self.directory = directory ?? NotesLocation.local
         try? FileManager.default.createDirectory(at: self.directory, withIntermediateDirectories: true)
         reload()
     }
@@ -227,13 +228,32 @@ final class NotesStore: ObservableObject {
         io.asyncAfter(deadline: .now() + 0.4, execute: work)
     }
 
+    /// Writes through a file coordinator so iCloud never uploads or replaces a half-written note.
     private func write(_ text: String, to url: URL) -> String? {
-        do {
-            try text.write(to: url, atomically: true, encoding: .utf8)
-            return nil
-        } catch {
-            return String(localized: "Could not save note: \(error.localizedDescription)")
+        var coordinationError: NSError?
+        var writeError: Error?
+        NSFileCoordinator().coordinate(writingItemAt: url, options: .forReplacing, error: &coordinationError) { target in
+            do { try text.write(to: target, atomically: true, encoding: .utf8) } catch { writeError = error }
         }
+        guard let error = writeError ?? coordinationError else { return nil }
+        return String(localized: "Could not save note: \(error.localizedDescription)")
+    }
+
+    /// Switches to another notes folder after every edit has reached disk. Returns false, and stays put,
+    /// while any save is failing, so an unsaved edit is never left behind in the old folder.
+    @discardableResult
+    func relocate(to folder: URL) -> Bool {
+        guard folder.standardizedFileURL != directory.standardizedFileURL else { return true }
+        flush()
+        guard dirtyText.isEmpty else { return false }
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        scanned.removeAll()
+        scannedTerms.removeAll()
+        notes = []
+        directory = folder
+        reload()
+        open(openID)
+        return true
     }
 
     /// Clears dirty state once the latest text reached disk; a saved note that is not open releases its text.
