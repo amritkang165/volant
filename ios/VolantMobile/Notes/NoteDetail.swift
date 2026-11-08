@@ -61,13 +61,12 @@ struct NoteDetail: View {
                 }
                 .accessibilityLabel("Actions")
             }
-            ToolbarItem(placement: .bottomBar) { footer.fixedSize() }
-                .sharedBackgroundVisibility(.hidden)
-            ToolbarSpacer(.flexible, placement: .bottomBar)
-            ToolbarItem(placement: .bottomBar) {
-                Button { model.newNote() } label: { Image(systemName: "square.and.pencil") }
-                    .accessibilityLabel("New Note")
-            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            footer
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, NotesStyle.inset)
+                .padding(.vertical, 6)
         }
         .onAppear(perform: load)
         .onChange(of: note?.downloading) { _, downloading in if downloading == false { load() } }

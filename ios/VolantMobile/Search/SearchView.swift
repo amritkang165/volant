@@ -9,7 +9,7 @@ struct SearchView: View {
     @EnvironmentObject private var mac: MacSettings
     @Environment(\.volantTheme) private var theme
     @Environment(\.openURL) private var openURL
-    @State private var query = ""
+    @State private var query = UserDefaults.standard.string(forKey: "fixtureQuery") ?? ""
     @State private var toast: String?
     @State private var asking: Quicklink?
 
@@ -106,7 +106,7 @@ struct SearchView: View {
                         Button { openURL(url) } label: {
                             HStack(spacing: 12) {
                                 ToolIcon(tool: .quicklinks, size: 30)
-                                Text("Search \(link.name) for “\(term)”").foregroundStyle(.primary).lineLimit(2)
+                                Text(link.name.lowercased().hasPrefix(String(localized: "search").lowercased()) ? "\(link.name) for “\(term)”" : "Search \(link.name) for “\(term)”").foregroundStyle(.primary).lineLimit(2)
                                 Spacer()
                                 Image(systemName: "arrow.up.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
                             }

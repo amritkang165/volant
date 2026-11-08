@@ -64,6 +64,22 @@ The app declares `ITSAppUsesNonExemptEncryption = NO` (it uses only Apple's HTTP
 ships a privacy manifest: no tracking, no collected data, and UserDefaults (CA92.1) and file
 timestamp (C617.1) access for its own and its iCloud container's files.
 
+## App Store listing
+
+`AppStore/` holds the listing for "Volant Mobile" as code:
+
+- `metadata.json`: subtitle, description, keywords, promotional text, URLs, categories, copyright.
+- `screenshots.sh [iphone|ipad|all]`: captures seven screens in the iPhone 17 Pro Max and iPad Pro
+  13" simulators from the fictional notes and settings in `fixtures/`, with dates set relative to
+  now, a 9:41 status bar and dark appearance, then frames each with a headline (`frame.swift`) at
+  1320x2868 and 2064x2752 into `build/appstore/`.
+- `asc.py`: `uv run AppStore/asc.py show`, `push [--screenshots build/appstore] [--skip-text]`,
+  `set-version <x.y.z>`, `age-rating`. It edits the version still being prepared, answers the
+  age rating questionnaire with its lowest values (4+), and replaces each screenshot set.
+
+The API cannot fill in App Privacy (Data Not Collected), price and availability, or App Review
+contact details; set those in App Store Connect.
+
 ## Privacy
 
 No account and no telemetry, as on the Mac. Widgets read titles and one-line previews from the App

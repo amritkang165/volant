@@ -57,6 +57,12 @@ for path, wants_icloud in [(app, True), (f"{app}/PlugIns/VolantWidgets.appex", F
         assert ent.get("com.apple.developer.icloud-container-identifiers") == [container], f"{path} lacks {container}"
         assert ent.get("com.apple.developer.icloud-container-environment") == "Production", f"{path} is not on the Production iCloud environment"
 print("Signed entitlements check passed")
+import json, re
+actions = json.load(open(f"{app}/Metadata.appintents/extract.actionsdata"))["actions"]
+named = [f"{name}: {meta['descriptionMetadata']['descriptionText']['key']}" for name, meta in actions.items()
+         if re.search(r"\b(mac|macos|iphone|ipad)\b", (meta.get("descriptionMetadata") or {}).get("descriptionText", {}).get("key", ""), re.I)]
+assert not named, "App Intent descriptions may not name a platform (ITMS-90626): " + "; ".join(named)
+print("App Intent descriptions check passed")
 PY
 if [[ -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" && -f "$ASC_DIR/private_keys/AuthKey_$ASC_KEY_ID.p8" ]]; then
   xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
