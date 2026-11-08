@@ -229,6 +229,93 @@ def attach_build(build_number: str | None):
     print(f"attached build {build['attributes']['version']} to {version['attributes']['versionString']}")
 
 
+def beta_group(client: Client, app_id: str, name: str, internal: bool, **attributes) -> dict:
+    """The app's beta group with this name, created when missing."""
+    for group in client.get(f"/apps/{app_id}/betaGroups")["data"]:
+        if group["attributes"]["name"] == name:
+            return group
+    return client.post("betaGroups", {"name": name, "isInternalGroup": internal, **attributes},
+                       {"app": {"data": {"type": "apps", "id": app_id}}})["data"]
+
+
+@cli.command("beta-internal")
+@click.option("--email", required=True, help="An App Store Connect user on the team; internal testers must be one.")
+@click.option("--first-name", default="")
+@click.option("--last-name", default="")
+def beta_internal(email: str, first_name: str, last_name: str):
+    """Create the "Volant Team" internal TestFlight group, which receives every build without
+    review, and add a team member to it."""
+    client = Client()
+    app_id = app(client)["id"]
+    group = beta_group(client, app_id, "Volant Team", True, hasAccessToAllBuilds=True)
+    existing = client.get("/betaTesters", **{"filter[email]": email, "filter[apps]": app_id})["data"]
+    if existing:
+        client.call("POST", f"/betaGroups/{group['id']}/relationships/betaTesters", json={"data": [{"type": "betaTesters", "id": existing[0]["id"]}]})
+    else:
+        client.post("betaTesters", {"email": email, "firstName": first_name, "lastName": last_name},
+                    {"betaGroups": {"data": [{"type": "betaGroups", "id": group["id"]}]}})
+    print(f"{email} is in Volant Team; TestFlight sends the invite by email")
+
+
+BETA_DESCRIPTION = ("Volant for iPhone and iPad: plain Markdown notes in iCloud, snippets and quicklinks shared with "
+                    "Volant on the Mac, a calculator for units, time zones and dates, widgets, a share extension and "
+                    "Shortcuts actions. No account and no telemetry.")
+WHAT_TO_TEST = ("Write and preview notes, pin and search them. Try the widgets, the New Volant Note control, Save to "
+                "Volant from Safari's share sheet, and the Volant actions in Shortcuts. If you use Volant on a Mac with "
+                "Sync settings and notes with iCloud on, check that snippets and quicklinks match and that edits sync.")
+REVIEW_NOTES = ("No sign-in or account is needed. Notes are stored in the tester's own iCloud Drive; with iCloud off they "
+                "stay on the device. Snippets and quicklinks start empty unless the tester uses Volant on a Mac; tap + "
+                "in Snippets or Quicklinks to add one.")
+
+
+@cli.command("beta-external")
+@click.option("--feedback-email", required=True)
+@click.option("--contact-first-name", required=True)
+@click.option("--contact-last-name", required=True)
+@click.option("--contact-email", required=True)
+@click.option("--contact-phone", default=None, help="Apple requires one before a build can be submitted for Beta App Review.")
+@click.option("--build", "build_number", default=None, help="Build to add and submit; the newest processed build by default.")
+@click.option("--public-link-limit", default=1000, show_default=True)
+def beta_external(feedback_email, contact_first_name, contact_last_name, contact_email, contact_phone, build_number, public_link_limit):
+    """Prepare external TestFlight: test information, review contact, What to Test, and a "Public Beta"
+    group with a public link. With a contact phone it also submits the build for Beta App Review."""
+    client = Client()
+    app_id = app(client)["id"]
+    meta = json.loads((HERE / "metadata.json").read_text())
+    localization = {"description": BETA_DESCRIPTION, "feedbackEmail": feedback_email,
+                    "marketingUrl": meta["marketingUrl"], "privacyPolicyUrl": meta["privacyPolicyUrl"]}
+    existing = client.get(f"/apps/{app_id}/betaAppLocalizations")["data"]
+    current = next((l for l in existing if l["attributes"]["locale"] == meta["locale"]), None)
+    if current:
+        client.patch("betaAppLocalizations", current["id"], localization)
+    else:
+        client.post("betaAppLocalizations", {"locale": meta["locale"], **localization}, {"app": {"data": {"type": "apps", "id": app_id}}})
+    review = client.get(f"/apps/{app_id}/betaAppReviewDetail")["data"]
+    details = {"contactFirstName": contact_first_name, "contactLastName": contact_last_name, "contactEmail": contact_email,
+               "demoAccountRequired": False, "notes": REVIEW_NOTES}
+    if contact_phone:
+        details["contactPhone"] = contact_phone
+    client.patch("betaAppReviewDetails", review["id"], details)
+    builds = client.get("/builds", **{"filter[app]": app_id, "sort": "-uploadedDate", "limit": 20})["data"]
+    build = next(b for b in builds if b["attributes"]["processingState"] == "VALID" and (build_number is None or b["attributes"]["version"] == build_number))
+    notes = client.get(f"/builds/{build['id']}/betaBuildLocalizations")["data"]
+    note = next((n for n in notes if n["attributes"]["locale"] == meta["locale"]), None)
+    if note:
+        client.patch("betaBuildLocalizations", note["id"], {"whatsNew": WHAT_TO_TEST})
+    else:
+        client.post("betaBuildLocalizations", {"locale": meta["locale"], "whatsNew": WHAT_TO_TEST}, {"build": {"data": {"type": "builds", "id": build["id"]}}})
+    group = beta_group(client, app_id, "Public Beta", False, publicLinkEnabled=True, publicLinkLimitEnabled=True,
+                       publicLinkLimit=public_link_limit, feedbackEnabled=True)
+    client.call("POST", f"/betaGroups/{group['id']}/relationships/builds", json={"data": [{"type": "builds", "id": build["id"]}]})
+    print(f"test information, review details and What to Test set; build {build['attributes']['version']} added to Public Beta")
+    if not contact_phone:
+        print("not submitted: a contact phone is required for Beta App Review")
+        return
+    client.post("betaAppReviewSubmissions", {}, {"build": {"data": {"type": "builds", "id": build["id"]}}})
+    link = client.get(f"/betaGroups/{group['id']}")["data"]["attributes"].get("publicLink")
+    print(f"submitted build {build['attributes']['version']} for Beta App Review; public link once approved: {link}")
+
+
 @cli.command("age-rating")
 def age_rating():
     """Print the age rating declaration's current attributes, to see which questions exist."""

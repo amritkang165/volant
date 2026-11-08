@@ -83,6 +83,11 @@ timestamp (C617.1) access for its own and its iCloud container's files.
   `set-version <x.y.z>`, `attach-build [build]`, `age-rating`. It edits the version still being prepared, answers the
   age rating questionnaire with its lowest values (4+), and replaces each screenshot set.
 
+TestFlight: `asc.py beta-internal --email <team member>` creates the "Volant Team" group, which gets
+every build without review. `asc.py beta-external --feedback-email ... --contact-... --contact-phone ...`
+sets the test information, review contact and What to Test, adds the build to the "Public Beta" group
+with a public link, and submits it for Beta App Review.
+
 The API cannot fill in App Privacy (Data Not Collected), price and availability, or App Review
 contact details; set those in App Store Connect.
 
