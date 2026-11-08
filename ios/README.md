@@ -29,14 +29,39 @@ Fixture launch arguments for simulator review: `-notesDirectory <path>` (fiction
 `-fixtureTool snippets|quicklinks|calculator`, `-fixtureSettings YES`, and `-fixtureWidgets YES`
 (draws the widget views from the App Group snapshot).
 
-### Signing
+### On a device
 
-Device builds need, under team REMBT6JY4N:
+`Scripts/device.sh <device-udid>` builds with the development profiles and installs it
+(`xcrun devicectl list devices` lists UDIDs). It needs, under team REMBT6JY4N:
 
-- App IDs `com.mysticcoders.volant.mobile` (iCloud with the container, App Groups),
-  `.mobile.widgets` (App Groups) and `.mobile.share` (iCloud with the container, App Groups).
-- App Group `group.com.mysticcoders.volant` on all three.
-- A development profile for each, or an Apple ID signed in to Xcode so automatic signing makes them.
+- App IDs `com.mysticcoders.volant.mobile` (iCloud with `iCloud.com.mysticcoders.volant`, App
+  Groups), `.mobile.widgets` (App Groups) and `.mobile.share` (iCloud with the container, App Groups).
+- App Group `group.com.mysticcoders.volant` on all three. The portal adds `group.` itself, so the
+  identifier is typed as `com.mysticcoders.volant`.
+- iOS App Development profiles "Volant mobile development profile", "Volant mobile widget
+  development profile" and "Volant mobile share development profile", or other names passed as
+  `VOLANT_APP_PROFILE`, `VOLANT_WIDGETS_PROFILE` and `VOLANT_SHARE_PROFILE`.
+
+## TestFlight
+
+`Scripts/testflight.sh` archives with the Apple Distribution certificate and App Store profiles,
+checks that the app and both extensions are signed for the App Group and the Production iCloud
+environment, and exports `build/testflight/<build>/export/Volant.ipa`. The build number is the time
+(yyyymmddHHMM); the version is `MARKETING_VERSION` in project.yml. With `ASC_KEY_ID` and
+`ASC_ISSUER_ID` set and the key at `~/.appstoreconnect/private_keys/AuthKey_<id>.p8`, it uploads;
+otherwise upload the .ipa with Transporter.
+
+Once per app:
+
+- An App Store Connect app record for `com.mysticcoders.volant.mobile`.
+- App Store profiles "Volant App Store", "Volant Widgets App Store" and "Volant Share App Store"
+  for the three App IDs, signed with the Apple Distribution certificate.
+- For external testers: a beta description, feedback email and Beta App Review. Internal testers
+  need none of these.
+
+The app declares `ITSAppUsesNonExemptEncryption = NO` (it uses only Apple's HTTPS and iCloud) and
+ships a privacy manifest: no tracking, no collected data, and UserDefaults (CA92.1) and file
+timestamp (C617.1) access for its own and its iCloud container's files.
 
 ## Privacy
 
