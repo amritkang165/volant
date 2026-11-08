@@ -211,6 +211,24 @@ def push(screenshots: Path | None, skip_text: bool):
         push_screenshots(client, app_id, screenshots, meta["locale"])
 
 
+@cli.command("attach-build")
+@click.argument("build_number", required=False)
+def attach_build(build_number: str | None):
+    """Attach a processed build to the version being prepared (the newest one by default). This sets
+    the build that would be submitted and is what gives App Store Connect the app's icon; it submits nothing."""
+    client = Client()
+    app_id = app(client)["id"]
+    version = editable_version(client, app_id)
+    builds = client.get("/builds", **{"filter[app]": app_id, "sort": "-uploadedDate", "limit": 20})["data"]
+    ready = [b for b in builds if b["attributes"]["processingState"] == "VALID" and (build_number is None or b["attributes"]["version"] == build_number)]
+    if not ready:
+        states = ", ".join(f"{b['attributes']['version']} {b['attributes']['processingState']}" for b in builds[:5])
+        raise click.ClickException(f"No processed build to attach yet ({states}).")
+    build = ready[0]
+    client.call("PATCH", f"/appStoreVersions/{version['id']}/relationships/build", json={"data": {"type": "builds", "id": build["id"]}})
+    print(f"attached build {build['attributes']['version']} to {version['attributes']['versionString']}")
+
+
 @cli.command("age-rating")
 def age_rating():
     """Print the age rating declaration's current attributes, to see which questions exist."""

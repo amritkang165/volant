@@ -80,7 +80,7 @@ timestamp (C617.1) access for its own and its iCloud container's files.
   and Search Results (3:2, 3840x2560) creative assets, shown on iOS 27 and later. Upload them in
   App Store Connect under Product Page Information, Header and Search Results.
 - `asc.py`: `uv run AppStore/asc.py show`, `push [--screenshots build/appstore] [--skip-text]`,
-  `set-version <x.y.z>`, `age-rating`. It edits the version still being prepared, answers the
+  `set-version <x.y.z>`, `attach-build [build]`, `age-rating`. It edits the version still being prepared, answers the
   age rating questionnaire with its lowest values (4+), and replaces each screenshot set.
 
 The API cannot fill in App Privacy (Data Not Collected), price and availability, or App Review
