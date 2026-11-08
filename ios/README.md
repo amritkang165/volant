@@ -73,6 +73,12 @@ timestamp (C617.1) access for its own and its iCloud container's files.
   13" simulators from the fictional notes and settings in `fixtures/`, with dates set relative to
   now, a 9:41 status bar and dark appearance, then frames each with a headline (`frame.swift`) at
   1320x2868 and 2064x2752 into `build/appstore/`.
+- `screenshots.sh duo` captures the iPhone Duo's folded outer screen (1398x2034) in the iOS 27.1
+  iPhone Duo simulator; `duo-inner` captures the unfolded inner screen (2007x2853) once it is
+  unfolded in DeviceHub. The Duo set uses the inner captures when they exist.
+- `creative.swift <build/appstore/iphone/raw> <out>`: the product page Header (21:9, 3840x1646)
+  and Search Results (3:2, 3840x2560) creative assets, shown on iOS 27 and later. Upload them in
+  App Store Connect under Product Page Information, Header and Search Results.
 - `asc.py`: `uv run AppStore/asc.py show`, `push [--screenshots build/appstore] [--skip-text]`,
   `set-version <x.y.z>`, `age-rating`. It edits the version still being prepared, answers the
   age rating questionnaire with its lowest values (4+), and replaces each screenshot set.

@@ -57,7 +57,7 @@ NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
 let center = NSMutableParagraphStyle()
 center.alignment = .center
 center.lineBreakMode = .byWordWrapping
-let headlineSize = W * (portrait ? 0.074 : 0.046)
+let headlineSize = W * (portrait ? 0.074 : (H > W * 1.4 ? 0.06 : 0.046))
 let headlineText = NSAttributedString(string: headline, attributes: [
     .font: NSFont.systemFont(ofSize: headlineSize, weight: .bold),
     .foregroundColor: NSColor.white, .paragraphStyle: center, .kern: -headlineSize * 0.01

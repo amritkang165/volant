@@ -157,16 +157,20 @@ def push_age_rating(client: Client, app_id: str):
     raise click.ClickException("Age rating was not accepted after adjusting answer types.")
 
 
-SCREENSHOT_SETS = {"iphone": "APP_IPHONE_67", "ipad": "APP_IPAD_PRO_3GEN_129"}
+SCREENSHOT_SETS = {"iphone": "APP_IPHONE_67", "ipad": "APP_IPAD_PRO_3GEN_129", "duo": "APP_IPHONE_DUO"}
 
 
 def push_screenshots(client: Client, app_id: str, folder: Path, locale: str):
-    """Replaces each device's screenshot set with the framed PNGs in folder/<device>, in name order."""
+    """Replaces each device's screenshot set with the framed PNGs in folder/<device>, in name order.
+    The iPhone Duo set takes the unfolded duo-inner captures when they exist, else the folded duo ones."""
     version = editable_version(client, app_id)
     loc = next(l for l in client.get(f"/appStoreVersions/{version['id']}/appStoreVersionLocalizations")["data"] if l["attributes"]["locale"] == locale)
     existing = {g["attributes"]["screenshotDisplayType"]: g for g in client.get(f"/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets")["data"]}
     for device, display in SCREENSHOT_SETS.items():
-        files = sorted((folder / device).glob("[0-9][0-9]-*.png"))
+        source = folder / device
+        if device == "duo" and (folder / "duo-inner").is_dir():
+            source = folder / "duo-inner"
+        files = sorted(source.glob("[0-9][0-9]-*.png"))
         if not files:
             continue
         group = existing.get(display) or client.post("appScreenshotSets", {"screenshotDisplayType": display},

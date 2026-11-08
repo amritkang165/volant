@@ -39,8 +39,10 @@ SHOTS=(
   "07-privacy|Private by design|Your notes stay in your own iCloud|-onboardingComplete NO -fixtureOnboardingPage 2"
 )
 
+# capture <device> <udid> <width> <height> [display] [rotate]: display picks one of a multi-screen
+# device's screens (simctl's --display), and rotate turns the raw framebuffer upright (degrees).
 capture() {
-  local device="$1" udid="$2" width="$3" height="$4"
+  local device="$1" udid="$2" width="$3" height="$4" display="${5:-}" rotate="${6:-0}"
   mkdir -p "$OUT/$device/raw"
   xcrun simctl boot "$udid" 2>/dev/null || true
   xcrun simctl bootstatus "$udid" -b > /dev/null
@@ -62,15 +64,20 @@ capture() {
     xcrun simctl launch "$udid" "$BUNDLE" -notesDirectory "$NOTES" -fixtureMacSettings "$SETTINGS" \
       ${extra[@]+"${extra[@]}"} $args ${query[@]+"${query[@]}"} > /dev/null
     sleep 4
-    xcrun simctl io "$udid" screenshot "$OUT/$device/raw/$name.png" > /dev/null 2>&1
+    xcrun simctl io "$udid" screenshot ${display:+--display="$display"} "$OUT/$device/raw/$name.png" > /dev/null 2>&1
+    [[ "$rotate" != 0 ]] && magick "$OUT/$device/raw/$name.png" -rotate "$rotate" "$OUT/$device/raw/$name.png"
     ./build/frame "$OUT/$device/raw/$name.png" "$OUT/$device/$name.png" "$width" "$height" "$headline" "$subline"
     echo "$device $name"
   done
   xcrun simctl status_bar "$udid" clear 2>/dev/null || true
 }
 
-udid() { xcrun simctl list devices available | awk -v want="$1" '/^-- iOS 26.5/{on=1; next} /^--/{on=0} on && index($0, want" (") {match($0, /[0-9A-F-]{36}/); print substr($0, RSTART, RLENGTH); exit}'; }
+udid() { xcrun simctl list devices available | awk -v want="$1" -v os="${2:-26.5}" '$0 ~ "^-- iOS "os {on=1; next} /^--/{on=0} on && index($0, want" (") {match($0, /[0-9A-F-]{36}/); print substr($0, RSTART, RLENGTH); exit}'; }
 
 [[ "$WHICH" == iphone || "$WHICH" == all ]] && capture iphone "$(udid "iPhone 17 Pro Max")" 1320 2868
 [[ "$WHICH" == ipad || "$WHICH" == all ]] && capture ipad "$(udid "iPad Pro 13-inch (M5)")" 2064 2752
+# iPhone Duo: the folded outer screen ("LCD", portrait) now; the unfolded inner screen
+# ("LCD-1") once the simulator is unfolded in DeviceHub, as duo-inner.
+[[ "$WHICH" == duo ]] && capture duo "$(udid "iPhone Duo" 27.1)" 1398 2034 LCD
+[[ "$WHICH" == duo-inner ]] && capture duo-inner "$(udid "iPhone Duo" 27.1)" 2007 2853 LCD-1
 echo "Framed screenshots in ios/$OUT"
