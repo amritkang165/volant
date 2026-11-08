@@ -14,7 +14,7 @@
 
 - `Core/` is the `VolantCore` package: Foundation only, no AppKit, SwiftUI, Carbon, CryptoKit or Combine, linked statically so it adds no embedded framework to sign. Code needing a platform framework belongs in the app target. Run its tests with `swift test --package-path Core`; ad-hoc `swiftc` checks link it through `tools/core-module.sh` rather than listing core files by path. See [cross-platform core](docs/cross-platform-core.md).
 
-- `iOS/` is Volant for iPhone and iPad: an XcodeGen project (`cd iOS && xcodegen generate`) linking `../Core`. Core declares iOS 26; keep Mac-only Core code inside `#if os(macOS)` and build the iOS app after Core changes. iOS changes are not native Mac changes for `tools/test-scope.py`, and CI does not build iOS yet. Notes share the Mac's iCloud container; snippets and quicklinks share its settings-sync key-value store, written only as lists that decode as `Preferences` expects. See `iOS/README.md`.
+- `ios/` is Volant for iPhone and iPad: an XcodeGen project (`cd ios && xcodegen generate`) linking `../Core`. Core declares iOS 26; keep Mac-only Core code inside `#if os(macOS)` and build the iOS app after Core changes. `ios/` changes are not native Mac changes for `tools/test-scope.py`, and CI does not build iOS yet. Notes share the Mac's iCloud container; snippets and quicklinks share its settings-sync key-value store, written only as lists that decode as `Preferences` expects. See `ios/README.md`.
 
 - Keep notes as plain Markdown files. Failed creates/updates must remain dirty through reload and support retry; never report Saved while any dirty write remains.
 - Drain queued notes writes before trashing. Preserve dirty text on save or trash failure.

@@ -16,3 +16,4 @@ dist-release.*/
 __pycache__/
 *.pyc
 build-dev/
+build-lite/

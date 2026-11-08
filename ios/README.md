@@ -17,7 +17,7 @@ sync key-value store, so a Mac with "Sync settings and notes with iCloud" on sha
 ## Build
 
 ```sh
-cd iOS
+cd ios
 xcodegen generate
 xcodebuild -project VolantMobile.xcodeproj -scheme VolantMobile \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' -derivedDataPath build \
