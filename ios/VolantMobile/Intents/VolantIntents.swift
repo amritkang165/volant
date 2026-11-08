@@ -106,9 +106,13 @@ struct QuicklinkEntityQuery: EntityStringQuery {
         await MainActor.run { links.filter { $0.name.localizedCaseInsensitiveContains(string) } }
     }
 
+    /// The first quicklinks only: iOS turns each suggestion into its own "Open … with Volant" tile in
+    /// Shortcuts and Siri, so the list is capped. Searching the picker still finds every quicklink.
     func suggestedEntities() async throws -> [QuicklinkEntity] {
-        await MainActor.run { links }
+        await MainActor.run { Array(links.prefix(Self.suggestionLimit)) }
     }
+
+    static let suggestionLimit = 10
 }
 
 /// Reads the Mac's synced snippets and quicklinks without the app's views, for intents run in the background.
@@ -216,7 +220,8 @@ struct CalculateIntent: AppIntent {
     }
 }
 
-/// Phrases that work in Siri and Spotlight without setting up a shortcut.
+/// Phrases that work in Siri and Spotlight without setting up a shortcut. Snippets get one tile that
+/// asks which snippet; quicklinks get a tile each, up to `QuicklinkEntityQuery.suggestionLimit`.
 struct VolantShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: NewNoteInAppIntent(), phrases: ["New note in \(.applicationName)", "Start a \(.applicationName) note"],
@@ -225,7 +230,7 @@ struct VolantShortcuts: AppShortcutsProvider {
                     shortTitle: "Create Note", systemImageName: "note.text.badge.plus")
         AppShortcut(intent: OpenNoteIntent(), phrases: ["Open \(\.$note) in \(.applicationName)"],
                     shortTitle: "Open Note", systemImageName: "note.text")
-        AppShortcut(intent: CopySnippetIntent(), phrases: ["Copy \(\.$snippet) with \(.applicationName)", "Copy a \(.applicationName) snippet"],
+        AppShortcut(intent: CopySnippetIntent(), phrases: ["Copy a snippet with \(.applicationName)", "Copy a \(.applicationName) snippet"],
                     shortTitle: "Copy Snippet", systemImageName: "text.quote")
         AppShortcut(intent: OpenQuicklinkIntent(), phrases: ["Open \(\.$link) with \(.applicationName)", "Open a \(.applicationName) quicklink"],
                     shortTitle: "Open Quicklink", systemImageName: "bolt.fill")
