@@ -47,15 +47,16 @@ Fixture launch arguments for simulator review: `-notesDirectory <path>` (fiction
 `Scripts/testflight.sh` archives with the Apple Distribution certificate and App Store profiles,
 checks that the app and both extensions are signed for the App Group and the Production iCloud
 environment, and exports `build/testflight/<build>/export/Volant.ipa`. The build number is the time
-(yyyymmddHHMM); the version is `MARKETING_VERSION` in project.yml. With `ASC_KEY_ID` and
-`ASC_ISSUER_ID` set and the key at `~/.appstoreconnect/private_keys/AuthKey_<id>.p8`, it uploads;
-otherwise upload the .ipa with Transporter.
+(yyyymmddHHMM); the version is `MARKETING_VERSION` in project.yml. With `ASC_KEY_ID` set and the
+key at `~/.appstoreconnect/private_keys/AuthKey_<id>.p8` it uploads, taking the issuer from
+`ASC_ISSUER_ID` or `~/.appstoreconnect/issuer_id`; otherwise upload the .ipa with Transporter.
 
 Once per app:
 
-- An App Store Connect app record for `com.mysticcoders.volant.mobile`.
-- App Store profiles "Volant App Store", "Volant Widgets App Store" and "Volant Share App Store"
-  for the three App IDs, signed with the Apple Distribution certificate.
+- The App Store Connect app record "Volant Mobile" ("Volant" was taken) for
+  `com.mysticcoders.volant.mobile`; the Home Screen name stays Volant.
+- App Store profiles "Volant mobile production profile", "Volant mobile widget production
+  profile" and "Volant mobile share production profile", with the Apple Distribution certificate.
 - For external testers: a beta description, feedback email and Beta App Review. Internal testers
   need none of these.
 
