@@ -39,6 +39,7 @@ struct NoteDetail: View {
                     .contentMargins(.vertical, 12, for: .scrollContent)
                     .focused($focused)
                     .autocorrectionDisabled(false)
+                    .padding(.horizontal, NotesStyle.inset - 5)
             }
         }
         .background(theme.background)

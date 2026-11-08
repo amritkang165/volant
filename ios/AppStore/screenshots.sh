@@ -77,7 +77,7 @@ udid() { xcrun simctl list devices available | awk -v want="$1" -v os="${2:-26.5
 [[ "$WHICH" == iphone || "$WHICH" == all ]] && capture iphone "$(udid "iPhone 17 Pro Max")" 1320 2868
 [[ "$WHICH" == ipad || "$WHICH" == all ]] && capture ipad "$(udid "iPad Pro 13-inch (M5)")" 2064 2752
 # iPhone Duo: the folded outer screen ("LCD", portrait) now; the unfolded inner screen
-# ("LCD-1") once the simulator is unfolded in DeviceHub, as duo-inner.
+# ("LCD-1", landscape) once the simulator is unfolded in DeviceHub, as duo-inner.
 [[ "$WHICH" == duo ]] && capture duo "$(udid "iPhone Duo" 27.1)" 1398 2034 LCD
-[[ "$WHICH" == duo-inner ]] && capture duo-inner "$(udid "iPhone Duo" 27.1)" 2007 2853 LCD-1
+[[ "$WHICH" == duo-inner ]] && capture duo-inner "$(udid "iPhone Duo" 27.1)" 2853 2007 LCD-1
 echo "Framed screenshots in ios/$OUT"
