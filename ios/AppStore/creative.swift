@@ -113,7 +113,7 @@ do {
     drawWing(ctx, in: CGRect(x: left, y: h * 0.56, width: 230, height: 230))
     text("Volant", size: 250, weight: .bold).draw(at: CGPoint(x: left + 270, y: h * 0.56))
     text("Notes, snippets and quicklinks.", size: 108, weight: .semibold).draw(at: CGPoint(x: left, y: h * 0.38))
-    text("On your iPhone, iPad and Mac.", size: 108, weight: .semibold, alpha: 0.6).draw(at: CGPoint(x: left, y: h * 0.38 - 140))
+    text("On your iPhone and your Mac.", size: 108, weight: .semibold, alpha: 0.6).draw(at: CGPoint(x: left, y: h * 0.38 - 140))
     save(ctx, "header.png")
 }
 
