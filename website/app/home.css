@@ -594,3 +594,23 @@
     gap: 10px;
   }
 }
+
+/* The homepage hero's announcement link, above the kicker. */
+.home-announce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.home-announce:hover,
+.home-announce:focus-visible {
+  border-color: var(--primary);
+}

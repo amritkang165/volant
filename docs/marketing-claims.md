@@ -309,3 +309,10 @@ Added in 0.3.39:
 | Story | In 0.3.39 | Evidence and limits | Website treatment |
 | --- | --- | --- | --- |
 | Notes in iCloud: the existing opt-in switch, renamed Sync settings and notes with iCloud, moves notes to iCloud Drive › Volant › Notes; the local folder is kept as a dated backup and turning sync off copies notes back | Yes | #380; NotesICloudSyncTests against temporary folders; a Developer ID export moved the owner's 149 notes into iCloud on launch and Volant for iPhone listed them (November 8, 2026); Optimize Mac Storage eviction and simultaneous two-device edits unverified (last writer wins) | Homepage privacy and FAQ, Notes and Privacy & Security docs; never "notes never leave your Mac" |
+
+Website, November 8, 2026:
+
+| Story | Status | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Volant for iPhone and iPad, coming soon (`/iphone`, linked from the homepage hero) | TestFlight: internal testing open; external beta submitted for Beta App Review | #381, #382; screenshots are simulator captures of the TestFlight build with fictional content; notes sync needs Volant 0.3.39 on the Mac; widgets, share extension and Shortcuts verified on the owner's iPhone build only | "Coming soon" and "in testing"; no TestFlight or App Store link until one is open to the public; no iPad-optimized layout claims (iPad runs the iPhone layout, with two-column Notes) |
+| Ready for iPhone Duo, folded or open: the outer screen works like any iPhone; unfolded, Notes shows the list beside the open note | Yes, in the TestFlight build 202611081541 | Built with the iOS 27.2 SDK; all seven screens reviewed on both displays of the Xcode 27 iPhone Duo simulator (iOS 27.1), where the note editor's overlap with the side controls was found and fixed; real Duo hardware and folding while the app is open unverified | "Ready for iPhone Duo"; no hardware-tested or "optimized" claims |
