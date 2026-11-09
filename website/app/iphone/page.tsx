@@ -10,7 +10,7 @@ import './iphone.css';
 export const metadata: Metadata = {
   title: 'Volant for iPhone — coming soon',
   description:
-    'Volant for iPhone and iPad is coming soon: your Markdown notes through iCloud, the snippets and quicklinks you set up on your Mac, and Volant’s calculator. No account. No telemetry.',
+    'Volant for iPhone is coming soon, ready for iPhone Duo folded or open: your Markdown notes through iCloud, the snippets and quicklinks you set up on your Mac, and Volant’s calculator. No account. No telemetry.',
   alternates: { canonical: 'https://usevolant.com/iphone' },
 };
 
@@ -72,6 +72,34 @@ export default function IPhonePage() {
           <Image key={screen.src} src={screen.src} alt={screen.alt} width={330} height={717} sizes="(max-width: 860px) 50vw, 25vw" />
         ))}
       </div>
+      <section className="iphone-duo" aria-labelledby="iphone-duo-title">
+        <div className="iphone-duo-copy">
+          <p className="home-kicker">READY FOR IPHONE DUO</p>
+          <h2 id="iphone-duo-title">Folded or open, Volant fits.</h2>
+          <p>
+            On the outer screen, Volant works the way it does on any iPhone. Unfold it and Notes spreads out: your
+            notes on one side, the one you’re writing on the other, with the rest of Volant using the whole display.
+          </p>
+        </div>
+        <div className="iphone-duo-shots">
+          <Image
+            className="iphone-duo-open"
+            src="/images/iphone/duo-unfolded.webp"
+            alt="Volant on iPhone Duo unfolded: the notes list beside an open note"
+            width={1400}
+            height={985}
+            sizes="(max-width: 860px) 100vw, 60vw"
+          />
+          <Image
+            className="iphone-duo-folded"
+            src="/images/iphone/duo-folded.webp"
+            alt="Volant Home on the folded iPhone Duo’s outer screen"
+            width={520}
+            height={757}
+            sizes="(max-width: 860px) 40vw, 18vw"
+          />
+        </div>
+      </section>
       <ul className="iphone-features">
         {features.map(({ icon: Icon, title, body }) => (
           <li key={title}>
