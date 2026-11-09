@@ -99,7 +99,7 @@ export default function Home() {
         <section className="home-hero wrap home-hero-try">
           <div className="home-hero-copy">
             <a className="home-announce" href="/iphone">
-              Coming soon: Volant for iPhone <ArrowRight size={14} />
+              Volant for iPhone is in public beta <ArrowRight size={14} />
             </a>
             <p className="home-kicker">
               A LITTLE LESS FRICTION. A LOT MORE FLOW.

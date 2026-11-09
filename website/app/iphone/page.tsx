@@ -1,16 +1,16 @@
 // oxlint-disable next/no-html-link-for-pages -- Plain anchors preserve production navigation; see QUALITY.md.
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { ArrowRight, Cloud, Calculator, LayoutGrid, Lock, Search, TextQuote } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Cloud, Calculator, LayoutGrid, Lock, Search, TextQuote } from 'lucide-react';
 import { downloadURL, repositoryURL } from '@/components/site-chrome';
 import { SiteShell } from '@/components/site-shell';
 import { StarButton } from '@/components/star-button';
 import './iphone.css';
 
 export const metadata: Metadata = {
-  title: 'Volant for iPhone — coming soon',
+  title: 'Volant for iPhone — public beta',
   description:
-    'Volant for iPhone is coming soon, ready for iPhone Duo folded or open: your Markdown notes through iCloud, the snippets and quicklinks you set up on your Mac, and Volant’s calculator. No account. No telemetry.',
+    'Volant for iPhone is in public beta on TestFlight, ready for iPhone Duo folded or open: your Markdown notes through iCloud, the snippets and quicklinks you set up on your Mac, and Volant’s calculator. No account. No telemetry.',
   alternates: { canonical: 'https://usevolant.com/iphone' },
 };
 
@@ -54,19 +54,26 @@ const screens = [
   { src: '/images/iphone/snippets.webp', alt: 'Snippets from the Mac with their keywords' },
 ] as const;
 
-/** The "coming soon" page for Volant for iPhone and iPad. Every claim describes the TestFlight
- * build as it stands; no beta or App Store link appears until one is open to the public. */
+const betaURL = 'https://testflight.apple.com/join/rC8T5QFS';
+
+/** The Volant for iPhone and iPad page, while the app is in public beta on TestFlight. Every claim
+ * describes the beta build as it stands; no App Store link appears until the app is released there. */
 export default function IPhonePage() {
   return (
     <SiteShell mainClassName="wrap iphone-page">
-      <p className="home-kicker">COMING SOON</p>
+      <p className="home-kicker">PUBLIC BETA</p>
       <h1>
         Volant for <em>iPhone.</em>
       </h1>
       <p className="iphone-lede">
-        Your notes, snippets, quicklinks and calculator from Volant on your Mac, on your iPhone and iPad. In testing
-        now, with a public beta on TestFlight next.
+        Your notes, snippets, quicklinks and calculator from Volant on your Mac, on your iPhone and iPad. Now in
+        public beta on TestFlight.
       </p>
+      <div className="home-actions">
+        <a className="button" href={betaURL}>
+          Join the beta on TestFlight <ArrowUpRight size={18} />
+        </a>
+      </div>
       <div className="iphone-screens">
         {screens.map((screen) => (
           <Image key={screen.src} src={screen.src} alt={screen.alt} width={330} height={717} sizes="(max-width: 860px) 50vw, 25vw" />
@@ -110,10 +117,10 @@ export default function IPhonePage() {
         ))}
       </ul>
       <section className="iphone-ready" aria-labelledby="iphone-ready-title">
-        <h2 id="iphone-ready-title">Get ready on your Mac</h2>
+        <h2 id="iphone-ready-title">Bring your Mac along</h2>
         <p>
-          Install Volant on your Mac and turn on <strong>Sync settings and notes with iCloud</strong> in Settings → Data
-          &amp; Configuration. When Volant for iPhone arrives, your notes, snippets and quicklinks are already there.
+          Install Volant 0.3.39 or later on your Mac and turn on <strong>Sync settings and notes with iCloud</strong> in
+          Settings → Data &amp; Configuration. Your notes, snippets and quicklinks then appear in Volant for iPhone.
         </p>
         <div className="home-actions">
           <a className="button" href={downloadURL} download>
