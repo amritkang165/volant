@@ -27,6 +27,12 @@ copying their per-folder UserDefaults keys.
   Settings explains that the iCloud notes were not copied.
 - Either move refuses while a note's save is failing, so an unsaved edit is never stranded.
 
+Notes whose contents are not on this Mac yet (an iCloud placeholder, or a dataless file under
+Optimize Mac Storage) are listed as "Downloading…" from their directory entry and are never read: a
+plain read would block until iCloud delivers the file. Opening one shows "Downloading from iCloud…"
+instead of an editor, edits are refused until it arrives, and full-text search skips it. Volant for
+iPhone does the same; the phone stalled at launch before it did.
+
 Writes and copies go through `NSFileCoordinator`. A metadata query watches the iCloud folder, asks
 for notes from other devices to download, and reloads the list. Backup export/import and the Raycast
 import read `NotesLocation.current`, so they use whichever folder is active.
@@ -41,7 +47,11 @@ entitlements along with the key-value one.
 ## Evidence and limits
 
 - `NotesICloudSyncTests` covers copy precedence, the backup rename, on/off moves with pins, the
-  unavailable-iCloud path and refusal during failing saves, against temporary folders.
+  unavailable-iCloud path, refusal during failing saves, and a note still in iCloud being listed but
+  never read, edited or searched until it arrives, against temporary folders.
+- Real iCloud, November 8, 2026: a Developer ID export of this branch moved the owner's 149 notes into
+  iCloud Drive › Volant › Notes on launch with the switch already on, and Volant for iPhone listed
+  them. The dataless-file path itself has not been exercised on a Mac with Optimize Mac Storage.
 - Not yet verified against real iCloud: a signed Release build with the container, two-device sync
   with the iPhone app, conflicting edits made on two devices at once (the last writer wins; iCloud's
   conflict versions are not surfaced), and Optimize Mac Storage evicting notes.

@@ -389,6 +389,12 @@ struct NotesView: View {
                         Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([note.url]) }
                     }.padding(NotesStyle.inset).frame(maxWidth: .infinity, alignment: .leading)
                 }.frame(maxHeight: .infinity)
+            } else if note.downloading {
+                VStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    Text("Downloading from iCloud…").foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let text = note.text {
                 if model.editing {
                     ZStack(alignment: .topLeading) {

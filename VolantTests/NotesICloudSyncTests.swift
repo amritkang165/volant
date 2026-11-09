@@ -116,6 +116,39 @@ final class NotesICloudSyncTests: XCTestCase {
         XCTAssertEqual(store.dirtyText[note.id], "Fictional draft")
     }
 
+    func testNoteNotYetDownloadedIsListedButNeverReadOrEdited() throws {
+        try write("# Here", "a.md", in: local)
+        try write("", ".b.md.icloud", in: local)
+        let store = NotesStore(directory: local, searchReader: { url in
+            XCTAssertNotEqual(url.lastPathComponent, "b.md", "a note still in iCloud must not be read")
+            return try? String(contentsOf: url, encoding: .utf8)
+        })
+        let pending = try XCTUnwrap(store.notes.first { $0.id == "b.md" })
+        XCTAssertTrue(pending.downloading)
+        XCTAssertNil(pending.readError)
+
+        store.open("b.md")
+        XCTAssertNil(store.notes.first { $0.id == "b.md" }?.text)
+        XCTAssertNil(store.text(of: "b.md"))
+        store.update("b.md", text: "typed before it arrived")
+        XCTAssertNil(store.dirtyText["b.md"], "edits wait until the note has downloaded")
+        let searched = expectation(description: "full-text search finishes without reading the pending note")
+        store.searchFiles("Here") { found in
+            XCTAssertEqual(found.map(\.id), ["a.md"])
+            searched.fulfill()
+        }
+        wait(for: [searched], timeout: 5)
+
+        try FileManager.default.removeItem(at: local.appendingPathComponent(".b.md.icloud"))
+        try write("# Arrived\nfrom another device", "b.md", in: local)
+        store.reload()
+        store.open("b.md")
+        let arrived = try XCTUnwrap(store.notes.first { $0.id == "b.md" })
+        XCTAssertFalse(arrived.downloading)
+        XCTAssertEqual(arrived.title, "Arrived")
+        XCTAssertEqual(store.text(of: "b.md"), "# Arrived\nfrom another device")
+    }
+
     private func makeSync(_ store: NotesStore) -> NotesICloudSync {
         let container = container!
         return NotesICloudSync(store: store, defaults: defaults, localFolder: local, resolveContainer: { container }, makeWatcher: { _, _ in nil })
