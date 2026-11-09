@@ -5,7 +5,7 @@ import VolantCore
 /// percentages and cooking measures as you type. Tapping an answer copies it.
 struct CalculatorView: View {
     @Environment(\.volantTheme) private var theme
-    @State private var query = ""
+    @State private var query = UserDefaults.standard.string(forKey: "fixtureQuery") ?? ""
     @State private var toast: String?
     @FocusState private var focused: Bool
 
@@ -48,7 +48,7 @@ struct CalculatorView: View {
         .background(theme.background)
         .navigationTitle("Calculator")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { focused = true }
+        .onAppear { focused = query.isEmpty }
         .toast($toast)
     }
 }

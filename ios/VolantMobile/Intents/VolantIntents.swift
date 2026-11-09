@@ -132,7 +132,7 @@ enum MacSettingsReader {
 /// Saves a note without opening Volant: the text becomes the body, with an optional title heading.
 struct CreateNoteIntent: AppIntent {
     static let title: LocalizedStringResource = "Create Note"
-    static let description = IntentDescription("Saves text as a new Volant note, synced to your Mac through iCloud.")
+    static let description = IntentDescription("Saves text as a new Volant note, synced through iCloud.")
 
     @Parameter(title: "Text", inputOptions: String.IntentInputOptions(multiline: true))
     var text: String
@@ -172,7 +172,7 @@ struct OpenNoteIntent: AppIntent {
 /// Copies a snippet with its placeholders filled in, and returns the text for later actions.
 struct CopySnippetIntent: AppIntent {
     static let title: LocalizedStringResource = "Copy Snippet"
-    static let description = IntentDescription("Copies one of your Mac’s snippets, with dates and other placeholders filled in.")
+    static let description = IntentDescription("Copies one of your Volant snippets, with dates and other placeholders filled in.")
 
     @Parameter(title: "Snippet")
     var snippet: SnippetEntity
@@ -188,7 +188,7 @@ struct CopySnippetIntent: AppIntent {
 /// Opens a quicklink, filling in its search text when it takes one.
 struct OpenQuicklinkIntent: AppIntent {
     static let title: LocalizedStringResource = "Open Quicklink"
-    static let description = IntentDescription("Opens one of your Mac’s quicklinks. Links with a search slot use the text you give.")
+    static let description = IntentDescription("Opens one of your Volant quicklinks. Links with a search slot use the text you give.")
 
     @Parameter(title: "Quicklink")
     var link: QuicklinkEntity
@@ -198,16 +198,17 @@ struct OpenQuicklinkIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & OpensIntent {
         guard let url = Quicklink(name: link.name, url: link.url).resolvedURL(query: query ?? "") else {
-            throw $link.needsValueError("That quicklink can’t be opened on iPhone. Choose another.")
+            throw $link.needsValueError("That quicklink can’t be opened here. Choose another.")
         }
         return .result(opensIntent: OpenURLIntent(url))
     }
 }
 
-/// Answers a calculation with the Mac launcher's calculator.
+/// Answers a calculation with the Mac launcher's calculator. Intent descriptions shown to Siri and
+/// Shortcuts must not name a platform such as Mac or iPhone (App Store check ITMS-90626).
 struct CalculateIntent: AppIntent {
     static let title: LocalizedStringResource = "Calculate"
-    static let description = IntentDescription("Answers math, unit conversions, dates and time zones, like Volant’s calculator on the Mac.")
+    static let description = IntentDescription("Answers math, unit conversions, dates and time zones with Volant’s calculator.")
 
     @Parameter(title: "Calculation")
     var expression: String

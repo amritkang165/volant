@@ -10,7 +10,8 @@ final class AppRouter: ObservableObject {
     @Published var toolPath: [Tool] = []
 
     /// Launch arguments that open a given screen, for simulator fixtures: `-fixtureTab more`,
-    /// `-fixtureTool calculator`, `-fixtureSettings YES`. Ignored when absent.
+    /// `-fixtureTool calculator`, `-fixtureSettings YES`, `-fixtureNote <file name>`, and
+    /// `-fixtureQuery <text>` for Search and the calculator. Ignored when absent.
     init(defaults: UserDefaults = .standard) {
         switch defaults.string(forKey: "fixtureTab") {
         case "notes": tab = .notes
@@ -78,7 +79,10 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: DeepLinkCenter.notification)) { _ in
             if let link = DeepLinkCenter.take() { router.handle(link, model: model) }
         }
-        .onAppear { if let link = DeepLinkCenter.take() { router.handle(link, model: model) } }
+        .onAppear {
+            if let link = DeepLinkCenter.take() { router.handle(link, model: model) }
+            if let id = UserDefaults.standard.string(forKey: "fixtureNote") { router.open(noteID: id, in: model) }
+        }
         .fullScreenCover(isPresented: Binding(get: { !onboardingComplete }, set: { onboardingComplete = !$0 })) {
             OnboardingView { onboardingComplete = true }
         }

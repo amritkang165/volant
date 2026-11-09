@@ -21,6 +21,10 @@ final class MacSettings: ObservableObject {
     private var observer: NSObjectProtocol?
 
     init() {
+        if let path = UserDefaults.standard.string(forKey: "fixtureMacSettings") {
+            loadFixture(URL(fileURLWithPath: path))
+            return
+        }
         observer = NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                           object: store, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.load() }
@@ -43,6 +47,19 @@ final class MacSettings: ObservableObject {
         if rawLinks.count != quicklinks.count { rawLinks = quicklinks.map(Self.object) }
         updated = [snippetEntry?.modified, linkEntry?.modified].compactMap { $0 }.max()
         state = snippetEntry == nil && linkEntry == nil ? .empty : .ready
+    }
+
+    /// Fictional snippets and quicklinks from a JSON file, for simulator screenshots (`-fixtureMacSettings <path>`).
+    /// The iCloud store is never read or written in this mode.
+    private func loadFixture(_ url: URL) {
+        struct Fixture: Decodable { let snippets: [Snippet]; let quicklinks: [Quicklink] }
+        guard let data = try? Data(contentsOf: url), let fixture = try? JSONDecoder().decode(Fixture.self, from: data) else { return }
+        snippets = fixture.snippets
+        quicklinks = fixture.quicklinks
+        rawSnippets = snippets.map(Self.object)
+        rawLinks = quicklinks.map(Self.object)
+        updated = Date().addingTimeInterval(-300)
+        state = .ready
     }
 
     /// Whether edits can be sent: iCloud is signed in and the store has been read.
