@@ -51,13 +51,16 @@ export default function PrivacyAndSecurity() {
           <a href="/docs/agents">AI connections</a>.
         </li>
         <li>
-          <strong>iCloud settings sync</strong> uses Apple’s
-          key-value service only when enabled. It shares selected global
-          shortcuts, snippets, quicklinks, aliases, appearance, and
-          clipboard-retention settings. Notes, clipboard history, API keys, AI
-          configuration, app-specific shortcuts, and extension approvals are
-          excluded. It is off until you turn it on in Settings → Data &amp;
-          Configuration.
+          <strong>iCloud sync</strong> is off until you turn on Sync settings
+          and notes with iCloud in Settings → Data &amp; Configuration. It uses
+          Apple’s key-value service for selected global shortcuts, snippets,
+          quicklinks, aliases, appearance, and clipboard-retention settings,
+          and moves your notes to iCloud Drive › Volant › Notes in your own
+          iCloud account, still as Markdown files. Your Mac’s notes folder is
+          kept as a dated backup, and turning sync off copies notes back.
+          Clipboard history, API keys, AI configuration, app-specific
+          shortcuts, and extension approvals are excluded. Volant has no
+          server of its own.
         </li>
         <li>
           <strong>Network extensions</strong> never reach the network

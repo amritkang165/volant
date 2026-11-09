@@ -41,7 +41,7 @@ const questions = [
   ],
   [
     'Where does my data live?',
-    'Notes are plain Markdown files on your Mac. Clipboard history is encrypted locally with a Keychain key. You choose what to attach to AI prompts; cloud providers receive the messages you send. Updates, optional AI connections, and exchange rates use separate helpers. Opt-in iCloud settings sync carries selected settings between your Macs and excludes notes, clipboard history, and keys.',
+    'Notes are plain Markdown files on your Mac, or in your own iCloud Drive when you turn on iCloud sync. Clipboard history is encrypted locally with a Keychain key. You choose what to attach to AI prompts; cloud providers receive the messages you send. Updates, optional AI connections, and exchange rates use separate helpers. Opt-in iCloud sync carries selected settings and your notes between your Macs and excludes clipboard history and keys.',
   ],
   [
     'Are all the features here in the download?',
@@ -256,8 +256,9 @@ export default function Home() {
               Your say.
             </h2>
             <p>
-              Your notes and encrypted clipboard history stay on your Mac. You
-              choose what to send to AI. No Volant account. No telemetry.
+              Your notes stay on your Mac, or in your own iCloud when you turn
+              on sync. Clipboard history stays encrypted on your Mac. You choose
+              what to send to AI. No Volant account. No telemetry.
             </p>
             <a href="/docs/privacy-and-security">
               Read the privacy details <ArrowUpRight size={15} />

@@ -292,7 +292,7 @@ Merged after 0.3.38, not in the current download:
 
 ## Privacy language
 
-No Volant account or telemetry. Usage stats in Settings › Your Volant are computed from data on the Mac and never sent; there is no opt-in telemetry either. Notes and encrypted clipboard history remain local. Submitted AI prompts and selected context reach the chosen provider/server. Keys stay in Keychain. Updates, HTTP AI, rates and network extensions use separate helpers; opt-in iCloud uses Apple's system service. Avoid blanket “everything stays on your Mac,” “entirely offline,” or “zero dependencies” claims. Say “no Accessibility unless you choose Type at the cursor” for the current download, and “no Accessibility unless you choose Type at the cursor or Search Menu Items” once Search Menu Items ships: the main app stays sandboxed and never uses Accessibility, and only the separate input helper does, listed as Volant in System Settings, after the owner picks that output or turns on Search Menu Items.
+No Volant account or telemetry. Usage stats in Settings › Your Volant are computed from data on the Mac and never sent; there is no opt-in telemetry either. Notes remain local unless the owner turns on iCloud sync, which keeps them as Markdown files in the owner's own iCloud Drive (iCloud Drive › Volant › Notes); encrypted clipboard history remains local. Submitted AI prompts and selected context reach the chosen provider/server. Keys stay in Keychain. Updates, HTTP AI, rates and network extensions use separate helpers; opt-in iCloud uses Apple's system service. Avoid blanket “everything stays on your Mac,” “entirely offline,” or “zero dependencies” claims. Say “no Accessibility unless you choose Type at the cursor” for the current download, and “no Accessibility unless you choose Type at the cursor or Search Menu Items” once Search Menu Items ships: the main app stays sandboxed and never uses Accessibility, and only the separate input helper does, listed as Volant in System Settings, after the owner picks that output or turns on Search Menu Items.
 
 ## Imagery
 
@@ -303,3 +303,9 @@ Existing hero and Notes assets are native fixtures. Added calculator, waiting-qu
 1. Done October 7, 2026: published the 0.2.0 website, verified DMG delivery, activated the signed build-8 appcast, and the owner completed 0.1.5 → 0.2.0 Sparkle upgrades on two Macs.
 2. Complete compatible remote Herdr, real-provider attachment, and installed Apple/model checks under their own authorized test scope.
 3. Refresh the original hero/Notes imagery in a future cohesive capture pass; do not reconstruct native UI in HTML.
+
+Added in 0.3.39:
+
+| Story | In 0.3.39 | Evidence and limits | Website treatment |
+| --- | --- | --- | --- |
+| Notes in iCloud: the existing opt-in switch, renamed Sync settings and notes with iCloud, moves notes to iCloud Drive › Volant › Notes; the local folder is kept as a dated backup and turning sync off copies notes back | Yes | #380; NotesICloudSyncTests against temporary folders; a Developer ID export moved the owner's 149 notes into iCloud on launch and Volant for iPhone listed them (November 8, 2026); Optimize Mac Storage eviction and simultaneous two-device edits unverified (last writer wins) | Homepage privacy and FAQ, Notes and Privacy & Security docs; never "notes never leave your Mac" |
