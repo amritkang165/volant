@@ -173,6 +173,7 @@ final class NotesStore: ObservableObject {
                 let stamp = Self.stamp(of: url)
                 if var known = previous[id], known.readError == nil, let stamp, known.stamp == stamp {
                     known.url = url
+                    known.downloading = false
                     if id != openID { known.unload() }
                     return known
                 }

@@ -4048,6 +4048,281 @@
         }
       }
     },
+    "%lld iCloud notes couldn’t be copied to this Mac. They are still in iCloud Drive › Volant › Notes.": {
+      "comment": "Notes iCloud sync status; needs a plural variant for one note",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud-Notiz konnte nicht auf diesen Mac kopiert werden. Sie befindet sich weiterhin in iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud-Notizen konnten nicht auf diesen Mac kopiert werden. Sie befinden sich weiterhin in iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld iCloud note couldn’t be copied to this Mac. It is still in iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld iCloud notes couldn’t be copied to this Mac. They are still in iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "No se pudo copiar %lld nota de iCloud a este Mac. Sigue en iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "No se pudieron copiar %lld notas de iCloud a este Mac. Siguen en iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld note iCloud n’a pas pu être copiée sur ce Mac. Elle se trouve toujours dans iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notes iCloud n’ont pas pu être copiées sur ce Mac. Elles se trouvent toujours dans iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Impossibile copiare %lld nota di iCloud su questo Mac. Si trova ancora in iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Impossibile copiare %lld note di iCloud su questo Mac. Si trovano ancora in iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%lld件のiCloudのメモをこのMacにコピーできませんでした。これらのメモはiCloud Drive › Volant › Notesに残っています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud 메모 %lld개를 이 Mac으로 복사할 수 없습니다. 해당 메모는 iCloud Drive › Volant › Notes에 그대로 있습니다."
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud-notitie kon niet naar deze Mac worden gekopieerd. Deze staat nog in iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud-notities konden niet naar deze Mac worden gekopieerd. Ze staan nog in iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatki z iCloud nie zostały skopiowane na ten Mac. Nadal są w iCloud Drive › Volant › Notes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatek z iCloud nie zostało skopiowanych na ten Mac. Nadal są w iCloud Drive › Volant › Notes."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatka z iCloud nie została skopiowana na ten Mac. Nadal jest w iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatek z iCloud nie zostało skopiowanych na ten Mac. Nadal są w iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld nota do iCloud para este Mac. Ela continua no iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld notas do iCloud para este Mac. Elas continuam no iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld nota do iCloud para este Mac. Continua no iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld notas do iCloud para este Mac. Continuam no iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметки из iCloud не удалось скопировать на этот Mac. Они по-прежнему в iCloud Drive › Volant › Notes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметок из iCloud не удалось скопировать на этот Mac. Они по-прежнему в iCloud Drive › Volant › Notes."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметку из iCloud не удалось скопировать на этот Mac. Она по-прежнему в iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметки из iCloud не удалось скопировать на этот Mac. Они по-прежнему в iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "tr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud notu bu Mac’e kopyalanamadı. Hâlâ iCloud Drive › Volant › Notes konumunda."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld iCloud notu bu Mac’e kopyalanamadı. Hâlâ iCloud Drive › Volant › Notes konumunda."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатки з iCloud не вдалося скопіювати на цей Mac. Вони досі в iCloud Drive › Volant › Notes."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотаток з iCloud не вдалося скопіювати на цей Mac. Вони досі в iCloud Drive › Volant › Notes."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатку з iCloud не вдалося скопіювати на цей Mac. Вона досі в iCloud Drive › Volant › Notes."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатки з iCloud не вдалося скопіювати на цей Mac. Вони досі в iCloud Drive › Volant › Notes."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%lld条iCloud笔记无法拷贝到这台Mac。它们仍在iCloud云盘 › Volant › Notes中。"
+          }
+        }
+      }
+    },
     "%lld items selected. Review the report before importing.": {
       "comment": "Raycast import window status",
       "localizations": {
@@ -4957,6 +5232,281 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "另有%lld个已隐藏"
+          }
+        }
+      }
+    },
+    "%lld notes couldn’t be copied to iCloud. They are still in the Notes folder on this Mac.": {
+      "comment": "Notes iCloud sync status; needs a plural variant for one note",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld Notiz konnte nicht in iCloud kopiert werden. Sie befindet sich weiterhin im Notizenordner dieses Macs."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld Notizen konnten nicht in iCloud kopiert werden. Sie befinden sich weiterhin im Notizenordner dieses Macs."
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld note couldn’t be copied to iCloud. It is still in the Notes folder on this Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld notes couldn’t be copied to iCloud. They are still in the Notes folder on this Mac."
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "No se pudo copiar %lld nota a iCloud. Sigue en la carpeta de notas de este Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "No se pudieron copiar %lld notas a iCloud. Siguen en la carpeta de notas de este Mac."
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld note n’a pas pu être copiée dans iCloud. Elle se trouve toujours dans le dossier des notes de ce Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notes n’ont pas pu être copiées dans iCloud. Elles se trouvent toujours dans le dossier des notes de ce Mac."
+                }
+              }
+            }
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Impossibile copiare %lld nota su iCloud. Si trova ancora nella cartella delle note di questo Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Impossibile copiare %lld note su iCloud. Si trovano ancora nella cartella delle note di questo Mac."
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%lld件のメモをiCloudにコピーできませんでした。これらのメモはこのMacのメモのフォルダに残っています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메모 %lld개를 iCloud로 복사할 수 없습니다. 해당 메모는 이 Mac의 메모 폴더에 그대로 있습니다."
+          }
+        },
+        "nl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notitie kon niet naar iCloud worden gekopieerd. Deze staat nog in de notitiemap op deze Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notities konden niet naar iCloud worden gekopieerd. Ze staan nog in de notitiemap op deze Mac."
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatki nie zostały skopiowane do iCloud. Nadal są w folderze notatek na tym Macu."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatek nie zostało skopiowanych do iCloud. Nadal są w folderze notatek na tym Macu."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatka nie została skopiowana do iCloud. Nadal jest w folderze notatek na tym Macu."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld notatek nie zostało skopiowanych do iCloud. Nadal są w folderze notatek na tym Macu."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld nota para o iCloud. Ela continua na pasta de notas deste Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld notas para o iCloud. Elas continuam na pasta de notas deste Mac."
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld nota para o iCloud. Continua na pasta de notas deste Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "Não foi possível copiar %lld notas para o iCloud. Continuam na pasta de notas deste Mac."
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметки не удалось скопировать в iCloud. Они по-прежнему в папке заметок на этом Mac."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметок не удалось скопировать в iCloud. Они по-прежнему в папке заметок на этом Mac."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметку не удалось скопировать в iCloud. Она по-прежнему в папке заметок на этом Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld заметки не удалось скопировать в iCloud. Они по-прежнему в папке заметок на этом Mac."
+                }
+              }
+            }
+          }
+        },
+        "tr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld not iCloud’a kopyalanamadı. Hâlâ bu Mac’teki notlar klasöründe."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld not iCloud’a kopyalanamadı. Hâlâ bu Mac’teki notlar klasöründe."
+                }
+              }
+            }
+          }
+        },
+        "uk": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатки не вдалося скопіювати в iCloud. Вони досі в папці нотаток на цьому Mac."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотаток не вдалося скопіювати в iCloud. Вони досі в папці нотаток на цьому Mac."
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатку не вдалося скопіювати в iCloud. Вона досі в папці нотаток на цьому Mac."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "needs_review",
+                  "value": "%lld нотатки не вдалося скопіювати в iCloud. Вони досі в папці нотаток на цьому Mac."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "%lld条笔记无法拷贝到iCloud。它们仍在这台Mac上的笔记文件夹中。"
           }
         }
       }
@@ -48641,6 +49191,95 @@
         }
       }
     },
+    "In iCloud Drive › Volant › Notes": {
+      "comment": "Notes iCloud sync status; the value is a Finder location",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "In iCloud Drive › Volant › Notes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "En iCloud Drive › Volant › Notes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Dans iCloud Drive › Volant › Notes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "In iCloud Drive › Volant › Notes"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Drive › Volant › Notes内"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Drive › Volant › Notes에 있음"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "In iCloud Drive › Volant › Notes"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "W iCloud Drive › Volant › Notes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No iCloud Drive › Volant › Notes"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No iCloud Drive › Volant › Notes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "В iCloud Drive › Volant › Notes"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Drive › Volant › Notes içinde"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "В iCloud Drive › Volant › Notes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "位于iCloud云盘 › Volant › Notes"
+          }
+        }
+      }
+    },
     "Include Command, Control or Option in a global shortcut.": {
       "localizations": {
         "de": {
@@ -50943,6 +51582,7 @@
       }
     },
     "Keyboard shortcuts, snippets, quicklinks, aliases, appearance and clipboard history length follow you to Macs signed in to the same Apple Account. App shortcuts, favorites, Dock, status bar, dictation, AI and extension settings stay on this Mac. When turned on, settings already in iCloud replace these, and a copy of this Mac's config.json is kept beside it.": {
+      "extractionState": "stale",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -51026,6 +51666,94 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "键盘快捷键、片段、快速链接、别名、外观和剪贴板历史记录长度会同步到登录同一Apple账户的Mac上。App快捷键、个人收藏、程序坞、状态栏、听写、AI和扩展设置保留在这台Mac上。打开后，iCloud中已有的设置会替换这些设置，并会在旁边保留这台Mac的config.json副本。"
+          }
+        }
+      }
+    },
+    "Keyboard shortcuts, snippets, quicklinks, aliases, appearance and clipboard history length follow you to Macs signed in to the same Apple Account. App shortcuts, favorites, Dock, status bar, dictation, AI and extension settings stay on this Mac. When turned on, settings already in iCloud replace these, and a copy of this Mac's config.json is kept beside it. Notes move to iCloud Drive › Volant › Notes, where Volant for iPhone reads them, and this Mac's notes folder is kept as a dated backup. Turning sync off copies your notes back to this Mac.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Tastaturkurzbefehle, Textbausteine, Quicklinks, Aliasse, Erscheinungsbild und Länge des Zwischenablageverlaufs folgen dir auf Macs, die mit demselben Apple Account angemeldet sind. App-Kurzbefehle, Favoriten, Dock, Statusleiste, Diktat, KI und Erweiterungseinstellungen bleiben auf diesem Mac. Beim Einschalten ersetzen Einstellungen, die bereits in iCloud sind, diese hier, und eine Kopie der config.json dieses Macs wird daneben aufbewahrt. Notizen werden nach iCloud Drive › Volant › Notes bewegt, wo Volant für iPhone sie liest, und der Notizenordner dieses Macs wird als datierte Sicherung aufbewahrt. Wenn du die Synchronisierung ausschaltest, werden deine Notizen zurück auf diesen Mac kopiert."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Los atajos de teclado, fragmentos, enlaces rápidos, alias, la apariencia y la longitud del historial del portapapeles te acompañan en los Mac con la misma cuenta de Apple. Los atajos de apps, favoritos, Dock, barra de estado, dictado, IA y ajustes de extensiones se quedan en este Mac. Al activarlo, los ajustes que ya estén en iCloud reemplazan a estos, y se guarda una copia del config.json de este Mac junto a él. Las notas se trasladan a iCloud Drive › Volant › Notes, donde las lee Volant para iPhone, y la carpeta de notas de este Mac se conserva como copia de seguridad con fecha. Al desactivar la sincronización, tus notas se copian de nuevo en este Mac."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Les raccourcis clavier, extraits, liens rapides, alias, l’apparence et la longueur de l’historique du presse-papiers vous suivent sur les Mac connectés au même compte Apple. Les raccourcis d’apps, favoris, Dock, barre d’état, dictée, IA et réglages d’extensions restent sur ce Mac. Une fois l’option activée, les réglages déjà présents dans iCloud remplacent ceux-ci, et une copie du config.json de ce Mac est conservée à côté. Les notes sont déplacées vers iCloud Drive › Volant › Notes, où Volant pour iPhone les lit, et le dossier des notes de ce Mac est conservé comme sauvegarde datée. Désactiver la synchronisation recopie vos notes sur ce Mac."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Abbreviazioni da tastiera, frammenti, link rapidi, alias, aspetto e lunghezza della cronologia degli appunti ti seguono sui Mac con lo stesso Apple Account. Abbreviazioni app, preferiti, Dock, barra di stato, dettatura, AI e impostazioni delle estensioni restano su questo Mac. Quando attivi l’opzione, le impostazioni già presenti in iCloud sostituiscono queste e una copia del config.json di questo Mac viene conservata accanto. Le note vengono spostate in iCloud Drive › Volant › Notes, dove Volant per iPhone le legge, e la cartella delle note di questo Mac viene conservata come backup datato. Disattivando la sincronizzazione, le note vengono ricopiate su questo Mac."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "キーボードショートカット、スニペット、クイックリンク、エイリアス、外観、クリップボード履歴の長さは、同じAppleアカウントでサインインしているMacに引き継がれます。Appショートカット、よく使う項目、Dock、ステータスバー、音声入力、AI、機能拡張の設定はこのMacにのみ保存されます。オンにすると、iCloudにすでにある設定でこれらが置き換えられ、このMacのconfig.jsonのコピーがその隣に保存されます。メモはiCloud Drive › Volant › Notesに移動され、iPhone版Volantがそこから読み込みます。このMacのメモのフォルダは日付付きのバックアップとして保持されます。同期をオフにすると、メモがこのMacにコピーし直されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "키보드 단축키, 스니펫, 빠른 링크, 별칭, 화면 모드 및 클립보드 기록 길이가 같은 Apple 계정으로 로그인한 Mac 간에 동기화됩니다. 앱 단축키, 즐겨찾기, Dock, 상태 막대, 받아쓰기, AI 및 확장 프로그램 설정은 이 Mac에만 유지됩니다. 이 기능을 켜면 iCloud에 이미 있는 설정이 현재 설정을 대체하며, 이 Mac의 config.json 사본이 그 옆에 보관됩니다. 메모는 iCloud Drive › Volant › Notes로 이동되어 iPhone용 Volant에서 읽으며, 이 Mac의 메모 폴더는 날짜가 표시된 백업으로 보관됩니다. 동기화를 끄면 메모가 이 Mac으로 다시 복사됩니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Toetscombinaties, fragmenten, snelkoppelingen, aliassen, weergave en de lengte van de klembordgeschiedenis volgen je naar Macs die zijn ingelogd met dezelfde Apple Account. App-toetscombinaties, favorieten, Dock, statusbalk, dicteren, AI en extensie-instellingen blijven op deze Mac. Wanneer dit aan staat, vervangen instellingen die al in iCloud staan deze instellingen, en wordt er een kopie van config.json van deze Mac ernaast bewaard. Notities worden verplaatst naar iCloud Drive › Volant › Notes, waar Volant voor iPhone ze leest, en de notitiemap van deze Mac wordt bewaard als gedateerde reservekopie. Als je synchronisatie uitschakelt, worden je notities terug naar deze Mac gekopieerd."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Skróty klawiszowe, fragmenty, szybkie linki, aliasy, wygląd i długość historii schowka są dostępne na Macach zalogowanych do tego samego konta Apple. Skróty aplikacji, ulubione, Dock, pasek stanu, dyktowanie, AI i ustawienia rozszerzeń pozostają na tym Macu. Po włączeniu ustawienia zachowane już w iCloud zastępują te, a kopia pliku config.json z tego Maca jest przechowywana obok niego. Notatki są przenoszone do iCloud Drive › Volant › Notes, gdzie odczytuje je Volant na iPhone’a, a folder notatek z tego Maca jest przechowywany jako kopia zapasowa z datą. Wyłączenie synchronizacji kopiuje notatki z powrotem na ten Mac."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Atalhos de teclado, trechos, links rápidos, apelidos, aparência e tamanho do histórico da área de transferência acompanham você nos Macs com sessão iniciada na mesma Conta Apple. Atalhos de apps, favoritos, Dock, barra de status, ditado, IA e ajustes de extensões ficam neste Mac. Ao ativar, os ajustes que já estão no iCloud substituem estes, e uma cópia do config.json deste Mac é mantida ao lado dele. As notas são movidas para iCloud Drive › Volant › Notes, onde o Volant para iPhone as lê, e a pasta de notas deste Mac é mantida como um backup com data. Desativar a sincronização copia suas notas de volta para este Mac."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Os atalhos de teclado, excertos, ligações rápidas, alias, aspeto e tamanho do histórico da área de transferência acompanham-no nos Mac com sessão iniciada na mesma Conta Apple. Os atalhos de apps, favoritos, Dock, barra de estado, ditado, IA e definições de extensões ficam neste Mac. Ao ativar, as definições que já estão no iCloud substituem estas, e é guardada uma cópia do config.json deste Mac ao lado dele. As notas são movidas para iCloud Drive › Volant › Notes, onde o Volant para iPhone as lê, e a pasta de notas deste Mac é guardada como uma cópia de segurança datada. Desativar a sincronização copia as suas notas de volta para este Mac."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Сочетания клавиш, фрагменты, быстрые ссылки, псевдонимы, оформление и длина истории буфера обмена переносятся на Mac, где выполнен вход в тот же Аккаунт Apple. Сочетания для приложений, избранное, Dock, строка состояния, диктовка, настройки ИИ и расширений остаются на этом Mac. При включении настройки, уже находящиеся в iCloud, заменяют эти, а копия config.json этого Mac сохраняется рядом. Заметки перемещаются в iCloud Drive › Volant › Notes, где их читает Volant для iPhone, а папка заметок этого Mac сохраняется как резервная копия с датой. При выключении синхронизации заметки копируются обратно на этот Mac."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Klavye kestirmeleri, parçalar, hızlı bağlantılar, takma adlar, görünüm ve pano geçmişi uzunluğu aynı Apple Hesabı’na giriş yapmış Mac’lerde sizinle gelir. Uygulama kestirmeleri, favoriler, Dock, durum çubuğu, dikte, YZ ve genişletme ayarları bu Mac’te kalır. Açıldığında, iCloud’da zaten bulunan ayarlar bunların yerine geçer ve bu Mac’in config.json dosyasının bir kopyası yanında saklanır. Notlar iCloud Drive › Volant › Notes konumuna taşınır, iPhone için Volant onları buradan okur ve bu Mac’in notlar klasörü tarihli bir yedek olarak saklanır. Eşzamanlamayı kapatmak notlarınızı bu Mac’e geri kopyalar."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Клавіатурні скорочення, фрагменти, швидкі посилання, псевдоніми, вигляд і довжина історії буфера обміну переносяться на комп’ютери Mac, на яких виконано вхід з тим самим обліковим записом Apple. Скорочення програм, улюблені, Dock, рядок стану, диктування, параметри ШІ та розширень залишаються на цьому Mac. Після ввімкнення параметри, що вже є в iCloud, замінять ці, а копію config.json цього Mac буде збережено поруч із ним. Нотатки переміщуються до iCloud Drive › Volant › Notes, де їх читає Volant для iPhone, а папка нотаток цього Mac зберігається як резервна копія з датою. Після вимкнення синхронізації нотатки копіюються назад на цей Mac."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "键盘快捷键、片段、快速链接、别名、外观和剪贴板历史记录长度会同步到登录同一Apple账户的Mac上。App快捷键、个人收藏、程序坞、状态栏、听写、AI和扩展设置保留在这台Mac上。打开后，iCloud中已有的设置会替换这些设置，并会在旁边保留这台Mac的config.json副本。笔记会移到iCloud云盘 › Volant › Notes，iPhone版Volant会从这里读取笔记，这台Mac上的笔记文件夹会保留为带日期的备份。关闭同步会将你的笔记拷贝回这台Mac。"
           }
         }
       }
@@ -56230,6 +56958,95 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "移到废纸篓"
+          }
+        }
+      }
+    },
+    "Moving notes…": {
+      "comment": "Notes iCloud sync status",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notizen werden bewegt …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Moviendo notas…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Déplacement des notes…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Spostamento delle note…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メモを移動中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메모 이동 중…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notities verplaatsen…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Przenoszenie notatek…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Movendo notas…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A mover as notas…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Перемещение заметок…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notlar taşınıyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Переміщення нотаток…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "正在移动笔记…"
           }
         }
       }
@@ -62239,6 +63056,273 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "笔记"
+          }
+        }
+      }
+    },
+    "Notes stay on this Mac until iCloud Drive is turned on.": {
+      "comment": "Notes iCloud sync status",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notizen bleiben auf diesem Mac, bis iCloud Drive eingeschaltet ist."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Las notas se quedan en este Mac hasta que se active iCloud Drive."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Les notes restent sur ce Mac jusqu’à l’activation d’iCloud Drive."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Le note restano su questo Mac finché iCloud Drive non viene attivato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Driveがオンになるまで、メモはこのMacに保存されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Drive가 켜질 때까지 메모는 이 Mac에 유지됩니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notities blijven op deze Mac totdat iCloud Drive is ingeschakeld."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notatki pozostają na tym Macu do czasu włączenia iCloud Drive."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas ficam neste Mac até que o iCloud Drive seja ativado."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas ficam neste Mac até o iCloud Drive ser ativado."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Заметки остаются на этом Mac, пока не включен iCloud Drive."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud Drive açılana kadar notlar bu Mac’te kalır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нотатки залишаються на цьому Mac, доки не ввімкнено iCloud Drive."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "在打开iCloud云盘之前，笔记会保留在这台Mac上。"
+          }
+        }
+      }
+    },
+    "Notes stayed in iCloud because a note couldn’t be saved. Retry the save, then turn sync on and off again.": {
+      "comment": "Notes iCloud sync status",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Die Notizen sind in iCloud geblieben, weil eine Notiz nicht gesichert werden konnte. Versuche erneut, sie zu sichern, und schalte die Synchronisierung dann wieder ein und aus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Las notas se quedaron en iCloud porque no se pudo guardar una nota. Vuelve a intentar guardarla y luego activa y desactiva de nuevo la sincronización."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Les notes sont restées dans iCloud, car une note n’a pas pu être enregistrée. Réessayez l’enregistrement, puis réactivez et désactivez à nouveau la synchronisation."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Le note sono rimaste in iCloud perché non è stato possibile salvare una nota. Riprova a salvare, poi attiva e disattiva di nuovo la sincronizzazione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メモを保存できなかったため、メモはiCloudに残っています。保存を再試行し、同期をもう一度オンにしてからオフにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메모를 저장할 수 없어 메모가 iCloud에 남아 있습니다. 저장을 다시 시도한 후 동기화를 다시 켰다가 끄십시오."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De notities zijn in iCloud gebleven omdat een notitie niet kon worden bewaard. Probeer opnieuw te bewaren en zet synchronisatie daarna weer aan en uit."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notatki pozostały w iCloud, ponieważ nie można było zachować jednej z notatek. Ponów zachowywanie, a następnie ponownie włącz i wyłącz synchronizację."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas permaneceram no iCloud porque não foi possível salvar uma nota. Tente salvar novamente e, em seguida, ative e desative a sincronização outra vez."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas permaneceram no iCloud porque não foi possível guardar uma nota. Tente guardar novamente e, em seguida, ative e desative a sincronização outra vez."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Заметки остались в iCloud, так как не удалось сохранить заметку. Повторите сохранение, затем снова включите и выключите синхронизацию."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bir not kaydedilemediği için notlar iCloud’da kaldı. Kaydetmeyi yeniden deneyin, sonra eşzamanlamayı yeniden açıp kapatın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нотатки залишилися в iCloud, оскільки не вдалося зберегти нотатку. Повторіть збереження, а потім знову ввімкніть і вимкніть синхронізацію."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "由于一条笔记无法存储，笔记仍保留在iCloud中。请重新存储，然后再次打开并关闭同步。"
+          }
+        }
+      }
+    },
+    "Notes stayed on this Mac because a note couldn’t be saved. Retry the save, then turn sync off and on again.": {
+      "comment": "Notes iCloud sync status",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Die Notizen sind auf diesem Mac geblieben, weil eine Notiz nicht gesichert werden konnte. Versuche erneut, sie zu sichern, und schalte die Synchronisierung dann wieder aus und ein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Las notas se quedaron en este Mac porque no se pudo guardar una nota. Vuelve a intentar guardarla y luego desactiva y activa de nuevo la sincronización."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Les notes sont restées sur ce Mac, car une note n’a pas pu être enregistrée. Réessayez l’enregistrement, puis désactivez et réactivez la synchronisation."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Le note sono rimaste su questo Mac perché non è stato possibile salvare una nota. Riprova a salvare, poi disattiva e attiva di nuovo la sincronizzazione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "メモを保存できなかったため、メモはこのMacに残っています。保存を再試行し、同期をもう一度オフにしてからオンにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "메모를 저장할 수 없어 메모가 이 Mac에 남아 있습니다. 저장을 다시 시도한 후 동기화를 다시 껐다가 켜십시오."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "De notities zijn op deze Mac gebleven omdat een notitie niet kon worden bewaard. Probeer opnieuw te bewaren en zet synchronisatie daarna weer uit en aan."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Notatki pozostały na tym Macu, ponieważ nie można było zachować jednej z notatek. Ponów zachowywanie, a następnie ponownie wyłącz i włącz synchronizację."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas permaneceram neste Mac porque não foi possível salvar uma nota. Tente salvar novamente e, em seguida, desative e ative a sincronização outra vez."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "As notas permaneceram neste Mac porque não foi possível guardar uma nota. Tente guardar novamente e, em seguida, desative e ative a sincronização outra vez."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Заметки остались на этом Mac, так как не удалось сохранить заметку. Повторите сохранение, затем снова выключите и включите синхронизацию."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Bir not kaydedilemediği için notlar bu Mac’te kaldı. Kaydetmeyi yeniden deneyin, sonra eşzamanlamayı yeniden kapatıp açın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Нотатки залишилися на цьому Mac, оскільки не вдалося зберегти нотатку. Повторіть збереження, а потім знову вимкніть і ввімкніть синхронізацію."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "由于一条笔记无法存储，笔记仍保留在这台Mac上。请重新存储，然后再次关闭并打开同步。"
           }
         }
       }
@@ -85909,7 +86993,96 @@
         }
       }
     },
+    "Sync settings and notes with iCloud": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Einstellungen und Notizen mit iCloud synchronisieren"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sincronizar ajustes y notas con iCloud"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Synchroniser les réglages et les notes avec iCloud"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sincronizza impostazioni e note con iCloud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "設定とメモをiCloudと同期"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud와 설정 및 메모 동기화"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Synchroniseer instellingen en notities met iCloud"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Synchronizuj ustawienia i notatki z iCloud"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sincronizar ajustes e notas com o iCloud"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Sincronizar definições e notas com o iCloud"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Синхронизировать настройки и заметки через iCloud"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Ayarları ve notları iCloud ile eşzamanla"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Синхронізувати параметри й нотатки з iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "通过iCloud同步设置和笔记"
+          }
+        }
+      }
+    },
     "Sync settings with iCloud": {
+      "extractionState": "stale",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -105667,6 +106840,95 @@
         }
       }
     },
+    "iCloud notes couldn’t be reached, so they weren’t copied to this Mac. Sign in to iCloud, then turn sync on and off again.": {
+      "comment": "Notes iCloud sync status",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Auf die Notizen in iCloud konnte nicht zugegriffen werden, daher wurden sie nicht auf diesen Mac kopiert. Melde dich bei iCloud an und schalte die Synchronisierung dann wieder ein und aus."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "No se pudo acceder a las notas de iCloud, así que no se copiaron en este Mac. Inicia sesión en iCloud y luego activa y desactiva de nuevo la sincronización."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Les notes iCloud sont inaccessibles ; elles n’ont donc pas été copiées sur ce Mac. Connectez-vous à iCloud, puis réactivez et désactivez à nouveau la synchronisation."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Impossibile raggiungere le note di iCloud, quindi non sono state copiate su questo Mac. Accedi a iCloud, poi attiva e disattiva di nuovo la sincronizzazione."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloudのメモにアクセスできなかったため、このMacにコピーされませんでした。iCloudにサインインし、同期をもう一度オンにしてからオフにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud 메모에 접근할 수 없어 이 Mac으로 복사되지 않았습니다. iCloud에 로그인한 후 동기화를 다시 켰다가 끄십시오."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud-notities waren niet bereikbaar en zijn daarom niet naar deze Mac gekopieerd. Log in bij iCloud en zet synchronisatie daarna weer aan en uit."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Nie można było uzyskać dostępu do notatek w iCloud, więc nie zostały skopiowane na ten Mac. Zaloguj się do iCloud, a następnie ponownie włącz i wyłącz synchronizację."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Não foi possível acessar as notas do iCloud, então elas não foram copiadas para este Mac. Inicie sessão no iCloud e, em seguida, ative e desative a sincronização outra vez."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Não foi possível aceder às notas do iCloud, pelo que não foram copiadas para este Mac. Inicie sessão no iCloud e, em seguida, ative e desative a sincronização outra vez."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Не удалось получить доступ к заметкам в iCloud, поэтому они не скопированы на этот Mac. Войдите в iCloud, затем снова включите и выключите синхронизацию."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud notlarına ulaşılamadığı için bu Mac’e kopyalanmadılar. iCloud’a giriş yapın, sonra eşzamanlamayı yeniden açıp kapatın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Не вдалося отримати доступ до нотаток в iCloud, тому їх не скопійовано на цей Mac. Увійдіть в iCloud, а потім знову ввімкніть і вимкніть синхронізацію."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "无法访问iCloud笔记，因此未将其拷贝到这台Mac。请登录iCloud，然后再次打开并关闭同步。"
+          }
+        }
+      }
+    },
     "just now": {
       "comment": "Age of a clipboard item or note offered as AI Chat context",
       "localizations": {
@@ -110642,6 +111904,272 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "取色"
+          }
+        }
+      }
+    },
+    "Downloading…": {
+      "comment": "Title of an iCloud note not yet on this Mac",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wird geladen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Descargando…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Téléchargement…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Download in corso…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ダウンロード中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "다운로드 중…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Downloaden…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pobieranie…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Baixando…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A descarregar…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Загрузка…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "İndiriliyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Завантаження…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "正在下载…"
+          }
+        }
+      }
+    },
+    "From iCloud": {
+      "comment": "Preview of an iCloud note not yet on this Mac",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Aus iCloud"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Desde iCloud"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Depuis iCloud"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Da iCloud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloudから"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud에서"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Uit iCloud"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Z iCloud"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Do iCloud"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Do iCloud"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Из iCloud"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud'dan"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "З iCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "来自iCloud"
+          }
+        }
+      }
+    },
+    "Downloading from iCloud…": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Wird aus iCloud geladen …"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Descargando desde iCloud…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Téléchargement depuis iCloud…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Download da iCloud in corso…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloudからダウンロード中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud에서 다운로드 중…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Downloaden uit iCloud…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Pobieranie z iCloud…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Baixando do iCloud…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "A descarregar do iCloud…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Загрузка из iCloud…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "iCloud'dan indiriliyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Завантаження з iCloud…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "正在从iCloud下载…"
           }
         }
       }

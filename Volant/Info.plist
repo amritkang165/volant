@@ -30,10 +30,10 @@
 	<string>Volant lists connected Bluetooth devices when you open the Bluetooth command.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Volant lists connected Bluetooth devices on request.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Volant shows a live preview from your camera only while the Open Camera window is open. Nothing is recorded, saved or sent.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Volant shows today's events and their meeting links. Read-only.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Volant shows a live preview from your camera only while the Open Camera window is open. Nothing is recorded, saved or sent.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Volant searches your contacts so you can copy an email address or phone number. Read-only.</string>
 	<key>NSHumanReadableCopyright</key>
@@ -46,6 +46,18 @@
 	<string>Volant transcribes dictation on this Mac. Audio is never sent anywhere and is not saved.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.com.mysticcoders.volant</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Volant</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 	<key>SUEnableDownloaderService</key>
 	<true/>
 	<key>SUEnableInstallerLauncherService</key>

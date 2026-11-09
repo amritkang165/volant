@@ -11,6 +11,7 @@ final class SettingsState: ObservableObject {
     @Published var editing: AppEntry?
     @Published var registrationErrors: [String] = []
     @Published var iCloudStatus = ICloudSettingsSync.Status.off.text
+    @Published var notesICloudStatus: String?
 }
 
 /// Native settings; the injected configuration URL also supports isolated UI fixtures.
@@ -364,14 +365,17 @@ private struct SettingsView: View {
                 SettingsFooter(String(localized: "Aliases, shortcuts and preferences live in one portable JSON file."))
             }
             Section {
-                Toggle("Sync settings with iCloud", isOn: boolean("syncSettingsWithICloud", state.config.syncSettingsWithICloud))
+                Toggle("Sync settings and notes with iCloud", isOn: boolean("syncSettingsWithICloud", state.config.syncSettingsWithICloud))
                 if state.config.syncSettingsWithICloud {
                     LabeledContent("Status") { Text(state.iCloudStatus).foregroundStyle(.secondary).multilineTextAlignment(.trailing) }
+                }
+                if let notes = state.notesICloudStatus {
+                    LabeledContent("Notes") { Text(notes).foregroundStyle(.secondary).multilineTextAlignment(.trailing) }
                 }
             } header: {
                 Text("iCloud")
             } footer: {
-                SettingsFooter(String(localized: "Keyboard shortcuts, snippets, quicklinks, aliases, appearance and clipboard history length follow you to Macs signed in to the same Apple Account. App shortcuts, favorites, Dock, status bar, dictation, AI and extension settings stay on this Mac. When turned on, settings already in iCloud replace these, and a copy of this Mac's config.json is kept beside it."))
+                SettingsFooter(String(localized: "Keyboard shortcuts, snippets, quicklinks, aliases, appearance and clipboard history length follow you to Macs signed in to the same Apple Account. App shortcuts, favorites, Dock, status bar, dictation, AI and extension settings stay on this Mac. When turned on, settings already in iCloud replace these, and a copy of this Mac's config.json is kept beside it. Notes move to iCloud Drive › Volant › Notes, where Volant for iPhone reads them, and this Mac's notes folder is kept as a dated backup. Turning sync off copies your notes back to this Mac."))
             }
             Section {
                 LabeledContent("Raycast") {

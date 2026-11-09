@@ -21,6 +21,7 @@
 - Notes use native material and semantic styles. Keep the default surface focused on one note; browsing and secondary actions are on demand.
 - Run persistence tests for storage changes. `NotesRenderTests` generates fictional light/dark view fixtures; inspect them, but do not count successful rendering as live keyboard, sheet, titlebar, or OS appearance verification.
 - Current decisions, evidence and remaining work: [notes design review](docs/notes-design-review.md).
+- Notes sync with iCloud through the existing settings switch, off by default. Moves copy first, keep the local folder as a dated backup, and refuse while a save is failing; Debug builds stay local. Run `NotesICloudSyncTests`; real iCloud and two-device sync are separate evidence. See [notes in iCloud](docs/notes-icloud.md).
 
 - Live Markdown must preserve UTF-16 source ranges, selection, undo and input-method composition. Language choices edit only the opening fence through NSTextView’s editing API; Auto must stay local and must not rewrite detected tags into source. Live and Preview share fence parsing.
 
