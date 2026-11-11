@@ -27,6 +27,7 @@ struct FocusBrowser: Hashable {
         .safari("com.apple.SafariTechnologyPreview", "Safari Technology Preview"),
         .chromium("com.google.Chrome", "Google Chrome"),
         .chromium("com.brave.Browser", "Brave"),
+        .chromium("com.brave.Browser.origin", "Brave Origin"),
         .chromium("com.vivaldi.Vivaldi", "Vivaldi"),
         .chromium("com.microsoft.edgemac", "Microsoft Edge"),
         .chromium("company.thebrowser.Browser", "Arc"),
