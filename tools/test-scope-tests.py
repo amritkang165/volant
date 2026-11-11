@@ -22,7 +22,8 @@ class ScopeTests(unittest.TestCase):
                      "Volant/Appearance/ThemeStore.swift", "Volant/Dictionary/DictionaryModel.swift", "Volant/Dictionary/DictionaryView.swift", "Volant/Translation/TranslationModel.swift", "Volant/Translation/TranslationView.swift", "tools/launcher/check.swift", "tools/check-launcher-actions.sh", "tools/launcher/actions.swift", "tools/launcher/dictation-hud.swift", "tools/check-dictation-hud.sh", "Volant/Dictation/DictationIndicator.swift", "Volant/Dictation/DictationIndicatorPanel.swift", "Volant/HotKeys/DictationEscapeKey.swift", "Volant/Settings/DictationSettingsView.swift", "Volant/Settings/SettingsSection.swift", "Volant/Dictation/DictationTypingAccess.swift", "tools/run-bounded-check.py", "tools/app-module.sh",
                      "Volant/SystemControl/VolumeControl.swift", "Volant/SystemControl/Connectivity.swift", "Volant/SystemControl/Caffeinate.swift", "Volant/SystemControl/SystemEvents.swift", "Volant/SystemControl/ColorSampling.swift", "Volant/Camera/CameraPreviewWindow.swift",
                      "Volant/Snippets/Snippets.swift", "Volant/Quicklinks/Quicklinks.swift", "Volant/Settings/AppBindingStore.swift",
-                     "Volant/MenuItems/MenuItemsModel.swift", "Core/Sources/VolantCore/MenuItems/MenuItems.swift", "Volant/Settings/MenuItemsSettingsSection.swift"]:
+                     "Volant/MenuItems/MenuItemsModel.swift", "Core/Sources/VolantCore/MenuItems/MenuItems.swift", "Volant/Settings/MenuItemsSettingsSection.swift",
+                     "Volant/Focus/FocusController.swift", "Volant/Focus/FocusLauncher.swift", "Core/Sources/VolantCore/Focus/FocusSession.swift", "Volant/Settings/FocusSettingsSection.swift"]:
             self.assertEqual(scope.classify([path]), {"native": True, "ui": True}, path)
 
     def test_current_swiftui_surfaces_are_classified(self):

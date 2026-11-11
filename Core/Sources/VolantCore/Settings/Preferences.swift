@@ -10,6 +10,8 @@ public struct Preferences: Codable {
     /// System actions that are useful as instant global shortcuts. Unset until the owner picks one.
     public var lockScreenHotKey: String = ""
     public var sleepDisplaysHotKey: String = ""
+    /// Starts a Focus session with the remembered setup, or ends the running one.
+    public var focusHotKey: String = ""
     public var appHotKeys: [AppHotKey] = []
     public var clipboardRetention: Int = 500
     public var showOnLaunch: Bool = true
@@ -62,7 +64,7 @@ public struct Preferences: Codable {
     public var help: String = "Edit and choose Reload Configuration in Settings. Hotkeys: cmd|ctrl|option|shift|meh|hyper + key. App hotkeys use the bundle identifier. Snippets: {date} {isodate} {time} {datetime} {clipboard} {uuid}. Quicklinks: {query}. Aliases map a word to an app name or query. Appearance: theme system|light|dark, colorTheme system|volant|catppuccin-mocha|nord|…|custom-<name> (named themes set their own light or dark; customThemes holds imported Raycast themes), scale 0.8–1.4, opacity 0.5–1.0."
 
     public enum CodingKeys: String, CodingKey {
-        case favoriteApps, summonHotKey, notesHotKey, emojiHotKey, talkHotKey, lockScreenHotKey, sleepDisplaysHotKey, appHotKeys, clipboardRetention, showOnLaunch, showInDock, caffeinateKeepsDisplayAwake, dictationLowersVolume, dictationOutput, dictationTypesWhileSpeaking, dictationRemovesFillers, dictationPlaysSounds, dictationVocabulary, dictationFixesCloseMatches, fileSearchUsesFSearch, syncSettingsWithICloud, rexPanePreviews, extensionUpdateChecks, searchMenuItems, statusBar, focus, snippets, quicklinks, aliases, appearance
+        case favoriteApps, summonHotKey, notesHotKey, emojiHotKey, talkHotKey, lockScreenHotKey, sleepDisplaysHotKey, focusHotKey, appHotKeys, clipboardRetention, showOnLaunch, showInDock, caffeinateKeepsDisplayAwake, dictationLowersVolume, dictationOutput, dictationTypesWhileSpeaking, dictationRemovesFillers, dictationPlaysSounds, dictationVocabulary, dictationFixesCloseMatches, fileSearchUsesFSearch, syncSettingsWithICloud, rexPanePreviews, extensionUpdateChecks, searchMenuItems, statusBar, focus, snippets, quicklinks, aliases, appearance
         case help = "_help"
     }
 
@@ -87,6 +89,7 @@ public struct Preferences: Codable {
         talkHotKey = try c.decodeIfPresent(String.self, forKey: .talkHotKey) ?? d.talkHotKey
         lockScreenHotKey = try c.decodeIfPresent(String.self, forKey: .lockScreenHotKey) ?? d.lockScreenHotKey
         sleepDisplaysHotKey = try c.decodeIfPresent(String.self, forKey: .sleepDisplaysHotKey) ?? d.sleepDisplaysHotKey
+        focusHotKey = try c.decodeIfPresent(String.self, forKey: .focusHotKey) ?? d.focusHotKey
         emojiHotKey = try c.decodeIfPresent(String.self, forKey: .emojiHotKey) ?? d.emojiHotKey
         appHotKeys = try c.decodeIfPresent([AppHotKey].self, forKey: .appHotKeys) ?? d.appHotKeys
         clipboardRetention = try c.decodeIfPresent(Int.self, forKey: .clipboardRetention) ?? d.clipboardRetention

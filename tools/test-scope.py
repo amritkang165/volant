@@ -16,6 +16,8 @@ UI_PATTERNS = (
     "tools/launcher/*", "Volant/Settings/SettingsSection.swift",
     # Search Menu Items: the launcher fixture drives its model; Settings shows its switch.
     "Volant/MenuItems/*", "Core/Sources/VolantCore/MenuItems/*", "Volant/Settings/MenuItemsSettingsSection.swift",
+    # Focus: the launcher rows and form, the focus bar, reminder and menu bar item, and its Settings section.
+    "Volant/Focus/*", "Core/Sources/VolantCore/Focus/*", "Volant/Settings/FocusSettingsSection.swift",
     "tools/check-launcher.sh", "tools/check-launcher-actions.sh", "tools/app-module.sh", "tools/check-dictation-hud.sh", "tools/run-bounded-check.py",
     # Launcher fixtures drive these directly: volume and audio routes, Wi-Fi and Bluetooth, system actions,
     # Caffeinate, snippet and quicklink forms, and app shortcut bindings.

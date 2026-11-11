@@ -46,6 +46,8 @@ enum ResultRow: Identifiable, Hashable {
     /// Search Menu Items while its switch is off: opens the setting.
     case menuItemsOff
     case caffeinate(CaffeinateCommand)
+    /// A Focus row and its subtitle, worked out when the rows are built.
+    case focus(FocusRow, detail: String)
     case systemSettings(SystemSettingsDestination)
     case settings
     case reloadConfig
@@ -87,6 +89,7 @@ enum ResultRow: Identifiable, Hashable {
         case .pickAnotherColor: return "picked-color:another"
         case .privacySettings(let pane): return "privacy:" + pane.rawValue
         case .caffeinate(let command): return "caffeinate:" + command.id
+        case .focus(let row, _): return "focus:" + row.id
         case .agentSession(let session): return "agent:" + session.id
         case .herdrMachine(let machine, _, _): return "herdr-machine:" + (machine?.id ?? "local")
         case .rexPane(let pane): return "rex:" + pane.id
@@ -124,7 +127,7 @@ enum ResultRow: Identifiable, Hashable {
             return server.exposed ? String(localized: "Network", comment: "Server row label: other machines can connect")
                 : String(localized: "Local", comment: "Server row label: only this Mac can connect")
         case .menuItem(let entry): return entry.item.shortcut?.display ?? String(localized: "Menu Item", comment: "Result row kind label for a menu item without a keyboard shortcut")
-        case .core, .caffeinate, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
+        case .core, .caffeinate, .focus, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
         case .pickedColor: return String(localized: "Color", comment: "Result row kind label: a color picked from the screen")
         case .pickAnotherColor: return String(localized: "Command", comment: "Result row kind label")
         case .privacySettings: return String(localized: "System Settings", comment: "Result row kind label")
@@ -157,7 +160,7 @@ enum ResultRow: Identifiable, Hashable {
 
     var isCoreCommand: Bool {
         switch self {
-        case .core, .caffeinate, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .pickAnotherColor, .privacySettings, .menuItemsOff: return true
+        case .core, .caffeinate, .focus, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .pickAnotherColor, .privacySettings, .menuItemsOff: return true
         default: return false
         }
     }
@@ -177,6 +180,7 @@ enum ResultRow: Identifiable, Hashable {
         case .pickAnotherColor: return String(localized: "Pick Color", comment: "Footer and Actions label for Return on Pick Another Color")
         case .privacySettings: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .caffeinate(let command): return command.stop ? String(localized: "Stop", comment: "Footer label for Return: stop Caffeinate") : String(localized: "Start", comment: "Footer label for Return: start Caffeinate")
+        case .focus(let row, _): return row.primaryAction
         case .agentSession: return String(localized: "Focus in Herdr", comment: "Footer and Actions label for Return")
         case .herdrMachine(let machine, let enabled, let busy):
             if busy { return String(localized: "Working…", comment: "Footer and Actions label for Return") }
@@ -347,6 +351,8 @@ final class LauncherModel: ObservableObject {
     var showingTranslation: Bool { ["translate", "translation", "translator"].contains(routedQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()) }
     let caffeinate: CaffeinateService
     private var caffeinateSubscription: AnyCancellable?
+    let focus: FocusController
+    private var focusSubscription: AnyCancellable?
     var showingEmoji: Bool { routedQuery.trimmingCharacters(in: .whitespaces).hasPrefix(":") }
     var emojiSearch: (String) -> [EmojiEntry] = { EmojiIndex.search($0, limit: Int.max) }
     var searchText: String {
@@ -632,11 +638,12 @@ final class LauncherModel: ObservableObject {
     @Published private(set) var heldCalculation: CalculationAnswer?
     var calculationHoldDuration: TimeInterval = 0.6
 
-    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), caffeinate: CaffeinateService = CaffeinateService(), files: FileSearch = FileSearch(), agents: AgentsModel = AgentsModel(), rex: RexModel = RexModel(), onNote: @escaping (LauncherAction) -> Void) {
+    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController = FocusController(stateURL: FileManager.default.temporaryDirectory.appendingPathComponent("volant-focus-\(UUID().uuidString).json"), automaticTimer: false, restore: false), files: FileSearch = FileSearch(), agents: AgentsModel = AgentsModel(), rex: RexModel = RexModel(), onNote: @escaping (LauncherAction) -> Void) {
         self.agents = agents
         self.rex = rex
         self.files = files
         self.caffeinate = caffeinate
+        self.focus = focus
         self.usage = usage
         self.index = index
         self.clipboard = clipboard
@@ -661,6 +668,12 @@ final class LauncherModel: ObservableObject {
         dictationTranscriptSubscription = dictation.$transcript.removeDuplicates().sink { [weak self] text in
             guard let self, self.dictationSurface == .indicator else { return }
             self.dictationIndicator.heard(text)
+        }
+        focusSubscription = focus.$session.map { $0.map { [$0.isPaused] } }.removeDuplicates().dropFirst().sink { [weak self] _ in
+            DispatchQueue.main.async {
+                guard let self, FocusCommand.parse(self.query) != nil, self.entryForm == nil else { return }
+                self.refreshFocusResults()
+            }
         }
         caffeinateSubscription = caffeinate.$command.dropFirst().sink { [weak self] _ in
             DispatchQueue.main.async {
@@ -1274,6 +1287,7 @@ final class LauncherModel: ObservableObject {
         }
         if showingTranslation { sections = []; return }
         if CaffeinateCommand.matches(q) { refreshCaffeinateResults(); return }
+        if FocusCommand.parse(q) != nil { refreshFocusResults(); return }
         if q.lowercased() == "emoji" {
             sections = []
             DispatchQueue.main.async { [weak self] in
@@ -1782,6 +1796,99 @@ final class LauncherModel: ObservableObject {
         }
     }
 
+    /// The query the Focus rows were last built for, so only a same-query update keeps the selection.
+    private var focusRowsQuery: String?
+
+    /// The Focus rows for the query: starting a session when none runs, or controlling the one that does.
+    /// A new query selects the first row; a session change under the same query keeps the selected row.
+    private func refreshFocusResults() {
+        guard let command = FocusCommand.parse(query) else { return }
+        let selectedID = focusRowsQuery == query ? selectedRow?.id : nil
+        focusRowsQuery = query
+        let rows = FocusRow.rows(for: command, session: focus.session)
+        sections = [ResultSection(title: String(localized: "Focus", comment: "Launcher section title; the Focus command"), rows: rows.map { ResultRow.focus($0, detail: $0.detail(remembered: config.focus.lastSetup, session: focus.session)) })]
+        notice = nil
+        if let selectedID, let index = self.rows.firstIndex(where: { $0.id == selectedID }) { selection = index }
+        else { selection = 0 }
+    }
+
+    /// Acts on a Focus row. Starting or editing closes the launcher so the owner can get to work.
+    private func performFocus(_ row: FocusRow) {
+        switch row {
+        case .setUp: openFocusForm(editing: false)
+        case .edit: openFocusForm(editing: true)
+        case .quickStart(let minutes, let goal):
+            var setup = config.focus.lastSetup
+            if let minutes { setup.minutes = minutes }
+            if let goal { setup.goal = goal }
+            setup = FocusSetup(goal: setup.goal, minutes: setup.minutes, apps: setup.apps, websites: setup.websites, categories: setup.categories)
+            focus.start(setup)
+            rememberFocusSetup(setup)
+            query = ""
+            dismiss()
+        case .pause: focus.pause(); refreshFocusResults()
+        case .resume: focus.resume(); refreshFocusResults()
+        case .complete: focus.complete(); query = ""; dismiss()
+        case .end: focus.end(); refreshFocusResults()
+        }
+    }
+
+    /// Apps whose names match, for the Focus form's add field.
+    func searchApps(_ text: String) -> [AppEntry] { index.search(text, limit: 6) }
+
+    /// Opens the Focus form, filled from the running session when editing and from the last setup otherwise.
+    func openFocusForm(editing: Bool) {
+        let setup = editing ? (focus.session?.setup ?? config.focus.lastSetup) : config.focus.lastSetup
+        actionTarget = nil
+        showingAppMenu = false
+        actionFeedback = nil
+        let draft = LauncherEntryDraft(kind: editing && focus.isRunning ? .focusEdit : .focus, snapshot: LauncherEntries.Snapshot(config),
+                                       focus: FocusDraft(setup: setup, expected: config.focus))
+        draft.name = setup.goal
+        entryForm = draft
+        focusEntryName()
+    }
+
+    /// Saves the setup as the one new sessions start from. A failure is reported, not fatal: the
+    /// session itself is already running.
+    private func rememberFocusSetup(_ setup: FocusSetup) {
+        var updated = config.focus
+        updated.lastSetup = setup
+        do {
+            try Preferences.updateFocus(updated, expected: config.focus, at: actionConfigURL)
+            config.focus = updated
+        } catch {
+            if let latest = try? JSONDecoder().decode(Preferences.self, from: Data(contentsOf: actionConfigURL)) {
+                var retried = latest.focus
+                retried.lastSetup = setup
+                if (try? Preferences.updateFocus(retried, expected: latest.focus, at: actionConfigURL)) != nil {
+                    config = latest
+                    config.focus = retried
+                    return
+                }
+            }
+            actionFeedback = String(localized: "Couldn’t remember this Focus setup. Check config.json.", comment: "Launcher message when the Focus setup can't be saved")
+        }
+    }
+
+    /// Starts or updates the session from the Focus form, then closes the launcher.
+    private func saveFocus(_ draft: LauncherEntryDraft) -> Bool {
+        guard let form = draft.focus else { return false }
+        let setup = form.setup(goal: draft.name)
+        guard setup.blocksAnything else {
+            draft.error = String(localized: "Add at least one app, website or category to block.", comment: "Focus form error")
+            return false
+        }
+        if draft.kind == .focusEdit, focus.isRunning { focus.edit(setup) } else { focus.start(setup) }
+        rememberFocusSetup(setup)
+        entryForm = nil
+        query = ""
+        searchFocusRequest = UUID()
+        restoreSearchEditor()
+        dismiss()
+        return true
+    }
+
     private func refreshCaffeinateResults() {
         let selectedID = selectedRow?.id
         var commands = CaffeinateCommand.parse(query, keepsDisplayAwake: config.caffeinateKeepsDisplayAwake)
@@ -1846,6 +1953,9 @@ final class LauncherModel: ObservableObject {
             else if command == .newSnippet { openEntryForm(.snippet) }
             else if command == .newQuicklink { openEntryForm(.quicklink) }
             else { query = command.query }
+            return
+        case .focus(let row, _):
+            performFocus(row)
             return
         case .caffeinate(let command):
             let succeeded = caffeinate.perform(command)
@@ -2078,6 +2188,7 @@ final class LauncherModel: ObservableObject {
     @discardableResult
     func saveEntry(_ draft: LauncherEntryDraft) -> Bool {
         guard entryForm === draft else { return false }
+        if draft.kind.isFocus { return saveFocus(draft) }
         do {
             let saved: Preferences
             let search: String
@@ -2091,6 +2202,8 @@ final class LauncherModel: ObservableObject {
                 saved = try LauncherEntries.appendQuicklink(Quicklink(name: draft.name, url: draft.text),
                                                             expected: draft.snapshot, at: actionConfigURL)
                 search = saved.quicklinks.last.map { String($0.name.split(separator: " ").first ?? "") } ?? ""
+            case .focus, .focusEdit:
+                return false
             }
             config = saved
             entryForm = nil

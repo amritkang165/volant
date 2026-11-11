@@ -21,12 +21,13 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
     /// The notes panel, when it exists; a fronted launcher is ordered above it.
     weak var floatingPeer: NSWindow?
 
-    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), positionStore: UserDefaults = .standard, caffeinate: CaffeinateService = CaffeinateService(), preparesWhenHidden: Bool = true, files: FileSearch = FileSearch(), onNote: @escaping (LauncherAction) -> Void) {
+    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), positionStore: UserDefaults = .standard, caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController? = nil, preparesWhenHidden: Bool = true, files: FileSearch = FileSearch(), onNote: @escaping (LauncherAction) -> Void) {
         self.positionStore = positionStore
         self.preparesWhenHidden = preparesWhenHidden
         LauncherPanel.scale = config.appearance.clampedScale
         LauncherPanel.opacity = config.appearance.clampedOpacity
-        model = LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, files: files, onNote: onNote)
+        model = focus.map { LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, focus: $0, files: files, onNote: onNote) }
+            ?? LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, files: files, onNote: onNote)
         super.init(contentRect: NSRect(origin: .zero, size: LauncherPanel.size),
                    styleMask: [.nonactivatingPanel, .borderless, .fullSizeContentView],
                    backing: .buffered, defer: false)
@@ -251,6 +252,15 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
         guard isVisible else { return }
         model.query = ":"
         model.searchFocusRequest = UUID()
+    }
+
+    /// Opens the launcher on the Focus form, to edit the running session or start a new one.
+    func showFocusForm(editing: Bool) {
+        if NSApp.modalWindow != nil { toggle(); return }
+        if !isVisible { toggle() } else { makeKeyAndOrderFront(nil) }
+        guard isVisible else { return }
+        model.query = "focus"
+        model.openFocusForm(editing: editing)
     }
 
     func showAgents() {
