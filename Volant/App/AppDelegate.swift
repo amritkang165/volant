@@ -86,7 +86,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var focusBar = FocusBarPanel(controller: focus, actions: focusActions)
     private lazy var focusReminder = FocusReminderPanel(controller: focus, snoozeMinutes: { [weak self] in self?.config.focus.snoozeMinutes ?? 3 })
     private lazy var focusStatusItem = FocusStatusItem(controller: focus, actions: focusActions)
-    private lazy var panel: LauncherPanel = LauncherPanel(index: index, clipboard: clipboardStore, notes: notesStore, config: config, focus: focus) { [weak self] action in
+    private lazy var breaks = BreakController(preferences: config.breaks)
+    private lazy var breakPresenter = BreakPresenter(controller: breaks)
+    private lazy var panel: LauncherPanel = LauncherPanel(index: index, clipboard: clipboardStore, notes: notesStore, config: config, focus: focus, breaks: breaks) { [weak self] action in
         switch action {
         case .settings: self?.showSettings()
         case .extensionSettings:
@@ -207,6 +209,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         installApplicationMenu()
         installStatusItem()
         startFocus()
+        startBreaks()
         indexObserver = index.$apps.sink { [weak self] apps in self?.settingsPanel.state.apps = apps }
         index.start()
         clipboardMonitor.start()
@@ -280,6 +283,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        breaks.stop()
+        breakPresenter.close()
         panel.model.caffeinate.stop()
         panel.model.restoreDictationVolume()
         clipboardMonitor.stop()
@@ -311,6 +316,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         focusBar.refresh()
         focusStatusItem.refresh()
         _ = focusReminder
+    }
+
+    /// Starts the Break schedule and its windows. A break pauses a running Focus session and resumes
+    /// it afterward; a session the owner had already paused is left paused.
+    private func startBreaks() {
+        breaks.pauseFocus = { [weak self] in
+            guard let self, let session = self.focus.session, !session.isPaused else { return false }
+            self.focus.pause()
+            self.focus.dismissReminder()
+            return true
+        }
+        breaks.resumeFocus = { [weak self] in
+            guard let self, self.focus.session?.isPaused == true else { return }
+            self.focus.resume()
+        }
+        _ = breakPresenter
+        breaks.start()
     }
 
     /// The Toggle Focus Session shortcut: ends the running session, or starts one with the last
@@ -491,6 +513,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         config = loaded
+        breaks.apply(config.breaks)
         if config.dictationOutput == .copy, !config.searchMenuItems, !panel.model.dictationTypesAtCursor { inputHost.disconnect() }
         NSApp.setActivationPolicy(config.showInDock ? .regular : .accessory)
         applyTheme()
