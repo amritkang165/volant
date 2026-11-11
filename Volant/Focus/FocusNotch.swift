@@ -120,8 +120,29 @@ final class FocusNotchPanel: NSPanel {
         let width = open ? max(Self.expandedWidth, notch.width + 2 * Self.wing) : notch.width + 2 * Self.wing
         let height = open ? max(notch.height, host.fittingSize.height) : notch.height
         let frame = NSRect(x: (notch.midX - width / 2).rounded(), y: notch.maxY - height, width: width, height: height)
-        if self.frame != frame { setFrame(frame, display: true) }
-        if !isVisible { orderFrontRegardless() }
+        guard isVisible else {
+            setFrame(frame, display: true)
+            orderFrontRegardless()
+            return
+        }
+        guard self.frame != frame else { return }
+        resize(to: frame, opening: frame.height > self.frame.height)
+    }
+
+    /// Grows the black shape out of the notch, or draws it back in, with the window's frame. The
+    /// content keeps its final layout and is revealed by the growing edge. Reduce Motion resizes at once.
+    private func resize(to frame: NSRect, opening: Bool) {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
+            setFrame(frame, display: true)
+            return
+        }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = opening ? 0.32 : 0.22
+            context.timingFunction = opening ? CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1)
+                                             : CAMediaTimingFunction(name: .easeIn)
+            context.allowsImplicitAnimation = true
+            animator().setFrame(frame, display: true)
+        }
     }
 
     /// Keeps the notch showing a green check for a moment after a session completes.
@@ -159,10 +180,13 @@ struct FocusNotchView: View {
             .frame(height: state.notchHeight)
             if let reminder = controller.reminder {
                 FocusNotchReminder(controller: controller, reminder: reminder, snoozeMinutes: snoozeMinutes)
+                    .transition(reveal)
             } else if state.expanded, controller.isRunning {
                 FocusNotchControls(controller: controller, actions: actions)
+                    .transition(reveal)
             }
         }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: open)
         .frame(maxWidth: .infinity, alignment: .top)
         .background(Color.black, in: UnevenRoundedRectangle(bottomLeadingRadius: open ? 18 : 10, bottomTrailingRadius: open ? 18 : 10))
         .environment(\.colorScheme, .dark)
@@ -172,6 +196,11 @@ struct FocusNotchView: View {
     }
 
     private var open: Bool { state.expanded || controller.reminder != nil }
+    private var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
+    /// Controls fade in while sliding down from under the notch, and fade out on the way back.
+    private var reveal: AnyTransition {
+        reduceMotion ? .opacity : .asymmetric(insertion: .opacity.combined(with: .offset(y: -8)), removal: .opacity)
+    }
     private var completed: Bool { !controller.isRunning && controller.completedAt != nil }
 
     @ViewBuilder private var wingSymbol: some View {
