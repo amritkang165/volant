@@ -53,9 +53,26 @@ Tests: `FocusTests.swift` (`swift test --package-path Core --filter Focus`).
 
 Tests: `FocusControllerTests`, `FocusRowTests`, `FocusDraftTests` and `LauncherFocusTests`. The launcher fixture renders the idle rows, form, running rows, focus bar and reminder in light and dark (`/tmp/volant-core-focus-*`). Fixture renders aren't evidence of hiding a real app, live hotkey delivery, the menu bar item, or behavior across Spaces and full-screen apps. Those need the installed app.
 
-## Still to build
+## Websites (`Volant/Focus/FocusBrowsers.swift`)
 
-**Websites:** browser adapters through Apple Events, sandbox `temporary-exception.apple-events` entries for the supported browsers (also needed in `VolantDev.entitlements`), tab blanking and restore, and per-browser verification in the signed installed app. Website rules can already be added to a setup and are matched by the engine, but nothing enforces them yet, and the copy must not claim website blocking until this ships.
+- **How a tab is checked:** while a session is running, not paused, and blocks websites, `FocusController` asks the frontmost supported browser for its current tab. It asks once a second on the timer and immediately when a browser comes forward, with one check at a time. The answer is dropped if the session changed meanwhile.
+- **How Focus talks to the browser:** Apple Events are built directly (no compiled AppleScript) and sent on a private queue, the same way `SystemEvents.swift` does it:
+  - Chromium browsers: `URL ` of the `acTa` (active tab) of the front window, addressed by window `ID  ` and tab `ID  `.
+  - Safari: `pURL` of the `cTab` (current tab), with the tab addressed by its `pidx`.
+  - Nothing launches a browser. Only the one in front is asked.
+- **What happens to a blocked tab:** a match by `FocusSession.blockingRule` sets the tab to `about:blank` and shows the reminder ("x.com is blocked") from the notch or the reminder panel.
+- **Restoring tabs:** Focus keeps the blanked tab and its address in memory only. It puts the address back if the tab still shows the blank page:
+  - Snooze restores that site's tabs.
+  - Pause, End, Complete and edits that unblock a site restore the affected tabs.
+  - A crash loses the addresses, and those tabs stay blank.
+- **Permissions:** each browser is in `com.apple.security.temporary-exception.apple-events`, in both entitlements files, and `NSAppleEventsUsageDescription` explains the use. macOS asks once per browser. A refusal (`-1743`) stops Focus asking that browser until relaunch.
+- **Browser support:**
+  - **Verified** by the owner in signed Volant Dev on November 11, 2026: Google Chrome (blocking, Snooze restore, End and Pause restore, incognito), Safari, Brave, Brave Origin (`com.brave.Browser.origin`) and Vivaldi.
+  - **Implemented but not verified, not installed on the test Mac:** Microsoft Edge, Arc, Chromium and Safari Technology Preview. Don't list these until each is checked.
+  - **Unsupported:** Firefox, which has no scripting access to tabs.
+- **Limits:** only the front window's current tab is checked, so a blocked site in a background tab is caught when it's selected. A blocked page can show for up to about a second before it's blanked.
+
+Tests: `FocusBrowserTests` (a fake browser: blanking and the reminder, other sites and apps left alone, Snooze, Pause, End and edits restoring tabs, refused browsers not asked again, sessions without websites never asking, and every supported browser holding an Apple Events exception).
 
 ## Privacy rules
 
