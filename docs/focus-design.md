@@ -67,8 +67,7 @@ Tests: `FocusControllerTests`, `FocusRowTests`, `FocusDraftTests` and `LauncherF
   - A crash loses the addresses, and those tabs stay blank.
 - **Permissions:** each browser is in `com.apple.security.temporary-exception.apple-events`, in both entitlements files, and `NSAppleEventsUsageDescription` explains the use. macOS asks once per browser. A refusal (`-1743`) stops Focus asking that browser until relaunch.
 - **Browser support:**
-  - **Verified** by the owner in signed Volant Dev on November 11, 2026: Google Chrome (blocking, Snooze restore, End and Pause restore, incognito), Safari, Brave and Vivaldi.
-  - **Added on the same dictionary but not yet verified:** Brave Origin (`com.brave.Browser.origin`).
+  - **Verified** by the owner in signed Volant Dev on November 11, 2026: Google Chrome (blocking, Snooze restore, End and Pause restore, incognito), Safari, Brave, Brave Origin (`com.brave.Browser.origin`) and Vivaldi.
   - **Implemented but not verified, not installed on the test Mac:** Microsoft Edge, Arc, Chromium and Safari Technology Preview. Don't list these until each is checked.
   - **Unsupported:** Firefox, which has no scripting access to tabs.
 - **Limits:** only the front window's current tab is checked, so a blocked site in a background tab is caught when it's selected. A blocked page can show for up to about a second before it's blanked.
