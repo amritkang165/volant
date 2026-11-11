@@ -4,7 +4,7 @@ import SwiftUI
 import VolantCore
 
 /// The focus bar's menu-bar form: the time left as text in the menu bar, with the session's
-/// controls in a popover. It exists only while a docked session runs.
+/// controls in a popover. It exists only while a session runs with the menu bar placement.
 final class FocusStatusItem {
     private let controller: FocusController
     private let actions: FocusBarActions
@@ -22,7 +22,7 @@ final class FocusStatusItem {
 
     /// Adds, updates or removes the menu bar item to match the session.
     func refresh() {
-        guard controller.isRunning, controller.docked else {
+        guard controller.isRunning, controller.placement == .menuBar else {
             popover?.close()
             if let item { NSStatusBar.system.removeStatusItem(item) }
             item = nil

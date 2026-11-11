@@ -39,7 +39,15 @@ Tests: `FocusTests.swift` (`swift test --package-path Core --filter Focus`).
   - Starting saves the setup as `config.focus.lastSetup` through `Preferences.updateFocus`, retrying once against a newer file.
   - New `focus` queries select their first row; a session change under the same query keeps the selection.
   - `Focus Session` is a core command, and `focus` is reserved in `LauncherRouting`.
-- **Focus bar** (`FocusBarPanel`): a borderless, non-activating floating panel with the goal, the time left, Pause/Resume, Complete and a menu (Edit Session…, Move to Menu Bar, Reset Position, End Session). Its position is remembered and clamped back on screen. Docking hides it and shows `FocusStatusItem` in the menu bar instead: the time as text, with the same controls in a popover. The docked choice is kept in UserDefaults.
+- **Focus bar** (`FocusBarPanel`): a borderless, non-activating floating panel with the goal, the time left, Pause/Resume, Complete and a menu (Edit Session…, Move to Menu Bar, Reset Position, End Session). Its position is remembered and clamped back on screen. Docking hides it and shows `FocusStatusItem` in the menu bar instead: the time as text, with the same controls in a popover. The placement choice is kept in UserDefaults.
+- **Notch** (`FocusNotchPanel`, `Volant/Focus/FocusNotch.swift`): the default placement.
+  - On the screen in use (`NSScreen.main`), when it has a camera notch, the session shows as a black pill around the notch: the Focus symbol in the left wing and the time in the right, each 72 pt wide, so menu bar items beside the notch stay visible.
+  - The notch's position comes from `safeAreaInsets` and `auxiliaryTopLeftArea`/`auxiliaryTopRightArea` (`NotchGeometry`).
+  - Resting the pointer on it for 0.25 s expands it downward into the goal, time and controls. Leaving collapses it after 0.6 s.
+  - Reminders drop out of the notch instead of the reminder panel. The panel still announces them to VoiceOver and closes them after its lifetime.
+  - A completed session shows a green "Done" for 2.5 s.
+  - It joins every Space and full-screen app at status-bar level plus one, and never activates Volant.
+  - On screens without a notch, the placement falls back to the floating bar. The placement (notch, floating bar or menu bar) is picked from the bar's "Show In" menu and kept per-Mac in UserDefaults. An earlier "Move to Menu Bar" choice carries over as the menu bar.
 - **Reminder** (`FocusReminderPanel`): near the top of the screen under the pointer. It shows what was blocked, the goal, Snooze N Minutes and Back to Work, is announced to VoiceOver, and closes itself after 12 seconds.
 - **Settings:** a Focus section in General with the snooze length (1 to 30 minutes). The Toggle Focus Session shortcut (`focusHotKey`, per-Mac, not synced) is in Keyboard Shortcuts. It ends a running session, or starts one with the last setup, opening the form when that setup blocks nothing.
 

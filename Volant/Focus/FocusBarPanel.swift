@@ -13,7 +13,8 @@ final class FocusBarActions {
 /// The small floating bar that shows the goal and the time left while a session runs. It never
 /// activates Volant and becomes key only for its menu, so the owner keeps typing where they were. It can be
 /// dragged anywhere; the position is remembered and clamped back on screen after display changes.
-/// While the bar is docked, the menu bar item shows the time instead and the bar stays hidden.
+/// It shows only while the placement resolves to the floating bar: the notch and menu bar item take
+/// over otherwise.
 final class FocusBarPanel: NSPanel, NSWindowDelegate {
     static let positionKey = "focusBarPosition"
     static let width: CGFloat = 300
@@ -51,9 +52,10 @@ final class FocusBarPanel: NSPanel, NSWindowDelegate {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
-    /// Shows the bar while an undocked session runs and hides it otherwise.
+    /// Shows the bar while a session runs with the floating placement, or the notch placement on a
+    /// screen without a notch, and hides it otherwise.
     func refresh() {
-        guard controller.isRunning, !controller.docked else {
+        guard controller.isRunning, controller.placement.resolved(hasNotch: NotchGeometry.current() != nil) == .floating else {
             if isVisible { orderOut(nil) }
             return
         }
@@ -154,10 +156,11 @@ struct FocusSessionButtons: View {
             iconButton("checkmark", String(localized: "Complete", comment: "Focus button: finish the session as done")) { controller.complete() }
             Menu {
                 Button(String(localized: "Edit Session…", comment: "Focus menu item")) { actions.edit() }
-                Button(controller.docked ? String(localized: "Show Floating Bar", comment: "Focus menu item: move the timer out of the menu bar")
-                                         : String(localized: "Move to Menu Bar", comment: "Focus menu item: show the timer in the menu bar instead")) { controller.docked.toggle() }
+                Picker(String(localized: "Show In", comment: "Focus menu: where the session shows (notch, floating bar or menu bar)"), selection: $controller.placement) {
+                    ForEach(FocusBarPlacement.allCases) { Text($0.title).tag($0) }
+                }
                 Button(String(localized: "Reset Position", comment: "Focus menu item: put the floating bar back in its default place")) { actions.resetPosition() }
-                .disabled(controller.docked)
+                .disabled(controller.placement != .floating)
                 Divider()
                 Button(String(localized: "End Session", comment: "Focus menu item: stop without completing"), role: .destructive) { controller.end() }
             } label: {
