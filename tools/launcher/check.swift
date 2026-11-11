@@ -1241,6 +1241,20 @@ focusBar.appearance = corePanel.appearance
 focusBar.refresh()
 verify(focusBar.isVisible && !focusBar.isKeyWindow, "The focus bar shows for an undocked session without taking focus")
 try renderFocusWindow(focusBar, "focus-bar")
+let fakeScreen = NSScreen.main ?? NSScreen.screens[0]
+let fakeNotch = NSRect(x: fakeScreen.frame.midX - 95, y: fakeScreen.frame.maxY - 32, width: 190, height: 32)
+let focusNotch = FocusNotchPanel(controller: focusFixture, actions: FocusBarActions(), snoozeMinutes: { 3 }, geometry: { (fakeScreen, fakeNotch) })
+focusNotch.appearance = corePanel.appearance
+focusNotch.refresh()
+verify(waitUntil { focusNotch.isVisible } && focusNotch.isShowingSession && !focusNotch.isKeyWindow, "The notch shows the session without taking focus")
+verify(abs(focusNotch.frame.midX - fakeNotch.midX) < 1 && focusNotch.frame.maxY == fakeNotch.maxY && focusNotch.frame.width == fakeNotch.width + 2 * FocusNotchPanel.wing,
+       "The collapsed notch is centered on the notch and only as wide as its wings: \(focusNotch.frame)")
+try renderFocusWindow(focusNotch, "focus-notch")
+focusNotch.state.expanded = true
+verify(waitUntil { focusNotch.frame.height > fakeNotch.height }, "Expanding grows the notch downward")
+try renderFocusWindow(focusNotch, "focus-notch-expanded")
+focusNotch.state.expanded = false
+verify(waitUntil { focusNotch.frame.height == fakeNotch.height }, "Collapsing returns to the notch's height")
 let focusReminder = FocusReminderPanel(controller: focusFixture, snoozeMinutes: { 3 })
 focusReminder.appearance = corePanel.appearance
 var fixtureHidden = 0
@@ -1248,9 +1262,11 @@ focusFixture.handleActivation(bundleIdentifier: "com.example.chat", name: "Chat"
 verify(fixtureHidden == 1 && focusFixture.reminder?.name == "Chat", "A blocked app is hidden and named in the reminder")
 verify(waitUntil { focusReminder.isVisible }, "The reminder appears")
 try renderFocusWindow(focusReminder, "focus-reminder")
+verify(waitUntil { focusNotch.frame.height > fakeNotch.height }, "A reminder drops out of the notch")
+try renderFocusWindow(focusNotch, "focus-notch-reminder")
 focusFixture.dismissReminder()
 focusFixture.end()
-verify(waitUntil { !focusBar.isVisible && !focusReminder.isVisible }, "Ending the session removes the bar and reminder")
+verify(waitUntil { !focusBar.isVisible && !focusReminder.isVisible && !focusNotch.isVisible }, "Ending the session removes the bar, reminder and notch")
 corePanel.model.query = ""
 print("PASS: Focus rows, form, bar and reminder render with a fictional session")
 // Breaks: the launcher rows off and on, the heads-up, the Gentle reminder and countdown, and the

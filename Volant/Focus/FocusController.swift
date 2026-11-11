@@ -20,10 +20,12 @@ final class FocusController: ObservableObject {
     @Published private(set) var now: Date
     @Published private(set) var reminder: FocusReminder?
     @Published private(set) var error: String?
-    /// The focus bar's place: floating over windows, or text in the menu bar.
-    @Published var docked: Bool {
-        didSet { defaults.set(docked, forKey: Self.dockedKey) }
+    /// Where the session shows: around the notch, as a floating bar, or as text in the menu bar.
+    @Published var placement: FocusBarPlacement {
+        didSet { defaults.set(placement.rawValue, forKey: Self.placementKey) }
     }
+    /// When a session last completed, so the notch can show it briefly after the session is gone.
+    @Published private(set) var completedAt: Date?
 
     /// Called when a session completes, by time or by the owner, to celebrate it.
     var onComplete: () -> Void = {}
@@ -37,7 +39,9 @@ final class FocusController: ObservableObject {
     private var timer: Timer?
     private var activationObserver: NSObjectProtocol?
 
-    static let dockedKey = "focusBarDocked"
+    static let placementKey = "focusBarPlacement"
+    /// The earlier on/off choice for the menu bar, read once so an owner who docked keeps the menu bar.
+    static let legacyDockedKey = "focusBarDocked"
     static var defaultStateURL: URL { Preferences.supportDirectory.appendingPathComponent("focus-session.json") }
 
     init(stateURL: URL = FocusController.defaultStateURL, defaults: UserDefaults = .standard, clock: @escaping () -> Date = Date.init,
@@ -51,7 +55,8 @@ final class FocusController: ObservableObject {
         self.frontmost = frontmost
         self.automaticTimer = automaticTimer
         now = clock()
-        docked = defaults.bool(forKey: Self.dockedKey)
+        placement = defaults.string(forKey: Self.placementKey).flatMap(FocusBarPlacement.init(rawValue:))
+            ?? (defaults.bool(forKey: Self.legacyDockedKey) ? .menuBar : .notch)
         if restore { restoreSavedSession() }
     }
 
@@ -87,6 +92,7 @@ final class FocusController: ObservableObject {
     /// Ends the session as done and celebrates it.
     func complete() {
         guard session != nil else { return }
+        completedAt = clock()
         finish()
         onComplete()
     }

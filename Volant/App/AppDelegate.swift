@@ -86,6 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var focusBar = FocusBarPanel(controller: focus, actions: focusActions)
     private lazy var focusReminder = FocusReminderPanel(controller: focus, snoozeMinutes: { [weak self] in self?.config.focus.snoozeMinutes ?? 3 })
     private lazy var focusStatusItem = FocusStatusItem(controller: focus, actions: focusActions)
+    private lazy var focusNotch = FocusNotchPanel(controller: focus, actions: focusActions, snoozeMinutes: { [weak self] in self?.config.focus.snoozeMinutes ?? 3 })
     private lazy var breaks = BreakController(preferences: config.breaks)
     private lazy var breakPresenter = BreakPresenter(controller: breaks)
     private lazy var panel: LauncherPanel = LauncherPanel(index: index, clipboard: clipboardStore, notes: notesStore, config: config, focus: focus, breaks: breaks) { [weak self] action in
@@ -315,7 +316,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         focusActions.resetPosition = { [weak self] in self?.focusBar.resetPosition() }
         focusBar.refresh()
         focusStatusItem.refresh()
-        _ = focusReminder
+        focusNotch.refresh()
+        focusReminder.shownElsewhere = { [weak self] in self?.focusNotch.isShowingSession == true }
     }
 
     /// Starts the Break schedule and its windows. A break pauses a running Focus session and resumes

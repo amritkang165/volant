@@ -107,9 +107,45 @@ final class FocusControllerTests: XCTestCase {
         XCTAssertEqual(FocusController.clockText(3_725), "1:02:05")
     }
 
-    func testDockedChoiceIsRemembered() {
-        controller().docked = true
-        XCTAssertTrue(controller().docked)
+    func testPlacementIsRememberedAndAnEarlierDockedChoiceKeepsTheMenuBar() {
+        XCTAssertEqual(controller().placement, .notch)
+        controller().placement = .floating
+        XCTAssertEqual(controller().placement, .floating)
+        let legacy = UserDefaults(suiteName: "focus-legacy-" + UUID().uuidString)!
+        legacy.set(true, forKey: FocusController.legacyDockedKey)
+        defaults = legacy
+        XCTAssertEqual(controller().placement, .menuBar)
+    }
+
+    func testCompletionIsRecordedForTheNotch() {
+        let focus = controller()
+        focus.start(setup)
+        focus.end()
+        XCTAssertNil(focus.completedAt)
+        focus.start(setup)
+        focus.complete()
+        XCTAssertEqual(focus.completedAt, now)
+    }
+}
+
+final class FocusNotchTests: XCTestCase {
+    func testNotchSitsBetweenTheAreasBesideIt() {
+        let frame = NSRect(x: 0, y: 0, width: 1512, height: 982)
+        let notch = NotchGeometry.notch(frame: frame, topInset: 32, left: NSRect(x: 0, y: 950, width: 661, height: 32),
+                                        right: NSRect(x: 851, y: 950, width: 661, height: 32))
+        XCTAssertEqual(notch, NSRect(x: 661, y: 950, width: 190, height: 32))
+    }
+
+    func testScreensWithoutANotchHaveNone() {
+        let frame = NSRect(x: 0, y: 0, width: 2560, height: 1440)
+        XCTAssertNil(NotchGeometry.notch(frame: frame, topInset: 0, left: nil, right: nil))
+        XCTAssertNil(NotchGeometry.notch(frame: frame, topInset: 32, left: .zero, right: .zero))
+    }
+
+    func testNotchPlacementFallsBackToTheFloatingBar() {
+        XCTAssertEqual(FocusBarPlacement.notch.resolved(hasNotch: true), .notch)
+        XCTAssertEqual(FocusBarPlacement.notch.resolved(hasNotch: false), .floating)
+        XCTAssertEqual(FocusBarPlacement.menuBar.resolved(hasNotch: true), .menuBar)
     }
 }
 

@@ -14,6 +14,9 @@ final class FocusReminderPanel: NSPanel {
     private var subscription: AnyCancellable?
     private var shownID: UUID?
     private var expiry: DispatchWorkItem?
+    /// Whether another surface, the notch, shows reminders right now; the panel then stays hidden
+    /// but still closes the reminder after its lifetime.
+    var shownElsewhere: () -> Bool = { false }
 
     init(controller: FocusController, snoozeMinutes: @escaping () -> Int) {
         self.controller = controller
@@ -47,17 +50,22 @@ final class FocusReminderPanel: NSPanel {
         }
         guard reminder.id != shownID else { return }
         shownID = reminder.id
+        scheduleExpiry(for: reminder.id)
+        NSAccessibility.post(element: NSApp as Any, notification: .announcementRequested,
+                             userInfo: [.announcement: String(localized: "\(reminder.name, format: .verbatim) is blocked during your focus session.", comment: "VoiceOver announcement when Focus blocks an app or site"),
+                                        .priority: NSAccessibilityPriorityLevel.high.rawValue])
+        guard !shownElsewhere() else { return }
         host.layoutSubtreeIfNeeded()
         let size = NSSize(width: Self.width, height: max(100, host.fittingSize.height))
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let visible = screen?.visibleFrame ?? .zero
         setFrame(NSRect(x: (visible.midX - size.width / 2).rounded(), y: (visible.maxY - size.height - 80).rounded(), width: size.width, height: size.height), display: true)
         orderFrontRegardless()
-        NSAccessibility.post(element: self, notification: .announcementRequested,
-                             userInfo: [.announcement: String(localized: "\(reminder.name, format: .verbatim) is blocked during your focus session.", comment: "VoiceOver announcement when Focus blocks an app or site"),
-                                        .priority: NSAccessibilityPriorityLevel.high.rawValue])
+    }
+
+    /// Closes the reminder after its lifetime unless a newer one replaced it.
+    private func scheduleExpiry(for id: UUID) {
         expiry?.cancel()
-        let id = reminder.id
         let work = DispatchWorkItem { [weak self] in
             guard let self, self.controller.reminder?.id == id else { return }
             self.controller.dismissReminder()
