@@ -2,7 +2,7 @@ import Foundation
 
 /// Discoverable entry points. Data rows keep their own identity and aren't branded as apps.
 public enum CoreCommand: String, CaseIterable, Hashable {
-    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, colorPicker, camera, newSnippet, newQuicklink, catalog, menuItems
+    case define, translate, caffeinate, emoji, notes, clipboard, contacts, files, shortcuts, agents, servers, ai, talk, confetti, wifi, bluetooth, audio, colorPicker, camera, newSnippet, newQuicklink, catalog, menuItems, focus
     /// The command's name in the launcher, translated in the Core table.
     public var titleResource: LocalizedStringResource {
         switch self {
@@ -29,6 +29,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .newQuicklink: return LocalizedStringResource("Create Quicklink", table: "Core", comment: "Launcher command name")
         case .catalog: return LocalizedStringResource("Extension Catalog", table: "Core", comment: "Launcher command name")
         case .menuItems: return LocalizedStringResource("Search Menu Items", table: "Core", comment: "Launcher command name: search the menu bar of the app that was in front")
+        case .focus: return LocalizedStringResource("Focus Session", table: "Core", comment: "Launcher command name: start or control a session that blocks distracting apps and websites")
         }
     }
     public var query: String {
@@ -68,6 +69,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .newQuicklink: return "link.badge.plus"
         case .catalog: return "puzzlepiece.extension"
         case .menuItems: return "filemenu.and.selection"
+        case .focus: return "target"
         }
     }
     /// The command's one-line description, translated in the Core table.
@@ -88,6 +90,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .contacts: return LocalizedStringResource("Find people in your Contacts", table: "Core", comment: "Launcher command description, shown under its name")
         case .files: return LocalizedStringResource("Find files on your Mac", table: "Core", comment: "Launcher command description, shown under its name")
         case .menuItems: return LocalizedStringResource("Find and choose a menu command in the app you were using", table: "Core", comment: "Launcher command description, shown under its name")
+        case .focus: return LocalizedStringResource("Block distracting apps and websites while you work", table: "Core", comment: "Launcher command description, shown under its name")
         default: return LocalizedStringResource("Built into Volant", table: "Core", comment: "Launcher command description, shown under its name")
         }
     }
@@ -113,6 +116,7 @@ public enum CoreCommand: String, CaseIterable, Hashable {
         case .camera: return "webcam | facetime camera | mirror | open camera"
         case .newSnippet: return LauncherRouting.snippetCreatePhrases.sorted().joined(separator: " | ")
         case .newQuicklink: return LauncherRouting.quicklinkCreatePhrases.sorted().joined(separator: " | ") + " | new link"
+        case .focus: return "start focus session | toggle focus session | block apps | block websites | distractions | pomodoro"
         default: return ""
         }
     }

@@ -1210,6 +1210,49 @@ verify(!awake.isActive && power.released == 1, "Return stops a Caffeinate sessio
 corePanel.model.query = "caffeinate nonsense"
 verify(corePanel.model.rows.isEmpty && corePanel.model.notice != nil)
 try renderCore("invalid")
+// Focus: idle rows, the setup form, running controls, the floating bar and a blocked-app reminder,
+// all with a fictional session that is never saved and an app that is never really hidden.
+corePanel.model.query = "focus"
+verify(waitUntil { corePanel.model.rows.map(\.id) == ["focus:set-up", "focus:start:-:"] }, "Idle Focus offers setup and the last setup")
+try renderCore("focus-idle")
+sendCoreKey("\r", code: 36)
+verify(waitUntil { corePanel.model.entryForm?.kind == .focus }, "Return on Start Focus Session opens the form")
+corePanel.model.entryForm?.name = "Write the launch post"
+corePanel.model.entryForm?.focus?.add(.app(bundleIdentifier: "com.example.chat", name: "Chat"))
+corePanel.model.entryForm?.focus?.add(.website("news.example.com"))
+try renderCore("focus-form")
+corePanel.model.cancelEntryForm()
+let focusFixture = corePanel.model.focus
+focusFixture.start(FocusSetup(goal: "Write the launch post", minutes: 25, apps: ["com.example.chat"], websites: ["news.example.com"], categories: [.social]))
+corePanel.model.query = "focus "
+verify(waitUntil { corePanel.model.rows.map(\.id) == ["focus:pause", "focus:complete", "focus:edit", "focus:end"] }, "A running session offers its controls")
+try renderCore("focus-running")
+/// Renders a Focus window's content where the UI VM runner collects launcher captures.
+func renderFocusWindow(_ window: NSWindow, _ name: String) throws {
+    RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+    let view = window.contentView!
+    view.layoutSubtreeIfNeeded()
+    let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
+    view.cacheDisplay(in: view.bounds, to: bitmap)
+    try bitmap.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: "/tmp/volant-core-\(name)-\(dark ? "dark" : "light").png"))
+}
+let focusBar = FocusBarPanel(controller: focusFixture, actions: FocusBarActions(), positions: positionDefaults)
+focusBar.appearance = corePanel.appearance
+focusBar.refresh()
+verify(focusBar.isVisible && !focusBar.isKeyWindow, "The focus bar shows for an undocked session without taking focus")
+try renderFocusWindow(focusBar, "focus-bar")
+let focusReminder = FocusReminderPanel(controller: focusFixture, snoozeMinutes: { 3 })
+focusReminder.appearance = corePanel.appearance
+var fixtureHidden = 0
+focusFixture.handleActivation(bundleIdentifier: "com.example.chat", name: "Chat") { fixtureHidden += 1; return true }
+verify(fixtureHidden == 1 && focusFixture.reminder?.name == "Chat", "A blocked app is hidden and named in the reminder")
+verify(waitUntil { focusReminder.isVisible }, "The reminder appears")
+try renderFocusWindow(focusReminder, "focus-reminder")
+focusFixture.dismissReminder()
+focusFixture.end()
+verify(waitUntil { !focusBar.isVisible && !focusReminder.isVisible }, "Ending the session removes the bar and reminder")
+corePanel.model.query = ""
+print("PASS: Focus rows, form, bar and reminder render with a fictional session")
 /// Describes the emoji grid's keyboard state for failure messages.
 func emojiGridState() -> String {
     "selection=\(corePanel.model.selection), rows=\(corePanel.model.rows.count), query=\(corePanel.model.query), key=\(corePanel.isKeyWindow), responder=\(String(describing: corePanel.firstResponder)), delegate=\(String(describing: (corePanel.firstResponder as? NSTextView)?.delegate)), placeholder=\(String(describing: ((corePanel.firstResponder as? NSTextView)?.delegate as? NSTextField)?.placeholderString))"

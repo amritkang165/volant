@@ -81,7 +81,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.floatingPeer = notes
         return notes
     }()
-    private lazy var panel: LauncherPanel = LauncherPanel(index: index, clipboard: clipboardStore, notes: notesStore, config: config) { [weak self] action in
+    private let focus = FocusController()
+    private let focusActions = FocusBarActions()
+    private lazy var focusBar = FocusBarPanel(controller: focus, actions: focusActions)
+    private lazy var focusReminder = FocusReminderPanel(controller: focus, snoozeMinutes: { [weak self] in self?.config.focus.snoozeMinutes ?? 3 })
+    private lazy var focusStatusItem = FocusStatusItem(controller: focus, actions: focusActions)
+    private lazy var panel: LauncherPanel = LauncherPanel(index: index, clipboard: clipboardStore, notes: notesStore, config: config, focus: focus) { [weak self] action in
         switch action {
         case .settings: self?.showSettings()
         case .extensionSettings:
@@ -201,6 +206,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updater.start()
         installApplicationMenu()
         installStatusItem()
+        startFocus()
         indexObserver = index.$apps.sink { [weak self] apps in self?.settingsPanel.state.apps = apps }
         index.start()
         clipboardMonitor.start()
@@ -296,6 +302,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = item
     }
 
+    /// Creates the focus bar, reminder and menu bar item, which follow the controller from then on,
+    /// and celebrates completed sessions.
+    private func startFocus() {
+        focus.onComplete = { ConfettiWindow.celebrate() }
+        focusActions.edit = { [weak self] in self?.panel.showFocusForm(editing: true) }
+        focusActions.resetPosition = { [weak self] in self?.focusBar.resetPosition() }
+        focusBar.refresh()
+        focusStatusItem.refresh()
+        _ = focusReminder
+    }
+
+    /// The Toggle Focus Session shortcut: ends the running session, or starts one with the last
+    /// setup, opening the form instead when that setup blocks nothing.
+    private func toggleFocus() {
+        if focus.isRunning { focus.end(); return }
+        let setup = config.focus.lastSetup
+        guard setup.blocksAnything else { panel.showFocusForm(editing: false); return }
+        focus.start(setup)
+    }
+
     private func registerHotKeys() {
         updateDictationEscape(listening: false)
         HotKeyCenter.shared.unregisterAll()
@@ -323,6 +349,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }, onRelease: { [weak self] in
                 self?.endDictationFromHotkey()
             }) == nil { failures.append(String(localized: "Dictate Text shortcut unavailable: \(KeyCombo.display(config.talkHotKey))", comment: "Settings error when a global shortcut can't be registered; the value is the key combination")) }
+        }
+        if let combo = KeyCombo(parsing: config.focusHotKey) {
+            if HotKeyCenter.shared.register(combo, handler: { [weak self] in self?.toggleFocus() }) == nil {
+                failures.append(String(localized: "Toggle Focus Session shortcut unavailable: \(KeyCombo.display(config.focusHotKey))", comment: "Settings error when a global shortcut can't be registered; the value is the key combination"))
+            }
         }
         for (value, action) in [(config.lockScreenHotKey, SystemAction.lockScreen), (config.sleepDisplaysHotKey, .sleepDisplays)] {
             guard let combo = KeyCombo(parsing: value) else { continue }

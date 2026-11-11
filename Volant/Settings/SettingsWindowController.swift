@@ -245,6 +245,7 @@ private struct SettingsView: View {
             } header: {
                 Text("Caffeinate")
             }
+            FocusSettingsSection(config: state.config, configURL: configURL, apply: apply)
             MenuItemsSettingsSection(config: state.config, access: menuItemsAccess, apply: apply, configURL: configURL)
         }
         .formStyle(.settings)
@@ -261,6 +262,7 @@ private struct SettingsView: View {
                 GlobalShortcutRow(title: String(localized: "Dictate Text", comment: "Keyboard Shortcuts settings row"), key: "talkHotKey", value: state.config.talkHotKey, configURL: configURL, onChange: onChange)
                 GlobalShortcutRow(title: String(localized: "Lock Screen", comment: "Keyboard Shortcuts settings row"), key: "lockScreenHotKey", value: state.config.lockScreenHotKey, configURL: configURL, onChange: onChange)
                 GlobalShortcutRow(title: String(localized: "Sleep Displays", comment: "Keyboard Shortcuts settings row"), key: "sleepDisplaysHotKey", value: state.config.sleepDisplaysHotKey, configURL: configURL, onChange: onChange)
+                GlobalShortcutRow(title: String(localized: "Toggle Focus Session", comment: "Keyboard Shortcuts settings row: start a Focus session with the last setup, or end the running one"), key: "focusHotKey", value: state.config.focusHotKey, configURL: configURL, onChange: onChange)
             } footer: {
                 SettingsFooter(String(localized: "Click a shortcut and press a new combination; it saves immediately. Hold Dictate Text while you speak, or tap it to start and again to stop."))
             }

@@ -26,10 +26,28 @@ Focus helps the owner stay on one task: a goal, a duration, and the apps and web
 
 Tests: `FocusTests.swift` (`swift test --package-path Core --filter Focus`).
 
+## App (`Volant/Focus`)
+
+- **`FocusController`** owns the running session.
+  - It saves the session to `focus-session.json` in the support folder after every change and restores it on launch, unless it has already run out.
+  - While a session runs, it ticks once a second and observes app activation. A blocked app is hidden with `NSRunningApplication.hide()`, never quit, and a reminder is published.
+  - The clock, state file, frontmost-app lookup and hiding are injected for tests.
+  - Completing a session, by time or by the owner, throws confetti. Ending it doesn't.
+- **Launcher:**
+  - `focus` lists Start Focus Session… and Start with Last Setup while idle, and Pause/Resume, Complete, Edit and End while a session runs. `focus 25m goal` starts at once with the remembered block list.
+  - The form reuses the snippet and quicklink entry form (`LauncherEntryKind.focus` and `.focusEdit`). The goal is the name field, plus a length menu and the block list as chips with an add field suggesting categories, installed apps and typed websites.
+  - Starting saves the setup as `config.focus.lastSetup` through `Preferences.updateFocus`, retrying once against a newer file.
+  - New `focus` queries select their first row; a session change under the same query keeps the selection.
+  - `Focus Session` is a core command, and `focus` is reserved in `LauncherRouting`.
+- **Focus bar** (`FocusBarPanel`): a borderless, non-activating floating panel with the goal, the time left, Pause/Resume, Complete and a menu (Edit Session…, Move to Menu Bar, Reset Position, End Session). Its position is remembered and clamped back on screen. Docking hides it and shows `FocusStatusItem` in the menu bar instead: the time as text, with the same controls in a popover. The docked choice is kept in UserDefaults.
+- **Reminder** (`FocusReminderPanel`): near the top of the screen under the pointer. It shows what was blocked, the goal, Snooze N Minutes and Back to Work, is announced to VoiceOver, and closes itself after 12 seconds.
+- **Settings:** a Focus section in General with the snooze length (1 to 30 minutes). The Toggle Focus Session shortcut (`focusHotKey`, per-Mac, not synced) is in Keyboard Shortcuts. It ends a running session, or starts one with the last setup, opening the form when that setup blocks nothing.
+
+Tests: `FocusControllerTests`, `FocusRowTests`, `FocusDraftTests` and `LauncherFocusTests`. The launcher fixture renders the idle rows, form, running rows, focus bar and reminder in light and dark (`/tmp/volant-core-focus-*`). Fixture renders aren't evidence of hiding a real app, live hotkey delivery, the menu bar item, or behavior across Spaces and full-screen apps. Those need the installed app.
+
 ## Still to build
 
-1. **App:** launcher rows and the setup form, the floating focus bar (move to the menu bar, reset position), app hiding and the reminder panel, the completion animation, Settings (snooze length, Toggle Focus Session hotkey), relaunch restore, and reserving `focus` in `LauncherRouting`. Native fixtures in light and dark.
-2. **Websites:** browser adapters through Apple Events, sandbox `temporary-exception.apple-events` entries for the supported browsers (also needed in `VolantDev.entitlements`), tab blanking and restore, and per-browser verification in the signed installed app.
+**Websites:** browser adapters through Apple Events, sandbox `temporary-exception.apple-events` entries for the supported browsers (also needed in `VolantDev.entitlements`), tab blanking and restore, and per-browser verification in the signed installed app. Website rules can already be added to a setup and are matched by the engine, but nothing enforces them yet, and the copy must not claim website blocking until this ships.
 
 ## Privacy rules
 
