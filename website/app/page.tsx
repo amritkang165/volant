@@ -10,6 +10,7 @@ import {
   Search,
   Calculator,
   Clipboard,
+  Target,
   FileText,
   Code2,
   SlidersHorizontal,
@@ -45,7 +46,7 @@ const questions = [
   ],
   [
     'Are all the features here in the download?',
-    `Yes. Everything on this page is in the current download, Volant ${appVersion}, including the expanded calculator, color themes and theme import, the system commands, and iCloud settings sync.`,
+    `Yes. Everything on this page is in the current download, Volant ${appVersion}, including Focus with app and website blocking, Breaks, the expanded calculator, color themes and theme import, the system commands, and iCloud settings sync.`,
   ],
   [
     'Does it work with Shortcuts?',
@@ -81,6 +82,14 @@ const benefits = [
     text: 'Find that thing you copied. Jot down a Markdown note. Reuse a snippet instead of typing it again.',
     link: '/docs/clipboard-and-snippets',
     label: 'Explore clipboard & snippets',
+  },
+  {
+    id: 'focus',
+    icon: Target,
+    title: 'Keep distractions out of reach.',
+    text: 'New in 0.4.0: Focus hides distracting apps and blanks blocked sites in Safari, Chrome, Brave and Vivaldi. Breaks reminds you to step away.',
+    link: '/docs/focus-and-breaks',
+    label: 'Explore Focus & Breaks',
   },
 ];
 

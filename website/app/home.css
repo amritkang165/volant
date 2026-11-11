@@ -220,7 +220,7 @@
 }
 .home-benefit-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 35px;
   margin-top: 35px;
 }
@@ -391,6 +391,9 @@
 @media (max-width: 1000px) {
   .home-refresh .nav nav {
     gap: 15px;
+  }
+  .home-benefit-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   .home-hero {
     gap: 24px;
