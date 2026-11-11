@@ -663,7 +663,7 @@ private struct RowView: View {
         case .agents: return String(localized: "Find Herdr sessions and focus a pane", comment: "Launcher row subtitle for Open Agents")
         case .extensionUpdates(let names): return names
         case .appleShortcut, .calculation, .app: return nil
-        case .file(let f): return f.url.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
+        case .file(let f): return f.url.deletingLastPathComponent().path.replacingOccurrences(of: UserHome.path, with: "~")
         case .contact(let c): return c.email ?? c.phone ?? (c.organization.isEmpty ? nil : c.organization)
         case .event(let e):
             return e.isAllDay ? String(localized: "All day", comment: "Calendar event row subtitle") : "\(e.start.formatted(date: .omitted, time: .shortened)) – \(e.end.formatted(date: .omitted, time: .shortened))"

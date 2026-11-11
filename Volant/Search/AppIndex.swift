@@ -41,13 +41,18 @@ final class AppIndex: NSObject {
         return search(target, limit: 1).first
     }
 
-    static let applicationRoots: [String] = {
+    /// The application folders, including the owner's `~/Applications`, where JetBrains Toolbox,
+    /// browser web apps and per-user installers put apps. It comes from `UserHome`: in the sandbox
+    /// `NSHomeDirectory()` is the container, whose `Applications` folder never exists (#392).
+    static let applicationRoots: [String] = roots(home: UserHome.path)
+
+    static func roots(home: String) -> [String] {
         var roots = ["/Applications/", "/System/Applications/", "/System/Applications/Utilities/", "/Applications/Utilities/",
                      "/System/Library/CoreServices/Applications/"]
-        roots.append(NSHomeDirectory() + "/Applications/")
-        if let real = try? FileManager.default.destinationOfSymbolicLink(atPath: NSHomeDirectory()) { roots.append(real + "/Applications/") }
+        roots.append(home + "/Applications/")
+        if let real = try? FileManager.default.destinationOfSymbolicLink(atPath: home) { roots.append(real + "/Applications/") }
         return roots
-    }()
+    }
 
     /// Folders the Spotlight query searches: the application folders plus CoreServices for Finder.
     /// A whole-computer scope also waits on every mounted volume, and one slow mount (a network
