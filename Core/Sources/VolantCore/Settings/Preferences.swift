@@ -44,6 +44,7 @@ public struct Preferences: Codable {
     /// Accessibility.
     public var searchMenuItems: Bool = false
     public var statusBar = StatusBarConfiguration()
+    public var focus = FocusPreferences()
     // Compatibility for existing callers and older configuration files.
     public var promotedHarness: String? {
         get { statusBar.sources.contains("herdr") ? statusBar.herdrFilter : nil }
@@ -61,7 +62,7 @@ public struct Preferences: Codable {
     public var help: String = "Edit and choose Reload Configuration in Settings. Hotkeys: cmd|ctrl|option|shift|meh|hyper + key. App hotkeys use the bundle identifier. Snippets: {date} {isodate} {time} {datetime} {clipboard} {uuid}. Quicklinks: {query}. Aliases map a word to an app name or query. Appearance: theme system|light|dark, colorTheme system|volant|catppuccin-mocha|nord|…|custom-<name> (named themes set their own light or dark; customThemes holds imported Raycast themes), scale 0.8–1.4, opacity 0.5–1.0."
 
     public enum CodingKeys: String, CodingKey {
-        case favoriteApps, summonHotKey, notesHotKey, emojiHotKey, talkHotKey, lockScreenHotKey, sleepDisplaysHotKey, appHotKeys, clipboardRetention, showOnLaunch, showInDock, caffeinateKeepsDisplayAwake, dictationLowersVolume, dictationOutput, dictationTypesWhileSpeaking, dictationRemovesFillers, dictationPlaysSounds, dictationVocabulary, dictationFixesCloseMatches, fileSearchUsesFSearch, syncSettingsWithICloud, rexPanePreviews, extensionUpdateChecks, searchMenuItems, statusBar, snippets, quicklinks, aliases, appearance
+        case favoriteApps, summonHotKey, notesHotKey, emojiHotKey, talkHotKey, lockScreenHotKey, sleepDisplaysHotKey, appHotKeys, clipboardRetention, showOnLaunch, showInDock, caffeinateKeepsDisplayAwake, dictationLowersVolume, dictationOutput, dictationTypesWhileSpeaking, dictationRemovesFillers, dictationPlaysSounds, dictationVocabulary, dictationFixesCloseMatches, fileSearchUsesFSearch, syncSettingsWithICloud, rexPanePreviews, extensionUpdateChecks, searchMenuItems, statusBar, focus, snippets, quicklinks, aliases, appearance
         case help = "_help"
     }
 
@@ -111,6 +112,7 @@ public struct Preferences: Codable {
             if let id = try legacy.decodeIfPresent(String.self, forKey: .promotedHarness), Self.harnessOptions.contains(where: { $0.id == id }) { promotedHarness = id }
         }
         if !Self.harnessOptions.contains(where: { $0.id == statusBar.herdrFilter }) { statusBar.herdrFilter = "all" }
+        focus = (try? c.decodeIfPresent(FocusPreferences.self, forKey: .focus)) ?? d.focus
         snippets = try c.decodeIfPresent([Snippet].self, forKey: .snippets) ?? d.snippets
         quicklinks = try c.decodeIfPresent([Quicklink].self, forKey: .quicklinks) ?? d.quicklinks
         favoriteApps = try c.decodeIfPresent([String].self, forKey: .favoriteApps) ?? []
@@ -142,6 +144,25 @@ public struct Preferences: Codable {
             throw CocoaError(.fileReadCorruptFile)
         }
         object["dictationOutput"] = output.rawValue
+        let updated = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
+        _ = try JSONDecoder().decode(Preferences.self, from: updated)
+        try updated.write(to: url, options: .atomic)
+    }
+
+    /// Replace the Focus settings against an expected snapshot, keeping unknown keys inside the
+    /// `focus` block and everywhere else, so an edit made from a stale copy is refused.
+    public static func updateFocus(_ focus: FocusPreferences, expected: FocusPreferences, at url: URL = configURL) throws {
+        let data = try Data(contentsOf: url)
+        guard var object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        guard try JSONDecoder().decode(Preferences.self, from: data).focus == expected else {
+            throw CocoaError(.fileWriteFileExists)
+        }
+        var block = object["focus"] as? [String: Any] ?? [:]
+        let encoded = try JSONSerialization.jsonObject(with: JSONEncoder().encode(focus)) as? [String: Any] ?? [:]
+        block.merge(encoded) { _, new in new }
+        object["focus"] = block
         let updated = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
         _ = try JSONDecoder().decode(Preferences.self, from: updated)
         try updated.write(to: url, options: .atomic)

@@ -1,26 +1,38 @@
-# Native Focus sessions: feasibility and next steps
+# Focus sessions
 
-Raycast's [Focus feature](https://www.raycast.com/core-features/focus) combines a goal and duration, app/site block lists, pause and per-item snooze, editable sessions, and a floating timer. It advertises browser support without an extension and restoration of tabs. This is a behavioral reference, not evidence of how Raycast implements blocking. No implementation was copied.
+Focus helps the owner stay on one task: a goal, a duration, and the apps and websites to keep out of reach until the session ends. Raycast's [Focus](https://www.raycast.com/core-features/focus) and its [walkthrough](https://www.youtube.com/watch?v=NZwqx_dS-k0) are the behavioral reference; no implementation is copied. The full product spec and delivery plan are in issue #16.
 
-Volant can own goal/timer state, reusable preferences, pause/resume/end commands, and a movable compact status panel. Focus and Caffeinate should remain independent; a Focus session must not silently keep a computer awake. A timer alone must not be marketed as distraction blocking or as macOS Focus/Do Not Disturb integration.
+## Decisions
 
-## Implementation sequence
+- **Apps are hidden, never quit.** When a blocked app comes forward, Volant hides it and shows a reminder with the goal, Snooze and Back to Work. This needs no permission and loses no work.
+- **Websites are blocked by asking the browser** (owner's decision, November 11, 2026). While a session runs, Volant asks the frontmost supported browser for its active tab's address through Apple Events. It swaps a blocked tab for a blank page and restores it on Snooze, Pause, Complete or End. macOS asks once per browser for Automation consent, on first use. Safari and the Chromium browsers (Chrome, Arc, Brave, Edge, Vivaldi, Chromium) are candidates; each is listed only after it's verified in the signed app. Firefox can't report tab addresses to scripts and is unsupported.
+- **Rejected for now:**
+  - Reading the address bar through Accessibility in the input helper. It would cover Firefox, but it breaks that helper's rule of never reading window text.
+  - A Network Extension content filter. It needs a system extension, can't restore tabs, and its macOS 26 URL filter can't serve the macOS 15 baseline.
+  - Hosts-file edits and quitting apps. Never.
+- **Focus is not Caffeinate and not macOS Focus.** A session doesn't keep the Mac awake or silence notifications, and the copy never claims either.
 
-1. Session engine and launcher controls: one goal, bounded duration, pause/resume/end, explicit completion, optional compact timer, and state recovery that asks before restoring a session. Fake-clock tests cover sleep/wake, expiration, cancellation and stale callbacks. No browsing history in saved state.
-2. Opt-in app deterrence: investigate workspace activation observation and a non-destructive reminder for selected app bundle IDs. Never terminate apps, discard documents, or promise launch prevention from observing an app after activation. Validate signed sandbox behavior before claiming support. Use fictional apps for automated tests.
-3. Browser blocking spike: prove one supported browser before shipping a broad browser-support claim. Evaluate a browser extension for precise tab/domain matching and per-site snooze against a macOS Network Extension system extension for network filtering. Safari content blockers are another browser-specific option, with declarative rules but no browsing history visibility. Existing loaded pages and network requests are different concerns.
+## Engine (VolantCore, `Core/Sources/VolantCore/Focus`)
 
-Apple's [Network Extension deployment guide](https://developer.apple.com/documentation/technotes/tn3134-network-extension-provider-deployment) supports content-filter system extensions on macOS 10.15+. Direct Developer ID distribution is supported; packaging, signing, entitlements, activation and user approval need separate verification. The newer URL filter provider requires macOS 26, so it cannot be the only implementation for Volant's macOS 15 baseline. Do not assume iOS Screen Time APIs are a drop-in Mac blocker.
+- `FocusSetup`: goal, minutes (nil runs until ended, at most 12 hours), apps by bundle identifier, website rules and categories. Decoding drops unknown categories and invalid rules instead of failing.
+- `FocusCategory`: Social Media, News, Video and Streaming, Shopping, Messaging and Mail, each with website rules and Mac apps. Amazon is listed as `www.amazon.com` so AWS stays reachable.
+- `FocusHost`: rules come from what the owner types (`https://www.x.com/home` becomes `x.com`). A rule matches its host and subdomains, never a host that merely contains it. Internationalized names compare in their Punycode form. Only http and https pages have hosts.
+- `FocusSession`: start, pause, resume, edit, snooze, finish, all taking the current time, so the app drives it from the real clock and tests from a fixed one.
+  - A new length counts from the start, not counting time spent paused.
+  - Volant, the Finder, the Dock, System Settings, loginwindow and SecurityAgent are never hidden.
+  - `nextChange(after:)` tells the app when a session or snooze ends without the owner doing anything. The session is Codable, so it survives relaunch.
+- `FocusCommand`: the `focus` launcher query handles `focus`, `focus 25m goal`, `focus 1h30m`, and `pause`, `resume`, `complete`/`done`, `end`/`stop`, and `edit`.
+- `Preferences.focus`: the setup new sessions start from and the snooze length (3 minutes by default, 1 to 30). It's patched by `Preferences.updateFocus` against an expected snapshot, keeping unknown keys. It's per-Mac and not in `SettingsSync.keys`.
 
-[Safari content blockers](https://developer.apple.com/documentation/safariservices/creating-a-content-blocker) supply compiled blocking rules rather than observing browsing history. They alone don't provide cross-browser tab restoration. An Accessibility/browser-automation alternative would need permission and per-browser adapters; investigate it only with explicit supported-browser tests. Do not add wide Accessibility or Automation privileges merely to deliver a timer.
+Tests: `FocusTests.swift` (`swift test --package-path Core --filter Focus`).
 
-## Acceptance criteria before a blocking release
+## Still to build
 
-- Exact domain/subdomain rules and internationalized host handling; no substring matching such as `example.com.evil.test`.
-- Pause, snooze, end, timeout, permission revocation and crash/relaunch restore access predictably; filter cleanup never leaves the owner locked out.
-- Preserve tabs, unsaved forms and app documents. Avoid changing hosts files, killing applications, or rewriting browser tabs for a prototype.
-- Store chosen block rules locally, not a browsing history. No telemetry of visited URLs.
-- Test supported browsers, existing/new tabs, private mode, multiple windows, multiple profiles and offline states separately. Clearly label unsupported browsers.
-- Verify light/dark controls, keyboard and accessible names; installed signed/notarized verification is separate from fixture rendering.
+1. **App:** launcher rows and the setup form, the floating focus bar (move to the menu bar, reset position), app hiding and the reminder panel, the completion animation, Settings (snooze length, Toggle Focus Session hotkey), relaunch restore, and reserving `focus` in `LauncherRouting`. Native fixtures in light and dark.
+2. **Websites:** browser adapters through Apple Events, sandbox `temporary-exception.apple-events` entries for the supported browsers (also needed in `VolantDev.entitlements`), tab blanking and restore, and per-browser verification in the signed installed app.
 
-Next concrete gap: a bounded signed sandbox spike for app reminders and one browser's temporary domain blocks. No Focus session or blocker is implemented by the Caffeinate/emoji change.
+## Privacy rules
+
+- Page addresses are compared in memory only while a session is blocking, and only for the frontmost supported browser. They're never logged, persisted or synced.
+- Only blanked tabs' addresses are kept, in memory, until they're restored. A crash loses them, and the tabs stay blank.
+- Block lists live in config.json under `focus`. No browsing history is recorded.
