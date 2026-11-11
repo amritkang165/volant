@@ -38,6 +38,14 @@
 	<array>
 		<string>com.apple.loginwindow</string>
 		<string>com.apple.systemevents</string>
+		<string>com.apple.Safari</string>
+		<string>com.apple.SafariTechnologyPreview</string>
+		<string>com.google.Chrome</string>
+		<string>com.brave.Browser</string>
+		<string>com.vivaldi.Vivaldi</string>
+		<string>com.microsoft.edgemac</string>
+		<string>company.thebrowser.Browser</string>
+		<string>org.chromium.Chromium</string>
 	</array>
 	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
 	<array>

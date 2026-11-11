@@ -270,3 +270,124 @@ final class LauncherFocusTests: XCTestCase {
         XCTAssertTrue(CoreCommand.search("block websites").contains(.focus))
     }
 }
+
+/// A browser stand-in that shows one tab per address and records what Focus did to it.
+final class FakeFocusBrowsers: FocusBrowserAccess {
+    var address = "https://x.com/home"
+    var denied = false
+    var blanked: [String] = []
+    var restored: [String] = []
+    var showing: [String: String] = [:]
+
+    func currentTab(of browser: FocusBrowser) throws -> FocusOpenTab? {
+        if denied { throw FocusBrowserFailure.denied }
+        let key = NSAppleEventDescriptor(string: address)
+        return FocusOpenTab(browser: browser, window: NSAppleEventDescriptor(int32: 1), tab: key, address: showing[address] ?? address)
+    }
+
+    func blank(_ tab: FocusOpenTab) throws {
+        blanked.append(tab.address)
+        showing[tab.address] = "about:blank"
+    }
+
+    func restore(_ tab: FocusOpenTab) throws -> Bool {
+        restored.append(tab.address)
+        showing[tab.address] = nil
+        return true
+    }
+}
+
+final class FocusBrowserTests: XCTestCase {
+    private var now = Date(timeIntervalSince1970: 1_800_000_000)
+    private var front: String? = "com.google.Chrome"
+    private let fake = FakeFocusBrowsers()
+
+    private func controller() -> FocusController {
+        FocusController(stateURL: FileManager.default.temporaryDirectory.appendingPathComponent("focus-\(UUID().uuidString).json"),
+                        defaults: UserDefaults(suiteName: "focus-browser-" + UUID().uuidString)!, clock: { [unowned self] in self.now },
+                        frontmost: { nil }, automaticTimer: false, restore: false, browsers: fake, browserQueue: nil,
+                        frontmostBundle: { [unowned self] in self.front })
+    }
+
+    private let setup = FocusSetup(goal: "Write", minutes: 25, websites: ["x.com"], categories: [])
+
+    func testBlanksABlockedTabAndRemindsWithTheSite() {
+        let focus = controller()
+        focus.start(setup)
+        focus.tick()
+        XCTAssertEqual(fake.blanked, ["https://x.com/home"])
+        XCTAssertEqual(focus.reminder?.target, .website("x.com"))
+        XCTAssertEqual(focus.reminder?.name, "x.com")
+        focus.tick()
+        XCTAssertEqual(fake.blanked.count, 1, "A blank page is never blanked again")
+    }
+
+    func testLeavesOtherSitesAndOtherAppsAlone() {
+        let focus = controller()
+        focus.start(setup)
+        fake.address = "https://notx.com/"
+        focus.tick()
+        front = "com.apple.TextEdit"
+        fake.address = "https://x.com/"
+        focus.tick()
+        front = "org.mozilla.firefox"
+        focus.tick()
+        XCTAssertTrue(fake.blanked.isEmpty)
+    }
+
+    func testSnoozeRestoresThatSitesTabsAndLetsItThrough() throws {
+        let focus = controller()
+        focus.start(setup)
+        focus.tick()
+        focus.snooze(try XCTUnwrap(focus.reminder), minutes: 3)
+        XCTAssertEqual(fake.restored, ["https://x.com/home"])
+        focus.tick()
+        XCTAssertEqual(fake.blanked.count, 1)
+        now += 181
+        focus.tick()
+        XCTAssertEqual(fake.blanked.count, 2)
+    }
+
+    func testEndingPausingOrEditingRestoresTabs() {
+        let focus = controller()
+        focus.start(setup)
+        focus.tick()
+        focus.pause()
+        XCTAssertEqual(fake.restored.count, 1)
+        focus.tick()
+        XCTAssertEqual(fake.blanked.count, 1, "A paused session asks nothing")
+        focus.resume()
+        focus.tick()
+        focus.edit(FocusSetup(goal: "Write", minutes: 25, websites: ["reddit.com"], categories: []))
+        XCTAssertEqual(fake.restored.count, 2)
+        fake.address = "https://reddit.com/"
+        focus.tick()
+        focus.end()
+        XCTAssertEqual(fake.restored.count, 3)
+    }
+
+    func testARefusedBrowserIsNotAskedAgain() {
+        let focus = controller()
+        fake.denied = true
+        focus.start(setup)
+        focus.tick()
+        XCTAssertEqual(focus.refusedBrowsers, ["com.google.Chrome"])
+        fake.denied = false
+        focus.tick()
+        XCTAssertTrue(fake.blanked.isEmpty)
+    }
+
+    func testSessionsWithoutWebsitesNeverAsk() {
+        let focus = controller()
+        focus.start(FocusSetup(goal: "Write", apps: ["com.example.chat"], categories: []))
+        focus.tick()
+        XCTAssertTrue(fake.blanked.isEmpty)
+    }
+
+    func testEverySupportedBrowserHasAnAppleEventsException() throws {
+        let data = try Data(contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Volant/Volant.entitlements"))
+        let plist = try XCTUnwrap(PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+        let allowed = Set(plist["com.apple.security.temporary-exception.apple-events"] as? [String] ?? [])
+        for browser in FocusBrowser.all { XCTAssertTrue(allowed.contains(browser.bundleIdentifier), browser.name) }
+    }
+}
