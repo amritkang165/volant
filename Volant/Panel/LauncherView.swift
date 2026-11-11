@@ -522,6 +522,7 @@ private extension CoreCommand {
         case .catalog: return Color(red: 0.95, green: 0.42, blue: 0.29)
         case .menuItems: return Color(red: 0.35, green: 0.4, blue: 0.85)
         case .focus: return Color(red: 0.0, green: 0.55, blue: 0.5)
+        case .breaks: return Color(red: 0.2, green: 0.6, blue: 0.3)
         }
     }
 }
@@ -606,6 +607,7 @@ private struct RowView: View {
         case .privacySettings(let pane): return pane.title
         case .caffeinate(let command): return command.title
         case .focus(let row, _): return row.title
+        case .breaks(let row, _): return row.title
         case .agentSession(let session): return session.project
         case .herdrMachine(let machine, _, _): return machine?.label ?? String(localized: "Local", comment: "Herdr machine row title for this Mac")
         case .rexPane(let pane): return pane.project
@@ -648,6 +650,7 @@ private struct RowView: View {
         case .privacySettings(let pane): return pane.detail
         case .caffeinate(let command): return command.detail
         case .focus(_, let detail): return detail
+        case .breaks(_, let detail): return detail
         case .systemSettings: return String(localized: "Open this pane in System Settings", comment: "Launcher row subtitle")
         case .settings: return String(localized: "Preferences, app shortcuts and backups", comment: "Launcher row subtitle for Volant Settings")
         case .reloadConfig: return String(localized: "Apply changes from config.json", comment: "Launcher row subtitle for Reload Configuration")
@@ -709,6 +712,7 @@ private struct RowView: View {
         case .privacySettings(let pane): CommandTile(symbol: pane.symbol, tint: .gray)
         case .caffeinate: CommandTile(symbol: "cup.and.saucer", tint: CoreCommand.caffeinate.tint)
         case .focus(let row, _): CommandTile(symbol: row.symbol, tint: CoreCommand.focus.tint)
+        case .breaks(let row, _): CommandTile(symbol: row.symbol, tint: CoreCommand.breaks.tint)
         case .agentSession(let session):
             Image(systemName: session.agentStatus == "blocked" ? "exclamationmark.bubble" : "terminal").font(.system(size: 20))
                 .foregroundStyle(session.agentStatus == "blocked" ? Color.orange : Color.secondary)

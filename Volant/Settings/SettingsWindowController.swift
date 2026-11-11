@@ -246,6 +246,7 @@ private struct SettingsView: View {
                 Text("Caffeinate")
             }
             FocusSettingsSection(config: state.config, configURL: configURL, apply: apply)
+            BreakSettingsSection(config: state.config, configURL: configURL, apply: apply)
             MenuItemsSettingsSection(config: state.config, access: menuItemsAccess, apply: apply, configURL: configURL)
         }
         .formStyle(.settings)

@@ -21,13 +21,21 @@ final class LauncherPanel: NSPanel, NSWindowDelegate {
     /// The notes panel, when it exists; a fronted launcher is ordered above it.
     weak var floatingPeer: NSWindow?
 
-    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), positionStore: UserDefaults = .standard, caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController? = nil, preparesWhenHidden: Bool = true, files: FileSearch = FileSearch(), onNote: @escaping (LauncherAction) -> Void) {
+    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), positionStore: UserDefaults = .standard, caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController? = nil, breaks: BreakController? = nil, preparesWhenHidden: Bool = true, files: FileSearch = FileSearch(), onNote: @escaping (LauncherAction) -> Void) {
         self.positionStore = positionStore
         self.preparesWhenHidden = preparesWhenHidden
         LauncherPanel.scale = config.appearance.clampedScale
         LauncherPanel.opacity = config.appearance.clampedOpacity
-        model = focus.map { LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, focus: $0, files: files, onNote: onNote) }
-            ?? LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, files: files, onNote: onNote)
+        switch (focus, breaks) {
+        case let (focus?, breaks?):
+            model = LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, focus: focus, breaks: breaks, files: files, onNote: onNote)
+        case let (focus?, nil):
+            model = LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, focus: focus, files: files, onNote: onNote)
+        case let (nil, breaks?):
+            model = LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, breaks: breaks, files: files, onNote: onNote)
+        case (nil, nil):
+            model = LauncherModel(index: index, clipboard: clipboard, notes: notes, config: config, usage: usage, caffeinate: caffeinate, files: files, onNote: onNote)
+        }
         super.init(contentRect: NSRect(origin: .zero, size: LauncherPanel.size),
                    styleMask: [.nonactivatingPanel, .borderless, .fullSizeContentView],
                    backing: .buffered, defer: false)

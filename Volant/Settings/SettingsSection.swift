@@ -73,7 +73,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
     var keywords: [String] {
         switch self {
-        case .general: ["login", "startup", "dock", "launch", "caffeinate", "display", "awake", "sleep", "focus", "snooze", "block", "distraction", "menu items", "menus", "accessibility"]
+        case .general: ["login", "startup", "dock", "launch", "caffeinate", "display", "awake", "sleep", "focus", "snooze", "block", "distraction", "breaks", "rest", "stretch", "eye strain", "menu items", "menus", "accessibility"]
         case .appearance: ["theme", "color", "dark", "light", "size", "opacity", "raycast theme"]
         case .keyboardShortcuts: ["hotkey", "shortcut", "notes", "emoji", "lock screen", "sleep displays", "dictate", "focus"]
         case .appShortcuts: ["alias", "hotkey", "application"]

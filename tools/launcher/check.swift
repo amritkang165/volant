@@ -1253,6 +1253,95 @@ focusFixture.end()
 verify(waitUntil { !focusBar.isVisible && !focusReminder.isVisible }, "Ending the session removes the bar and reminder")
 corePanel.model.query = ""
 print("PASS: Focus rows, form, bar and reminder render with a fictional session")
+// Breaks: the launcher rows off and on, the heads-up, the Gentle reminder and countdown, and the
+// Standard and Strict overlays, with a fictional schedule on a fixture clock that is never saved
+// to the owner's support folder. No real idle time, camera or microphone is read.
+corePanel.model.query = "break"
+verify(waitUntil { corePanel.model.rows.map(\.id) == ["break:on", "break:now"] }, "Breaks off offers Turn On and Take a Break Now")
+verify(corePanel.model.selection == 0, "A new break query selects its first row")
+try renderCore("break-off")
+corePanel.model.breaks.apply(BreakPreferences(enabled: true))
+corePanel.model.query = "breaks "
+verify(waitUntil { corePanel.model.rows.map(\.id) == ["break:now", "break:skip", "break:pause", "break:off"] }, "Breaks on offers its controls")
+try renderCore("break-rows")
+corePanel.model.breaks.apply(BreakPreferences())
+corePanel.model.query = ""
+var breakClock = Date(timeIntervalSince1970: 1_800_000_000)
+let breakFixture = BreakController(preferences: BreakPreferences(enabled: true),
+                                   stateURL: root.appendingPathComponent("break-schedule.json"), clock: { breakClock },
+                                   idleSeconds: { 0 }, inCall: { false }, automaticTimer: false, restore: false)
+breakFixture.start()
+/// Moves the fixture clock forward one second at a time, ticking the Break schedule each time.
+func advanceBreaks(_ seconds: Int) {
+    for _ in 0..<seconds {
+        breakClock += 1
+        breakFixture.tick()
+    }
+}
+let breakPresenter = BreakPresenter(controller: breakFixture)
+breakPresenter.notice.appearance = corePanel.appearance
+advanceBreaks(44 * 60)
+verify(breakFixture.schedule.phase == .headsUp, "The heads-up comes a minute before the break")
+breakPresenter.refresh()
+verify(waitUntil { breakPresenter.notice.isVisible && !breakPresenter.notice.isKeyWindow }, "The heads-up shows without taking focus")
+try renderFocusWindow(breakPresenter.notice, "break-heads-up")
+breakFixture.apply(BreakPreferences(enabled: true, strictness: .gentle))
+advanceBreaks(60)
+verify(breakFixture.schedule.phase == .reminding, "A Gentle break reminds instead of covering the screen")
+breakPresenter.refresh()
+verify(waitUntil { breakPresenter.notice.isVisible } && breakPresenter.overlays.isEmpty, "The Gentle reminder is a panel, not an overlay")
+try renderFocusWindow(breakPresenter.notice, "break-gentle")
+breakFixture.takeBreakNow()
+advanceBreaks(15)
+breakPresenter.refresh()
+verify(waitUntil { breakPresenter.notice.isVisible } && breakPresenter.overlays.isEmpty, "A Gentle break counts down in the panel")
+try renderFocusWindow(breakPresenter.notice, "break-gentle-running")
+breakFixture.endBreak()
+breakFixture.apply(BreakPreferences(enabled: true))
+breakFixture.takeBreakNow()
+advanceBreaks(2)
+breakPresenter.refresh()
+verify(waitUntil { !breakPresenter.overlays.isEmpty && breakPresenter.overlays.allSatisfy(\.isVisible) }, "A Standard break covers every display")
+verify(!breakPresenter.notice.isVisible, "The overlay replaces the notice")
+verify(breakPresenter.overlays.count == NSScreen.screens.count, "One overlay per display")
+verify(breakPresenter.overlays.allSatisfy { $0.collectionBehavior.contains(.canJoinAllSpaces) && $0.collectionBehavior.contains(.fullScreenAuxiliary) }, "Overlays join every Space and full-screen apps")
+breakPresenter.overlays.forEach { $0.appearance = corePanel.appearance }
+try renderFocusWindow(breakPresenter.overlays[0], "break-standard")
+breakFixture.apply(BreakPreferences(enabled: true, strictness: .strict))
+breakPresenter.refresh()
+verify(waitUntil { !breakPresenter.overlays.isEmpty }, "A Strict break covers the screen")
+breakPresenter.overlays.forEach { $0.appearance = corePanel.appearance }
+try renderFocusWindow(breakPresenter.overlays[0], "break-strict-waiting")
+let strictOverlay = breakPresenter.overlays[0]
+/// Sends Return down or up to a Strict overlay, as holding the key would.
+func sendReturn(_ type: NSEvent.EventType, to window: NSWindow) {
+    let event = NSEvent.keyEvent(with: type, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+        windowNumber: window.windowNumber, context: nil, characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)!
+    if type == .keyDown { window.keyDown(with: event) } else { window.keyUp(with: event) }
+}
+sendReturn(.keyDown, to: strictOverlay)
+verify(!strictOverlay.hold.isHolding, "Return can't start skipping a Strict break before Skip appears")
+sendReturn(.keyUp, to: strictOverlay)
+advanceBreaks(12)
+try renderFocusWindow(breakPresenter.overlays[0], "break-strict")
+sendReturn(.keyDown, to: strictOverlay)
+RunLoop.main.run(until: Date().addingTimeInterval(1))
+sendReturn(.keyUp, to: strictOverlay)
+verify(breakFixture.isOnBreak && strictOverlay.hold.progress == 0, "Letting go of Return early keeps the Strict break")
+sendReturn(.keyDown, to: strictOverlay)
+verify(waitUntil(timeout: 5) { !breakFixture.isOnBreak }, "Holding Return for three seconds skips a Strict break")
+sendReturn(.keyUp, to: strictOverlay)
+breakPresenter.refresh()
+verify(waitUntil { breakPresenter.overlays.isEmpty && !strictOverlay.isVisible }, "Skipping removes every overlay")
+let orphan = BreakOverlayWindow(controller: breakFixture, screen: NSScreen.screens[0], strict: false)
+orphan.orderFrontRegardless()
+orphan.arm(until: Date())
+verify(waitUntil(timeout: BreakOverlayWindow.watchdogSlack + 2) { !orphan.isVisible }, "An overlay's watchdog removes it after the break's end even if nothing else does")
+breakPresenter.close()
+orphan.close()
+corePanel.makeKeyAndOrderFront(nil)
+verify(waitUntil { corePanel.isKeyWindow }, "The launcher is key again once the overlays are gone")
+print("PASS: Break rows, heads-up, Gentle reminder and Standard and Strict overlays render with a fictional schedule")
 /// Describes the emoji grid's keyboard state for failure messages.
 func emojiGridState() -> String {
     "selection=\(corePanel.model.selection), rows=\(corePanel.model.rows.count), query=\(corePanel.model.query), key=\(corePanel.isKeyWindow), responder=\(String(describing: corePanel.firstResponder)), delegate=\(String(describing: (corePanel.firstResponder as? NSTextView)?.delegate)), placeholder=\(String(describing: ((corePanel.firstResponder as? NSTextView)?.delegate as? NSTextField)?.placeholderString))"

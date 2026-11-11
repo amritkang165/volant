@@ -23,7 +23,8 @@ class ScopeTests(unittest.TestCase):
                      "Volant/SystemControl/VolumeControl.swift", "Volant/SystemControl/Connectivity.swift", "Volant/SystemControl/Caffeinate.swift", "Volant/SystemControl/SystemEvents.swift", "Volant/SystemControl/ColorSampling.swift", "Volant/Camera/CameraPreviewWindow.swift",
                      "Volant/Snippets/Snippets.swift", "Volant/Quicklinks/Quicklinks.swift", "Volant/Settings/AppBindingStore.swift",
                      "Volant/MenuItems/MenuItemsModel.swift", "Core/Sources/VolantCore/MenuItems/MenuItems.swift", "Volant/Settings/MenuItemsSettingsSection.swift",
-                     "Volant/Focus/FocusController.swift", "Volant/Focus/FocusLauncher.swift", "Core/Sources/VolantCore/Focus/FocusSession.swift", "Volant/Settings/FocusSettingsSection.swift"]:
+                     "Volant/Focus/FocusController.swift", "Volant/Focus/FocusLauncher.swift", "Core/Sources/VolantCore/Focus/FocusSession.swift", "Volant/Settings/FocusSettingsSection.swift",
+                     "Volant/Breaks/BreakController.swift", "Volant/Breaks/BreakPanels.swift", "Core/Sources/VolantCore/Breaks/BreakSchedule.swift", "Volant/Settings/BreakSettingsSection.swift"]:
             self.assertEqual(scope.classify([path]), {"native": True, "ui": True}, path)
 
     def test_current_swiftui_surfaces_are_classified(self):

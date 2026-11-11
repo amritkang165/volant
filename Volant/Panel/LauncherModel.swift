@@ -48,6 +48,8 @@ enum ResultRow: Identifiable, Hashable {
     case caffeinate(CaffeinateCommand)
     /// A Focus row and its subtitle, worked out when the rows are built.
     case focus(FocusRow, detail: String)
+    /// A Break row and its subtitle, worked out when the rows are built.
+    case breaks(BreakRow, detail: String)
     case systemSettings(SystemSettingsDestination)
     case settings
     case reloadConfig
@@ -90,6 +92,7 @@ enum ResultRow: Identifiable, Hashable {
         case .privacySettings(let pane): return "privacy:" + pane.rawValue
         case .caffeinate(let command): return "caffeinate:" + command.id
         case .focus(let row, _): return "focus:" + row.id
+        case .breaks(let row, _): return "break:" + row.id
         case .agentSession(let session): return "agent:" + session.id
         case .herdrMachine(let machine, _, _): return "herdr-machine:" + (machine?.id ?? "local")
         case .rexPane(let pane): return "rex:" + pane.id
@@ -127,7 +130,7 @@ enum ResultRow: Identifiable, Hashable {
             return server.exposed ? String(localized: "Network", comment: "Server row label: other machines can connect")
                 : String(localized: "Local", comment: "Server row label: only this Mac can connect")
         case .menuItem(let entry): return entry.item.shortcut?.display ?? String(localized: "Menu Item", comment: "Result row kind label for a menu item without a keyboard shortcut")
-        case .core, .caffeinate, .focus, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
+        case .core, .caffeinate, .focus, .breaks, .systemAction, .systemToggle, .menuItemsOff: return String(localized: "Command", comment: "Result row kind label")
         case .pickedColor: return String(localized: "Color", comment: "Result row kind label: a color picked from the screen")
         case .pickAnotherColor: return String(localized: "Command", comment: "Result row kind label")
         case .privacySettings: return String(localized: "System Settings", comment: "Result row kind label")
@@ -160,7 +163,7 @@ enum ResultRow: Identifiable, Hashable {
 
     var isCoreCommand: Bool {
         switch self {
-        case .core, .caffeinate, .focus, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .pickAnotherColor, .privacySettings, .menuItemsOff: return true
+        case .core, .caffeinate, .focus, .breaks, .settings, .reloadConfig, .agents, .volume, .audioRoute, .connectivity, .systemSettings, .systemAction, .systemToggle, .pickedColor, .pickAnotherColor, .privacySettings, .menuItemsOff: return true
         default: return false
         }
     }
@@ -181,6 +184,7 @@ enum ResultRow: Identifiable, Hashable {
         case .privacySettings: return String(localized: "Open Settings", comment: "Footer and Actions label for Return")
         case .caffeinate(let command): return command.stop ? String(localized: "Stop", comment: "Footer label for Return: stop Caffeinate") : String(localized: "Start", comment: "Footer label for Return: start Caffeinate")
         case .focus(let row, _): return row.primaryAction
+        case .breaks(let row, _): return row.primaryAction
         case .agentSession: return String(localized: "Focus in Herdr", comment: "Footer and Actions label for Return")
         case .herdrMachine(let machine, let enabled, let busy):
             if busy { return String(localized: "Working…", comment: "Footer and Actions label for Return") }
@@ -353,6 +357,8 @@ final class LauncherModel: ObservableObject {
     private var caffeinateSubscription: AnyCancellable?
     let focus: FocusController
     private var focusSubscription: AnyCancellable?
+    let breaks: BreakController
+    private var breaksSubscription: AnyCancellable?
     var showingEmoji: Bool { routedQuery.trimmingCharacters(in: .whitespaces).hasPrefix(":") }
     var emojiSearch: (String) -> [EmojiEntry] = { EmojiIndex.search($0, limit: Int.max) }
     var searchText: String {
@@ -638,12 +644,13 @@ final class LauncherModel: ObservableObject {
     @Published private(set) var heldCalculation: CalculationAnswer?
     var calculationHoldDuration: TimeInterval = 0.6
 
-    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController = FocusController(stateURL: FileManager.default.temporaryDirectory.appendingPathComponent("volant-focus-\(UUID().uuidString).json"), automaticTimer: false, restore: false), files: FileSearch = FileSearch(), agents: AgentsModel = AgentsModel(), rex: RexModel = RexModel(), onNote: @escaping (LauncherAction) -> Void) {
+    init(index: AppIndex, clipboard: ClipboardStore, notes: NotesStore, config: Preferences, usage: UsageStore = UsageStore(), caffeinate: CaffeinateService = CaffeinateService(), focus: FocusController = FocusController(stateURL: FileManager.default.temporaryDirectory.appendingPathComponent("volant-focus-\(UUID().uuidString).json"), automaticTimer: false, restore: false), breaks: BreakController = BreakController(stateURL: FileManager.default.temporaryDirectory.appendingPathComponent("volant-breaks-\(UUID().uuidString).json"), idleSeconds: { 0 }, inCall: { false }, automaticTimer: false, restore: false), files: FileSearch = FileSearch(), agents: AgentsModel = AgentsModel(), rex: RexModel = RexModel(), onNote: @escaping (LauncherAction) -> Void) {
         self.agents = agents
         self.rex = rex
         self.files = files
         self.caffeinate = caffeinate
         self.focus = focus
+        self.breaks = breaks
         self.usage = usage
         self.index = index
         self.clipboard = clipboard
@@ -675,6 +682,13 @@ final class LauncherModel: ObservableObject {
                 self.refreshFocusResults()
             }
         }
+        breaksSubscription = breaks.$schedule.map { "\($0.phase.rawValue)/\($0.pausedUntil == nil)" }
+            .combineLatest(breaks.$preferences.map(\.enabled)).map { "\($0)/\($1)" }.removeDuplicates().dropFirst().sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    guard let self, BreakCommand.parse(self.query) != nil else { return }
+                    self.refreshBreakResults()
+                }
+            }
         caffeinateSubscription = caffeinate.$command.dropFirst().sink { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self else { return }
@@ -1288,6 +1302,7 @@ final class LauncherModel: ObservableObject {
         if showingTranslation { sections = []; return }
         if CaffeinateCommand.matches(q) { refreshCaffeinateResults(); return }
         if FocusCommand.parse(q) != nil { refreshFocusResults(); return }
+        if BreakCommand.parse(q) != nil { refreshBreakResults(); return }
         if q.lowercased() == "emoji" {
             sections = []
             DispatchQueue.main.async { [weak self] in
@@ -1812,6 +1827,62 @@ final class LauncherModel: ObservableObject {
         else { selection = 0 }
     }
 
+    /// The query the Break rows were last built for, so only a same-query update keeps the selection.
+    private var breakRowsQuery: String?
+
+    /// The Break rows for the query and the schedule's state. A new query selects the first row; a
+    /// state change under the same query keeps the selected row when it is still there.
+    private func refreshBreakResults() {
+        guard let command = BreakCommand.parse(query) else { return }
+        let selectedID = breakRowsQuery == query ? selectedRow?.id : nil
+        breakRowsQuery = query
+        let rows = BreakRow.rows(for: command, controller: breaks)
+        sections = [ResultSection(title: String(localized: "Breaks", comment: "Launcher section title; the Breaks command"),
+                                  rows: rows.map { ResultRow.breaks($0, detail: $0.detail(controller: breaks)) })]
+        notice = nil
+        if let selectedID, let index = self.rows.firstIndex(where: { $0.id == selectedID }) { selection = index }
+        else { selection = 0 }
+    }
+
+    /// Acts on a Break row. Taking a break closes the launcher; the other rows stay so the owner
+    /// sees the new state.
+    private func performBreak(_ row: BreakRow) {
+        switch row {
+        case .takeNow:
+            breaks.takeBreakNow()
+            query = ""
+            dismiss()
+            return
+        case .endBreak: breaks.endBreak()
+        case .skipNext: breaks.skip()
+        case .pause: breaks.pauseForAnHour()
+        case .resume: breaks.resume()
+        case .turnOn, .turnOff: setBreaksEnabled(row == .turnOn)
+        }
+        refreshBreakResults()
+    }
+
+    /// Turns breaks on or off in config.json against the settings the launcher holds, retrying once
+    /// against a newer file, then applies the change and asks the app to reload its settings.
+    private func setBreaksEnabled(_ enabled: Bool) {
+        for attempt in 0..<2 {
+            var current = config.breaks
+            if attempt == 1, let latest = try? JSONDecoder().decode(Preferences.self, from: Data(contentsOf: actionConfigURL)) {
+                config = latest
+                current = latest.breaks
+            }
+            var updated = current
+            updated.enabled = enabled
+            if (try? Preferences.updateBreaks(updated, expected: current, at: actionConfigURL)) != nil {
+                config.breaks = updated
+                breaks.apply(updated)
+                onNote(.reloadConfig)
+                return
+            }
+        }
+        actionFeedback = String(localized: "Couldn’t change Breaks. Check config.json.", comment: "Launcher message when turning breaks on or off can't be saved")
+    }
+
     /// Acts on a Focus row. Starting or editing closes the launcher so the owner can get to work.
     private func performFocus(_ row: FocusRow) {
         switch row {
@@ -1956,6 +2027,9 @@ final class LauncherModel: ObservableObject {
             return
         case .focus(let row, _):
             performFocus(row)
+            return
+        case .breaks(let row, _):
+            performBreak(row)
             return
         case .caffeinate(let command):
             let succeeded = caffeinate.perform(command)
