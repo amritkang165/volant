@@ -202,9 +202,21 @@ export default function PrivacyAndSecurity() {
               <td>
                 Only for <code>dark mode</code> and <code>menu bar</code>,
                 asked the first time you use one. Volant asks System Events to
-                switch Light and Dark or menu bar hiding, and automates no
-                other app. Restart, Shut Down and Log Out ask macOS&rsquo;s own
-                loginwindow to show its confirmation, which needs no prompt.
+                switch Light and Dark or menu bar hiding. Restart, Shut Down
+                and Log Out ask macOS&rsquo;s own loginwindow to show its
+                confirmation, which needs no prompt.
+              </td>
+            </tr>
+            <tr>
+              <td>Automation (browsers)</td>
+              <td>
+                Only during a Focus session that blocks websites, asked once
+                per browser the first time it&rsquo;s in front. Volant asks
+                only the browser in front for its current tab&rsquo;s address,
+                compares it on your Mac, and swaps a blocked tab for a blank
+                page. Addresses are never saved, logged or synced; Volant keeps
+                a blanked tab&rsquo;s address in memory only to put it back.
+                Volant never opens a browser to ask it anything.
               </td>
             </tr>
           </tbody>
@@ -226,6 +238,12 @@ export default function PrivacyAndSecurity() {
       <p>
         <strong>No Input Monitoring grant.</strong> Global hotkeys use
         Carbon&rsquo;s hotkey registration, which needs no permission at all.
+      </p>
+      <p>
+        <strong>No permission for Breaks.</strong> When you turn Breaks on, it
+        reads how long your Mac has been idle and whether any camera or
+        microphone is in use, so a break never interrupts a call. It never
+        opens a camera or microphone, and saves none of this.
       </p>
       <p>
         <strong>

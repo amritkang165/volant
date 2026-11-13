@@ -38,6 +38,15 @@ final class FocusController: ObservableObject {
     private let automaticTimer: Bool
     private var timer: Timer?
     private var activationObserver: NSObjectProtocol?
+    private let browsers: FocusBrowserAccess
+    private let browserQueue: DispatchQueue?
+    private let frontmostBundle: () -> String?
+    /// Tabs Focus blanked, by tab, with the rule that blocked each, so they can be put back. Held in
+    /// memory only; a crash loses them and the tabs stay blank.
+    private var blankedTabs: [String: (tab: FocusOpenTab, rule: String)] = [:]
+    private var browserCheckRunning = false
+    /// Browsers whose Automation access the owner refused; Focus stops asking them until relaunch.
+    @Published private(set) var refusedBrowsers: Set<String> = []
 
     static let placementKey = "focusBarPlacement"
     /// The earlier on/off choice for the menu bar, read once so an owner who docked keeps the menu bar.
@@ -47,7 +56,13 @@ final class FocusController: ObservableObject {
     init(stateURL: URL = FocusController.defaultStateURL, defaults: UserDefaults = .standard, clock: @escaping () -> Date = Date.init,
          hide: @escaping (NSRunningApplication) -> Bool = { $0.hide() },
          frontmost: @escaping () -> NSRunningApplication? = { NSWorkspace.shared.frontmostApplication },
-         automaticTimer: Bool = true, restore: Bool = true) {
+         automaticTimer: Bool = true, restore: Bool = true,
+         browsers: FocusBrowserAccess = AppleEventFocusBrowsers(),
+         browserQueue: DispatchQueue? = DispatchQueue(label: "com.mysticcoders.volant.focus-browsers"),
+         frontmostBundle: (() -> String?)? = nil) {
+        self.browsers = browsers
+        self.browserQueue = browserQueue
+        self.frontmostBundle = frontmostBundle ?? { frontmost()?.bundleIdentifier }
         self.stateURL = stateURL
         self.defaults = defaults
         self.clock = clock
@@ -77,7 +92,10 @@ final class FocusController: ObservableObject {
         if let app = frontmost() { handleActivation(of: app) }
     }
 
-    func pause() { mutate { $0.pause(at: clock()) } }
+    func pause() {
+        mutate { $0.pause(at: clock()) }
+        restoreTabs { _ in true }
+    }
 
     func resume() {
         mutate { $0.resume(at: clock()) }
@@ -86,6 +104,7 @@ final class FocusController: ObservableObject {
 
     func edit(_ setup: FocusSetup) {
         mutate { $0.edit(setup, at: clock()) }
+        restoreTabs { !setup.blockedWebsites.contains($0) }
         if let app = frontmost() { handleActivation(of: app) }
     }
 
@@ -107,6 +126,7 @@ final class FocusController: ObservableObject {
     func snooze(_ reminder: FocusReminder, minutes: Int) {
         guard self.reminder?.id == reminder.id else { return }
         mutate { $0.snooze(reminder.target, minutes: minutes, at: clock()) }
+        if case .website(let rule) = reminder.target { restoreTabs { $0 == rule } }
         self.reminder = nil
     }
 
@@ -115,6 +135,7 @@ final class FocusController: ObservableObject {
     /// Hides `app` and shows a reminder when the running session blocks it. Never quits the app.
     func handleActivation(of app: NSRunningApplication) {
         guard let bundleIdentifier = app.bundleIdentifier, app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+        if FocusBrowser.named(bundleIdentifier) != nil { checkBrowser() }
         handleActivation(bundleIdentifier: bundleIdentifier, name: app.localizedName) { [hide] in hide(app) }
     }
 
@@ -145,7 +166,59 @@ final class FocusController: ObservableObject {
     func tick() {
         now = clock()
         guard let session else { return }
-        if session.isFinished(at: now) { complete() }
+        if session.isFinished(at: now) { complete(); return }
+        checkBrowser()
+    }
+
+    /// Asks the browser in front for its current tab and blanks it when the session blocks its
+    /// site. Runs at most one check at a time, only while a session is blocking websites, and
+    /// drops the answer when the session changed while the browser was answering.
+    func checkBrowser() {
+        guard !browserCheckRunning, let session, !session.isPaused, !session.isFinished(at: clock()),
+              !session.setup.blockedWebsites.isEmpty, let bundle = frontmostBundle(),
+              let browser = FocusBrowser.named(bundle), !refusedBrowsers.contains(bundle) else { return }
+        browserCheckRunning = true
+        let sessionID = session.id
+        onBrowserQueue({ [browsers] in Result { try browsers.currentTab(of: browser) } }) { [weak self] result in
+            guard let self else { return }
+            self.browserCheckRunning = false
+            switch result {
+            case .failure(let failure):
+                if failure as? FocusBrowserFailure == .denied { self.refusedBrowsers.insert(bundle) }
+            case .success(let tab):
+                guard let tab, let current = self.session, current.id == sessionID,
+                      let rule = current.blockingRule(forPageAddress: tab.address, at: self.clock()) else { return }
+                self.blank(tab, rule: rule, goal: current.setup.goal)
+            }
+        }
+    }
+
+    /// Replaces the tab with a blank page, remembers its address, and reminds the owner of the goal.
+    private func blank(_ tab: FocusOpenTab, rule: String, goal: String) {
+        onBrowserQueue({ [browsers] in Result { try browsers.blank(tab) } }) { [weak self] result in
+            guard let self, case .success = result else { return }
+            if self.blankedTabs[tab.key] == nil { self.blankedTabs[tab.key] = (tab, rule) }
+            self.reminder = FocusReminder(target: .website(rule), name: rule, goal: goal)
+        }
+    }
+
+    /// Puts back the blanked tabs whose rule matches, if they still show the blank page.
+    private func restoreTabs(where matches: (String) -> Bool) {
+        let restoring = blankedTabs.filter { matches($0.value.rule) }
+        guard !restoring.isEmpty else { return }
+        for key in restoring.keys { blankedTabs.removeValue(forKey: key) }
+        let tabs = restoring.values.map(\.tab)
+        onBrowserQueue({ [browsers] in tabs.forEach { _ = try? browsers.restore($0) } }) { _ in }
+    }
+
+    /// Runs Apple Events work off the main thread and hands the result back on it; tests pass no
+    /// queue and run it in place.
+    private func onBrowserQueue<T>(_ work: @escaping () -> T, then finish: @escaping (T) -> Void) {
+        guard let browserQueue else { finish(work()); return }
+        browserQueue.async {
+            let value = work()
+            DispatchQueue.main.async { finish(value) }
+        }
     }
 
     private func mutate(_ change: (inout FocusSession) -> Void) {
@@ -158,6 +231,7 @@ final class FocusController: ObservableObject {
     private func finish() {
         session = nil
         reminder = nil
+        restoreTabs { _ in true }
         sessionChanged()
     }
 
